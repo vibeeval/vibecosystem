@@ -2,52 +2,77 @@
 
 # vibecosystem
 
-**AI software team built on Claude Code.**
-
-119 agents. 202 skills. 48 hooks. Zero manual work.
+**Your AI software team. Built on Claude Code.**
 
 [Turkce](#turkce) | [English](#english) | [Espanol](docs/README_ES.md) | [Francais](docs/README_FR.md) | [Deutsch](docs/README_DE.md) | [Portugues](docs/README_PT.md) | [Italiano](docs/README_IT.md) | [Nederlands](docs/README_NL.md) | [中文](docs/README_ZH.md) | [日本語](docs/README_JA.md) | [한국어](docs/README_KO.md) | [العربية](docs/README_AR.md) | [हिन्दी](docs/README_HI.md) | [Русский](docs/README_RU.md)
 
-<img src="assets/gif1-numbers.gif" alt="Ecosystem Numbers" width="700">
+![vibecosystem](assets/gif1-numbers.gif)
 
 </div>
 
----
+vibecosystem turns Claude Code into a full AI software team — 119 specialized agents that plan, build, review, test, and learn from every mistake. No configuration needed — just install and code.
 
-## At a Glance
+## The Problem
 
-| Metric | Count |
-|--------|-------|
-| Agents | **119** |
-| Skills | **202** |
-| Hooks | **48** |
-| Rules | **16** |
-| Manual work | **0** |
+Claude Code is powerful, but it's one assistant. You prompt, it responds, you review. For complex projects you need a planner, a reviewer, a security auditor, a tester — and you end up being all of them yourself.
 
----
+## The Solution
+
+vibecosystem is a complete [Claude Code](https://docs.anthropic.com/en/docs/claude-code) ecosystem that creates a self-organizing AI team:
+
+1. **119 agents** — specialized roles from frontend-dev to security-analyst
+2. **202 skills** — reusable knowledge from TDD workflows to Kubernetes patterns
+3. **48 hooks** — TypeScript sensors that observe, filter, and inject context
+4. **16 rules** — behavioral guidelines that shape every agent's output
+5. **Self-learning** — every error becomes a rule, automatically
+
+After setup, you say "build a feature" and 20+ agents coordinate across 5 phases.
 
 <a name="english"></a>
 
-## What is this?
+## Quick Start
 
-vibecosystem turns Claude Code into a full AI software team. Not a single assistant — a **team** of 119 specialized agents that plan, build, review, test, and learn from every mistake.
+```bash
+git clone https://github.com/vibeeval/vibecosystem.git
+cd vibecosystem
+./install.sh
+```
 
-No custom model. No custom API. Just Claude Code's hook + agent + rules system, pushed to the limit.
+That's it. Use Claude Code normally. The team activates.
 
-### The Big Picture
+## How It Works
 
-<img src="assets/gif5-bigpicture.gif" alt="Big Picture" width="700">
+```
+YOU SAY SOMETHING                VIBECOSYSTEM ACTIVATES              RESULT
+┌──────────────┐                 ┌──────────────────────┐            ┌──────────┐
+│ "add a new   │──→ Intent ──→  │ Phase 1: scout +     │──→ Code   │ Feature  │
+│  feature"    │   Classifier   │   architect plan     │   Written │ built,   │
+│              │                 │ Phase 2: backend-dev │   Tested  │ reviewed,│
+│              │                 │   + frontend-dev     │   Reviewed│ tested,  │
+│              │                 │ Phase 3: code-review │           │ merged   │
+│              │                 │   + security-review  │           │          │
+│              │                 │ Phase 4: verifier    │           │          │
+│              │                 │ Phase 5: self-learner│           │          │
+└──────────────┘                 └──────────────────────┘            └──────────┘
+```
 
----
+**Hooks** are sensors — they observe every tool call and inject relevant context:
+```
+"fix the bug"       → compiler-in-loop + error-broadcast      ~2,400 tok
+"add api endpoint"  → edit-context + signature-helper + arch   ~3,100 tok
+"explain this code" → (nothing extra)                          ~800 tok
+```
 
-## Core Features
+**Agents** are muscles — each one specialized for a specific job:
+```
+GraphQL API      → graphql-expert   (backup: backend-dev)
+Kubernetes       → kubernetes-expert (backup: devops)
+DDD modeling     → ddd-expert       (backup: architect)
+Bug reproduction → replay           (backup: sleuth)
+... 70 more routing rules
+```
 
-### 1. Self-Learning Pipeline
-
-Every error becomes a rule. Automatically.
-
-<img src="assets/gif2-pipeline.gif" alt="Self-Learning Pipeline" width="700">
-
+**Self-Learning Pipeline** turns mistakes into permanent knowledge:
 ```
 Error happens → passive-learner captures pattern
 → consolidator groups & counts
@@ -57,11 +82,13 @@ Error happens → passive-learner captures pattern
 
 No manual intervention. The system writes its own rules.
 
-### 2. Agent Swarm
+## Core Features
+
+### Agent Swarm
 
 Say "add a new feature" and 20+ agents activate across 5 phases.
 
-<img src="assets/gif3-swarm.gif" alt="Agent Swarm" width="700">
+![Agent Swarm](assets/gif3-swarm.gif)
 
 ```
 Phase 1 (Discovery):    scout + architect + project-manager
@@ -71,19 +98,13 @@ Phase 4 (QA Loop):      verifier + tdd-guide (max 3 retry → escalate)
 Phase 5 (Final):        self-learner + technical-writer
 ```
 
-### 3. Adaptive Hook Loading
+### Self-Learning Pipeline
 
-48 hooks exist but they don't all run at once. Intent determines which hooks fire.
+Every error becomes a rule. Automatically.
 
-<img src="assets/gif4-hooks.gif" alt="Adaptive Hooks" width="700">
+![Self-Learning](assets/gif2-pipeline.gif)
 
-```
-"fix the bug"      → compiler-in-loop + error-broadcast     ~2,400 tok
-"add api endpoint"  → edit-context + signature-helper + arch  ~3,100 tok
-"explain this code" → (nothing)                               ~800 tok
-```
-
-### 4. Dev-QA Loop
+### Dev-QA Loop
 
 Every task goes through a quality gate:
 
@@ -94,7 +115,7 @@ Developer implements → code-reviewer + verifier check
 → 3x FAIL → escalate (reassign / decompose / defer)
 ```
 
-### 5. Canavar Cross-Training
+### Canavar Cross-Training
 
 When one agent makes a mistake, the entire team learns from it.
 
@@ -104,21 +125,17 @@ Agent error → error-ledger.jsonl → skill-matrix.json
 → Team-wide error prevention
 ```
 
-### 6. Assignment Matrix
+### Adaptive Hook Loading
 
-74-row routing table: every task type maps to the right agent.
+48 hooks exist but they don't all run at once. Intent determines which hooks fire.
 
-```
-GraphQL API      → graphql-expert  (backup: backend-dev)
-Kubernetes       → kubernetes-expert (backup: devops)
-DDD modeling     → ddd-expert      (backup: architect)
-Bug reproduction → replay          (backup: sleuth)
-... 70 more rows
-```
+![Hooks](assets/gif4-hooks.gif)
 
 ---
 
 ## Architecture
+
+![Big Picture](assets/gif5-bigpicture.gif)
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -166,6 +183,33 @@ Bug reproduction → replay          (backup: sleuth)
 
 ---
 
+## Comparison
+
+| Feature | vibecosystem | Single Claude Code | Cursor | aider |
+|---------|:----------:|:------------------:|:------:|:-----:|
+| Specialized agents | **119** | 0 | 0 | 0 |
+| Self-learning | **Yes** | No | No | No |
+| Agent swarm coordination | **Yes** | No | No | No |
+| Cross-agent error training | **Yes** | No | No | No |
+| Dev-QA retry loop | **Yes** | No | No | No |
+| Adaptive hook loading | **Yes** | No | No | No |
+| Assignment matrix routing | **Yes** | No | No | No |
+| Claude Code native | **Yes** | Yes | No | No |
+| Zero config after install | **Yes** | Yes | No | No |
+
+---
+
+## What's Included
+
+| Component | Count | Description |
+|-----------|-------|-------------|
+| `agents/` | 119 | Markdown agent definitions with specialized prompts |
+| `skills/` | 202 | Reusable knowledge — TDD, security, patterns, frameworks |
+| `hooks/src/` | 48 | TypeScript hooks — sensors, learners, validators |
+| `rules/` | 16 | Behavioral guidelines — coding style, safety, QA |
+
+---
+
 ## Tech Stack
 
 | Component | Technology |
@@ -192,6 +236,27 @@ implicit coordination through context.
 
 ---
 
+## Data & Privacy
+
+- All data stays on your machine (`~/.claude/`)
+- No network requests, no telemetry, no cloud sync
+- Self-learned rules go to `~/.claude/rules/`
+- Hooks run locally via Claude Code's native hook system
+
+---
+
+## Contributing
+
+Contributions welcome! Areas where help is needed:
+
+- **More agent definitions** — specialized roles for your domain
+- **More skill patterns** — framework-specific knowledge (Rails, Flutter, etc.)
+- **Better hooks** — new sensors, smarter context injection
+- **Documentation** — tutorials, guides, examples
+- **Translations** — improve existing or add new languages
+
+---
+
 <a name="turkce"></a>
 
 ## Turkce
@@ -202,22 +267,21 @@ vibecosystem, Claude Code'u tam bir AI yazilim ekibine donusturur. Tek bir asist
 
 Ozel model yok. Ozel API yok. Sadece Claude Code'un hook + agent + rules sistemi, sonuna kadar kullanilmis.
 
+### Hizli Baslangic
+
+```bash
+git clone https://github.com/vibeeval/vibecosystem.git
+cd vibecosystem
+./install.sh
+```
+
 ### Nasil Calisir?
 
 1. **Hook'lar sensor** — gozlemler, filtreler, isaret eder
 2. **Agent'lar kas** — calisir, uretir, duzeltir
 3. **Aralarindaki kopru:** context injection
-4. **Direkt RPC yok** — bilerek boyle. Claude Code'un hook API'si buna izin vermiyor
+4. **Direkt RPC yok** — bilerek boyle
 5. **Context uzerinden implicit koordinasyon** calisiyor
-
-### Temel Ozellikler
-
-- **Self-Learning:** Her hata otomatik kural olur
-- **Agent Swarm:** 5 fazda 20+ agent paralel calisir
-- **Adaptive Hooks:** Intent'e gore sadece gerekli hook'lar calisir
-- **Dev-QA Loop:** Her task icin implement → review → max 3 retry → escalate
-- **Canavar:** Bir agent'in hatasi tum ekibe yayilir
-- **Assignment Matrix:** 74 satirlik task→agent yonlendirme tablosu
 
 ### Felsefe
 
