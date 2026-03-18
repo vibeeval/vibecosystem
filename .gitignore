@@ -1,5 +1,5 @@
 node_modules/
-dist/
+# dist/ — pre-built hooks are included for zero-dependency install
 *.db
 *.sqlite
 .env

@@ -99,21 +99,27 @@ for d in "$REPO_DIR/skills/"*/; do
   smart_copy_dir "$d" "$CLAUDE_DIR/skills/$name"
 done
 
-# Hooks
+# Hooks (pre-built dist/ — no npm/node required)
 echo "Installing hooks..."
+mkdir -p "$CLAUDE_DIR/hooks/dist"
 mkdir -p "$CLAUDE_DIR/hooks/src/shared"
+# Copy pre-built .mjs files (ready to use, no build needed)
+for f in "$REPO_DIR/hooks/dist/"*.mjs; do
+  name=$(basename "$f")
+  smart_copy_file "$f" "$CLAUDE_DIR/hooks/dist/$name"
+done
+# Copy source files (for users who want to customize and rebuild)
 for f in "$REPO_DIR/hooks/src/"*.ts; do
   name=$(basename "$f")
   smart_copy_file "$f" "$CLAUDE_DIR/hooks/src/$name"
 done
-# Shared modules (required for build)
 for f in "$REPO_DIR/hooks/src/shared/"*.ts; do
   name=$(basename "$f")
   smart_copy_file "$f" "$CLAUDE_DIR/hooks/src/shared/$name"
 done
-# Always copy package.json and tsconfig.json (needed for build)
 cp "$REPO_DIR/hooks/package.json" "$CLAUDE_DIR/hooks/package.json"
 cp "$REPO_DIR/hooks/tsconfig.json" "$CLAUDE_DIR/hooks/tsconfig.json"
+HOOK_COUNT=$(ls "$CLAUDE_DIR/hooks/dist/"*.mjs 2>/dev/null | wc -l | tr -d ' ')
 
 # Rules
 echo "Installing rules..."
@@ -122,19 +128,6 @@ for f in "$REPO_DIR/rules/"*.md; do
   name=$(basename "$f")
   smart_copy_file "$f" "$CLAUDE_DIR/rules/$name"
 done
-
-# Build hooks
-echo ""
-echo "Building hooks..."
-cd "$CLAUDE_DIR/hooks"
-rm -rf dist/
-npm install --silent 2>/dev/null
-if npm run build --silent 2>&1; then
-  HOOK_COUNT=$(ls "$CLAUDE_DIR/hooks/dist/"*.mjs 2>/dev/null | wc -l | tr -d ' ')
-else
-  HOOK_COUNT="0 (build error)"
-  echo "  Hook build failed. Run 'cd ~/.claude/hooks && npm run build' to debug."
-fi
 
 echo ""
 echo "Installation complete!"
