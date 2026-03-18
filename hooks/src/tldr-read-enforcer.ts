@@ -11,7 +11,7 @@
 
 import { readFileSync, existsSync, statSync } from 'fs';
 import { basename, extname } from 'path';
-import { queryDaemonSync, DaemonResponse, trackHookActivitySync } from './daemon-client';
+import { queryDaemonSync, DaemonResponse, trackHookActivitySync } from './daemon-client.js';
 import { isRelevantForIntent } from './shared/context-budget.js';
 import { startTimer, endTimer } from './shared/hook-profiler.js';
 

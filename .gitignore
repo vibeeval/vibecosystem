@@ -6,3 +6,12 @@ dist/
 .env.*
 *.log
 .DS_Store
+*.bak
+*.backup
+*.orig
+*.swp
+*.pem
+*.key
+.idea/
+.vscode/settings.json
+package-lock.json

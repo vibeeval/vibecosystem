@@ -174,8 +174,8 @@ Update ledger with completed work.
 ## Example: Rigg Adapters
 
 ```bash
-/tdd-migrate /Users/cosimo/Documents/rigg/src/sdk/providers \
-  /Users/cosimo/Documents/rigg/src/sdk/providers \
+/tdd-migrate ~/your-project/src/sdk/providers \
+  ~/your-project/src/sdk/providers \
   --pattern lmstudio.ts \
   --items "xai,cerebras,togetherai,deepinfra,perplexity"
 ```

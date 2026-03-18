@@ -189,6 +189,9 @@ export interface DaemonResponse {
   // Track response fields
   hook?: string;
   total_invocations?: number;
+  // Import analysis response fields
+  imports?: any[];
+  importers?: any[];
 }
 
 /**

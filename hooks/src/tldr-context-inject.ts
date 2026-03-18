@@ -22,7 +22,7 @@ import {
   extractDaemon,
   DaemonResponse,
   trackHookActivitySync,
-} from './daemon-client';
+} from './daemon-client.js';
 
 interface HookInput {
   session_id: string;

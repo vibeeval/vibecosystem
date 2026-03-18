@@ -101,10 +101,15 @@ done
 
 # Hooks
 echo "Installing hooks..."
-mkdir -p "$CLAUDE_DIR/hooks/src"
+mkdir -p "$CLAUDE_DIR/hooks/src/shared"
 for f in "$REPO_DIR/hooks/src/"*.ts; do
   name=$(basename "$f")
   smart_copy_file "$f" "$CLAUDE_DIR/hooks/src/$name"
+done
+# Shared modules (required for build)
+for f in "$REPO_DIR/hooks/src/shared/"*.ts; do
+  name=$(basename "$f")
+  smart_copy_file "$f" "$CLAUDE_DIR/hooks/src/shared/$name"
 done
 # Always copy package.json and tsconfig.json (needed for build)
 cp "$REPO_DIR/hooks/package.json" "$CLAUDE_DIR/hooks/package.json"
@@ -122,8 +127,14 @@ done
 echo ""
 echo "Building hooks..."
 cd "$CLAUDE_DIR/hooks"
+rm -rf dist/
 npm install --silent 2>/dev/null
-npm run build --silent 2>/dev/null
+if npm run build --silent 2>&1; then
+  HOOK_COUNT=$(ls "$CLAUDE_DIR/hooks/dist/"*.mjs 2>/dev/null | wc -l | tr -d ' ')
+else
+  HOOK_COUNT="0 (build error)"
+  echo "  Hook build failed. Run 'cd ~/.claude/hooks && npm run build' to debug."
+fi
 
 echo ""
 echo "Installation complete!"
@@ -132,7 +143,7 @@ echo "  Skipped: $SKIPPED files (already existed)"
 echo ""
 echo "  Agents: $(ls "$CLAUDE_DIR/agents/"*.md 2>/dev/null | wc -l | tr -d ' ')"
 echo "  Skills: $(find "$CLAUDE_DIR/skills/" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')"
-echo "  Hooks:  $(ls "$CLAUDE_DIR/hooks/dist/"*.mjs 2>/dev/null | wc -l | tr -d ' ')"
+echo "  Hooks:  ${HOOK_COUNT:-$(ls "$CLAUDE_DIR/hooks/dist/"*.mjs 2>/dev/null | wc -l | tr -d ' ')}"
 echo "  Rules:  $(ls "$CLAUDE_DIR/rules/"*.md 2>/dev/null | wc -l | tr -d ' ')"
 echo ""
 if [ $SKIPPED -gt 0 ]; then
