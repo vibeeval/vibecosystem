@@ -45,7 +45,7 @@ tools: [Read, Bash, Grep, Glob]
 | 3.3.2 Labels | A | Tum input'larin `<label>`'i var |
 | 3.3.8 Redundant Entry | A | Daha once girilen bilgi tekrar istenmez |
 
-### Robust (Sagiam)
+### Robust (Saglam)
 
 | Kriter | Seviye | Kontrol |
 |--------|--------|---------|
@@ -131,6 +131,79 @@ Contrast = (L1 + 0.05) / (L2 + 0.05)
 5. Fix onerileri ile rapor olustur
 6. axe-core varsa entegre test calistir: `npx axe <url>`
 
+## NAMED ACCESSIBILITY RULES (Somut Esikler)
+
+| Kural | Esik | Platform Referans |
+|-------|------|-------------------|
+| touch-target-size | min 44x44pt (iOS HIG), 48x48dp (Material) | Apple HIG, Material Design |
+| color-contrast-normal | 4.5:1 ratio | WCAG 2.2 AA 1.4.3 |
+| color-contrast-large | 3:1 ratio (18px+ bold, 24px+) | WCAG 2.2 AA 1.4.3 |
+| color-contrast-enhanced | 7:1 ratio | WCAG 2.2 AAA 1.4.6 |
+| non-text-contrast | 3:1 (UI components, icons) | WCAG 2.2 AA 1.4.11 |
+| focus-indicator | 2px+ visible ring, 3:1 contrast | WCAG 2.2 AA 2.4.7 |
+| focus-not-obscured | Focus edilen eleman gorunur | WCAG 2.2 AA 2.4.11 |
+| text-spacing | line-height 1.5x, paragraph 2x | WCAG 2.2 AA 1.4.12 |
+| text-resize | 200% zoom'da icerik kaybolmamali | WCAG 2.2 AA 1.4.4 |
+| animation-duration | prefers-reduced-motion destegi | WCAG 2.2 AA 2.3.3 |
+| target-size-minimum | 24x24 CSS px (WCAG 2.2) | WCAG 2.2 AA 2.5.8 |
+| keyboard-trap | Focus hicbir yerde takilmamali | WCAG 2.2 A 2.1.2 |
+
+## PLATFORM-SPECIFIC REFERANSLAR
+
+### Apple Human Interface Guidelines
+- Touch target: min 44x44pt
+- Dynamic Type destegi (font scaling)
+- VoiceOver uyumlulugu
+- High contrast mode
+
+### Material Design
+- Touch target: min 48x48dp
+- TalkBack uyumlulugu
+- Elevation ile hiyerarsi (a11y icin de kontrast)
+
+### WCAG 2.2 (2023 Guncelleme)
+- 2.4.11 Focus Not Obscured (YENi)
+- 2.4.13 Focus Appearance (AAA, YENi)
+- 2.5.7 Dragging Movements (AA, YENi)
+- 2.5.8 Target Size Minimum (AA, YENi)
+- 3.2.6 Consistent Help (A, YENi)
+- 3.3.7 Redundant Entry (A, YENi)
+
+## AUTOMATED TESTING
+
+```bash
+# axe-core (en yaygin)
+npx axe <url>
+# veya programatik:
+npm install @axe-core/cli
+npx axe http://localhost:3000 --rules wcag2aa
+
+# Lighthouse a11y audit
+npx lighthouse <url> --only-categories=accessibility --output=json
+
+# pa11y (CI entegrasyonu)
+npx pa11y <url> --standard WCAG2AA
+
+# jest-axe (unit test icinde)
+import { axe, toHaveNoViolations } from 'jest-axe'
+expect.extend(toHaveNoViolations)
+const results = await axe(container)
+expect(results).toHaveNoViolations()
+```
+
+## COMMON ANTI-PATTERNS
+
+| Anti-Pattern | Neden Yanlis | Dogru Yol |
+|-------------|-------------|-----------|
+| `outline: none` | Focus indicator siliniyor | Custom outline style tanimla |
+| `div onClick` sans keyboard | Klavye kullanicilar erisimsiz | `<button>` veya role+tabIndex+onKeyDown |
+| Placeholder as label | Yazinca kaybolur | `<label>` kullan |
+| Color-only info | Renk korlugu | Icon + renk + text |
+| `tabIndex > 0` | Tab sirasini bozar | `tabIndex={0}` veya `-1` kullan |
+| `aria-hidden` + focusable | Screen reader karisir | Focusable elemani aria-hidden icine koyma |
+| Auto-playing video/audio | Rahatsiz edici | User-initiated play |
+| Missing skip nav | Uzun nav tekrari | `<a href="#main">Skip to content</a>` |
+
 ## KURALLAR
 
 - `outline: none` veya `outline: 0` gorursen HEMEN uyar (focus indicator silme)
@@ -138,3 +211,6 @@ Contrast = (L1 + 0.05) / (L2 + 0.05)
 - ARIA kullanmadan once native HTML dene (button > div[role=button])
 - Renk tek basina bilgi tasimamali (icon + renk, veya text + renk)
 - Animasyon icin prefers-reduced-motion media query kontrol et
+- Named rules esiklerine uy (yukaridaki tablo)
+- Automated test araci oner (axe-core, Lighthouse, pa11y)
+- Platform-specific rehberlere referans ver (Apple HIG, Material, WCAG 2.2)

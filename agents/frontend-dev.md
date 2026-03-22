@@ -36,12 +36,12 @@ Bu pattern'lara uymayan kod YAZMA. Uymadigini farkedersen duzelt.
 
 ### Recall
 ```bash
-cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "<frontend task keywords>" --k 3 --text-only
+cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "<frontend task keywords>" --k 3 --text-only
 ```
 
 ### Store
 ```bash
-cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
+cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
   --session-id "<task-name>" \
   --content "<what you learned>" \
   --context "<frontend component>" \
@@ -87,6 +87,72 @@ cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
 - `coding-standards` skill: TypeScript, naming, error handling
 - `security-review` skill: XSS, CSP, input sanitization
 
+## shadcn/ui Best Practices
+
+```typescript
+// Theme: CSS variable bazli, globals.css'te tanimli
+// Dark mode: class strategy (darkMode: 'class')
+
+// Component extend et, fork ETME:
+import { Button } from '@/components/ui/button'
+<Button variant="outline" className={cn('custom', className)} />
+
+// Composition:
+function SubmitButton(props: ButtonProps) {
+  return <Button type="submit" variant="default" {...props} />
+}
+
+// A11y: Radix tabanli, otomatik ARIA - ama her zaman dogrula
+// Token: CSS variable kullan, hardcoded hex KULLANMA
+```
+
+## Performance Budget
+
+| Metrik | Esik |
+|--------|------|
+| LCP | < 2.5s |
+| CLS | < 0.1 |
+| INP | < 200ms |
+| JS bundle | < 200KB gzipped |
+| FCP | < 1.8s |
+
+Bu esikleri asan degisiklik yapmadan ONCE iki kez dusun.
+
+## Responsive Breakpoints
+
+| Breakpoint | Piksel | Kullanim |
+|------------|--------|----------|
+| sm | 640px | Yatay telefon, 2-col grid |
+| md | 768px | Tablet, sidebar gorunur |
+| lg | 1024px | Laptop, full layout |
+| xl | 1280px | Desktop, genis icerik |
+| 2xl | 1536px | Monitor, max-width |
+
+```tsx
+// Grid pattern: 1col -> 2col -> 3col -> 4col
+<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+```
+
+## Component Composition Pattern
+
+```tsx
+// Compound component: esnek, genisletilebilir
+function Select({ children, ...props }: SelectProps) {
+  return <SelectRoot {...props}>{children}</SelectRoot>
+}
+Select.Trigger = SelectTrigger
+Select.Content = SelectContent
+Select.Item = SelectItem
+
+// Kullanim:
+<Select value={v} onValueChange={setV}>
+  <Select.Trigger />
+  <Select.Content>
+    <Select.Item value="a">A</Select.Item>
+  </Select.Content>
+</Select>
+```
+
 ## Rules
 1. **Recall before coding** - Check memory for past frontend solutions
 2. **Type-first** - Write TypeScript types before implementation
@@ -98,3 +164,5 @@ cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
 8. **Server-first** - Next.js'te default server component, "use client" sadece interaktif kisimlar
 9. **Test behavior** - Snapshot test yapma, kullanicinin gordugunu/yaptigini test et
 10. **cn() utility** - Conditional class'lar icin clsx + tailwind-merge
+11. **Performance budget** - LCP<2.5s, CLS<0.1, INP<200ms esiklerini as, uyar
+12. **shadcn extend** - shadcn/ui component'larini extend et, fork etme

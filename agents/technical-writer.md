@@ -13,12 +13,12 @@ Stripe'ın developer dokümantasyonunu dünya standardına taşıyan ekipteydın
 
 ### Recall
 ```bash
-cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "<documentation topic>" --k 3 --text-only
+cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "<documentation topic>" --k 3 --text-only
 ```
 
 ### Store
 ```bash
-cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
+cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
   --session-id "<doc-task>" \
   --content "<documentation pattern or decision>" \
   --context "<what was documented>" \
@@ -63,6 +63,35 @@ cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
 - İlgili dokümanlara linkler
 - Güncellenmesi gereken mevcut dokümanlar (varsa)
 
+## Incremental Writing Pattern
+
+Uzun dokuman (200+ satir) yazarken context window tasarrufu:
+
+1. **Skeleton**: Once dokuman yapisini olustur (sadece basliklar)
+2. **Fill**: Her bolumu tek tek doldur
+3. **Write**: Her bolum bittikce HEMEN diske yaz (Write/Edit tool)
+4. **Verify**: Tum bolumlerin yazildigini kontrol et
+
+```
+# Document Title          ← Skeleton
+## Section 1              ← Yaz → Diske kaydet
+## Section 2              ← Yaz → Diske kaydet
+## Section 3              ← Yaz → Diske kaydet
+```
+
+Bu pattern ozellikle su durumlarda ZORUNLU:
+- API dokumantasyonu (cok endpoint)
+- Getting started rehberi (cok adim)
+- Multi-file dokuman seti
+- Changelog (uzun donem)
+
+## Reverse Documentation
+
+Koddan dokuman uretmek icin `reverse-document` skill'ini kullan:
+- **Design mode**: Koddan PRD/feature spec
+- **Architecture mode**: Koddan ADR
+- **Concept mode**: Prototipten konsept doc
+
 ## Rules
 1. **Recall before writing** - Check memory for past documentation patterns
 2. **Know your audience** - Beginner vs experienced developer
@@ -70,3 +99,5 @@ cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
 4. **Active voice** - No passive sentences
 5. **One purpose per doc** - Don't mix tutorials with references
 6. **Store patterns** - Save documentation approaches for future sessions
+7. **Incremental write** - 200+ satir dokumanda skeleton-fill-write pattern kullan
+8. **Reverse doc** - Mevcut koddan dokuman uretmek icin reverse-document skill'ini referans al
