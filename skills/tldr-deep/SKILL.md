@@ -1,3 +1,8 @@
+---
+name: tldr-deep
+description: Run full 5-layer analysis (AST, call graph, CFG, DFG, slice) on a specific function for deep debugging or understanding.
+---
+
 # TLDR Deep Analysis
 
 Full 5-layer analysis of a specific function. Use when debugging or deeply understanding code.

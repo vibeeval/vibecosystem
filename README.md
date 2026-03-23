@@ -19,7 +19,7 @@
 
 vibecosystem turns Claude Code into a full AI software team — 119 specialized agents that plan, build, review, test, and learn from every mistake. No configuration needed — just install and code.
 
-> **v1.1**: 6 new skills (UI/UX patterns, brand identity, pentest methodology, and more), 5 enhanced agents, 3 new rules. See [UPGRADING.md](UPGRADING.md) for details.
+> **v1.2**: 2 new skills (external skills catalog, Pyxel game engine patterns), invisible routing in workflow-router, one-question rule, CI fixes. See [UPGRADING.md](UPGRADING.md) for details.
 
 ## The Problem
 

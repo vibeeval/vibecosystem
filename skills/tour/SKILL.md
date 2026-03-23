@@ -1,3 +1,8 @@
+---
+name: tour
+description: Friendly onboarding tour of Claude Code capabilities for users asking what it can do.
+---
+
 # Tour: What Can I Do?
 
 Friendly onboarding when users ask about capabilities.

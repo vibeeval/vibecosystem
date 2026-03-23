@@ -1,3 +1,8 @@
+---
+name: tldr-router
+description: Map code questions to the optimal tldr command by detecting intent and routing to the right analysis layer.
+---
+
 # TLDR Smart Router
 
 Maps questions to the optimal tldr command. Use this to pick the right layer.

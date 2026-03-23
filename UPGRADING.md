@@ -50,6 +50,26 @@ These are user data, never touch:
 
 ## Version History
 
+### v1.2.0 (2026-03-24)
+
+**New Skills (2):**
+- `external-skills-catalog` - 60+ community skill directory with quality rankings and fallback strategy
+- `pyxel-patterns` - Retro game engine patterns (game loop, sprites, MML audio, WASM deploy)
+
+**Enhanced Skills (1):**
+- `workflow-router` - Invisible routing principle, decision flowchart, fallback strategy chain
+
+**Enhanced Rules (1):**
+- `collaborative-decisions` - One-question rule (max 1 clarifying question)
+
+**Fixed:**
+- `a11y-expert.md` - Added missing YAML frontmatter
+- `start-observer.sh` - Converted CRLF to LF line endings
+
+**Inspired by:**
+- [Skill Gateway](https://github.com/buraksu42/skill-gateway) - Invisible routing, external catalog, one-question rule
+- [Pyxel](https://github.com/kitao/pyxel) - Retro game engine patterns, pixel art constraints, MML audio
+
 ### v1.1.0 (2026-03-22)
 
 **New Skills (6):**

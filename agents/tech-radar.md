@@ -41,7 +41,7 @@ Teknolojiyi 8 boyutta degerlendir:
 ```
 TECH EVALUATION — Bun Runtime:
 
-  Maturity:        6/10  (v1.1, stabil ama genc)
+  Maturity:        6/10  (v1.2, stabil ama genc)
   Community:       7/10  (buyuyen, ama Node.js'in %5'i)
   Performance:     9/10  (benchmark'larda 2-3x hizli)
   Ecosystem:       5/10  (npm uyumlu ama native eklentilerde sorun)
