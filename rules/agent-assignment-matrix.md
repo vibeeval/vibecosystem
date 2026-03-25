@@ -150,6 +150,8 @@ Task 3 kez QA'den gecemezse:
 | service-mesh-expert | devops + architect |
 | micro-frontend-expert | frontend-dev + architect |
 | compliance-expert | security-analyst + security-reviewer |
+| browser-agent | e2e-runner + manual browser testing |
+| harvest | oracle + WebFetch manual extraction |
 
 ## Severity → Response Mapping
 

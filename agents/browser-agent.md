@@ -137,6 +137,11 @@ Once configured, these tools become available:
 | growth | Competitor analysis - extract features, pricing, UX patterns |
 | designer | Design reference - capture UI patterns, extract color schemes |
 
+## Output
+
+ALWAYS write findings to:
+`$CLAUDE_PROJECT_DIR/.claude/cache/agents/browser-agent/output-{timestamp}.md`
+
 ## Use Cases
 
 ### Deploy Verification

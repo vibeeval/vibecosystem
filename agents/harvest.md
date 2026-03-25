@@ -165,7 +165,12 @@ Strategy: [single/deep/structured]
 | growth | Crawl competitor sites for feature/pricing analysis |
 | designer | Crawl design system documentation, component libraries |
 
-## Output Locations
+## Output
+
+ALWAYS write findings to:
+`$CLAUDE_PROJECT_DIR/.claude/cache/agents/harvest/output-{timestamp}.md`
+
+### Cache Structure
 
 ```
 $CLAUDE_PROJECT_DIR/.claude/cache/agents/harvest/

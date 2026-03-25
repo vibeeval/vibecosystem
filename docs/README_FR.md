@@ -6,7 +6,7 @@
 
 **Equipe logicielle IA construite sur Claude Code.**
 
-119 agents. 214 skills. 49 hooks. Zero intervention manuelle.
+121 agents. 223 skills. 49 hooks. Zero intervention manuelle.
 
 <img src="../assets/gif1-numbers.gif" alt="Ecosystem Numbers" width="700">
 
@@ -18,8 +18,8 @@
 
 | Metrique | Nombre |
 |----------|--------|
-| Agents | **119** |
-| Skills | **214** |
+| Agents | **121** |
+| Skills | **223** |
 | Hooks | **49** |
 | Rules | **21** |
 | Travail manuel | **0** |
@@ -28,7 +28,7 @@
 
 ## C'est quoi ?
 
-vibecosystem transforme Claude Code en une veritable equipe logicielle IA. Pas un simple assistant -- une **equipe** de 119 agents specialises qui planifient, construisent, revisent, testent et apprennent de chaque erreur.
+vibecosystem transforme Claude Code en une veritable equipe logicielle IA. Pas un simple assistant -- une **equipe** de 121 agents specialises qui planifient, construisent, revisent, testent et apprennent de chaque erreur.
 
 Pas de modele personnalise. Pas d'API personnalisee. Juste le systeme de hooks + agents + rules de Claude Code, pousse a ses limites.
 
@@ -124,7 +124,7 @@ Bug reproduction → replay          (backup: sleuth)
 │                                                         │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐              │
 │  │  Hooks   │  │  Agents  │  │  Skills  │              │
-│  │  (49)    │→ │  (119)   │← │  (214)   │              │
+│  │  (49)    │→ │  (121)   │← │  (223)   │              │
 │  └────┬─────┘  └────┬─────┘  └──────────┘              │
 │       │              │                                   │
 │       ▼              ▼                                   │

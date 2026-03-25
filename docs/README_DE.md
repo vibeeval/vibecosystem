@@ -6,7 +6,7 @@
 
 **KI-Softwareteam auf Basis von Claude Code.**
 
-119 Agents. 214 skills. 49 hooks. Null manuelle Arbeit.
+121 Agents. 223 skills. 49 hooks. Null manuelle Arbeit.
 
 <img src="../assets/gif1-numbers.gif" alt="Ecosystem Numbers" width="700">
 
@@ -18,8 +18,8 @@
 
 | Kennzahl | Anzahl |
 |----------|--------|
-| Agents | **119** |
-| Skills | **214** |
+| Agents | **121** |
+| Skills | **223** |
 | Hooks | **49** |
 | Rules | **21** |
 | Manuelle Arbeit | **0** |
@@ -28,7 +28,7 @@
 
 ## Was ist das?
 
-vibecosystem verwandelt Claude Code in ein vollstaendiges KI-Softwareteam. Kein einzelner Assistent -- ein **Team** aus 119 spezialisierten Agents, die planen, entwickeln, reviewen, testen und aus jedem Fehler lernen.
+vibecosystem verwandelt Claude Code in ein vollstaendiges KI-Softwareteam. Kein einzelner Assistent -- ein **Team** aus 121 spezialisierten Agents, die planen, entwickeln, reviewen, testen und aus jedem Fehler lernen.
 
 Kein eigenes Modell. Keine eigene API. Nur das Hook- + Agent- + Rules-System von Claude Code, bis ans Limit ausgereizt.
 
@@ -124,7 +124,7 @@ Bug reproduction → replay          (backup: sleuth)
 │                                                         │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐              │
 │  │  Hooks   │  │  Agents  │  │  Skills  │              │
-│  │  (49)    │→ │  (119)   │← │  (214)   │              │
+│  │  (49)    │→ │  (121)   │← │  (223)   │              │
 │  └────┬─────┘  └────┬─────┘  └──────────┘              │
 │       │              │                                   │
 │       ▼              ▼                                   │
