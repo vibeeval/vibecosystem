@@ -5,8 +5,8 @@
 **Your AI software team. Built on Claude Code.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Agents](https://img.shields.io/badge/agents-134-blue.svg)](#agents)
-[![Skills](https://img.shields.io/badge/skills-246-green.svg)](#skills)
+[![Agents](https://img.shields.io/badge/agents-136-blue.svg)](#agents)
+[![Skills](https://img.shields.io/badge/skills-253-green.svg)](#skills)
 [![Hooks](https://img.shields.io/badge/hooks-53-orange.svg)](#hooks)
 [![Rules](https://img.shields.io/badge/rules-21-red.svg)](#rules)
 [![Validate](https://github.com/vibeeval/vibecosystem/actions/workflows/validate.yml/badge.svg)](https://github.com/vibeeval/vibecosystem/actions/workflows/validate.yml)
@@ -17,9 +17,11 @@
 
 </div>
 
-vibecosystem turns Claude Code into a full AI software team — 134 specialized agents that plan, build, review, test, and learn from every mistake. No configuration needed — just install and code.
+vibecosystem turns Claude Code into a full AI software team — 136 specialized agents that plan, build, review, test, and learn from every mistake. No configuration needed — just install and code.
 
 > **v2.0**: 13 new agents (sast-scanner, mutation-tester, graph-analyst, mcp-manager, community-manager, benchmark, dependency-auditor, api-designer, incident-responder, data-modeler, test-architect, release-engineer, documentation-architect) + 23 new skills (SAST, compliance, product, marketing, MCP) + 4 new hooks + Agent Monitoring Dashboard + GitHub Actions CI/CD + MCP Auto-Discovery. See [UPGRADING.md](UPGRADING.md) for details.
+
+> **v2.1**: 7 new skills (minimax-pdf, minimax-docx, minimax-xlsx, pptx-generator, frontend-dev, fullstack-dev, clone-website) + 2 new agents (document-generator, website-cloner). Document generation, pixel-perfect website cloning, and enhanced frontend/fullstack patterns.
 
 ## The Problem
 
@@ -29,8 +31,8 @@ Claude Code is powerful, but it's one assistant. You prompt, it responds, you re
 
 vibecosystem is a complete [Claude Code](https://docs.anthropic.com/en/docs/claude-code) ecosystem that creates a self-organizing AI team:
 
-1. **134 agents** — specialized roles from frontend-dev to security-analyst
-2. **246 skills** — reusable knowledge from TDD workflows to Kubernetes patterns
+1. **136 agents** — specialized roles from frontend-dev to security-analyst
+2. **253 skills** — reusable knowledge from TDD workflows to Kubernetes patterns
 3. **53 hooks** — TypeScript sensors that observe, filter, and inject context
 4. **21 rules** — behavioral guidelines that shape every agent's output
 5. **Self-learning** — every error becomes a rule, automatically
@@ -188,7 +190,7 @@ Agent error → error-ledger.jsonl → skill-matrix.json
 │                                                         │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐              │
 │  │  Hooks   │  │  Agents  │  │  Skills  │              │
-│  │  (53)    │→ │  (134)   │← │  (246)   │              │
+│  │  (53)    │→ │  (136)   │← │  (253)   │              │
 │  └────┬─────┘  └────┬─────┘  └──────────┘              │
 │       │              │                                   │
 │       ▼              ▼                                   │
@@ -216,7 +218,7 @@ Agent error → error-ledger.jsonl → skill-matrix.json
 
 | Category | Count | Examples |
 |----------|-------|---------|
-| Core Dev | 13 | frontend-dev, backend-dev, kraken, spark, devops, browser-agent |
+| Core Dev | 14 | frontend-dev, backend-dev, kraken, spark, devops, browser-agent, website-cloner |
 | Review & QA | 8 | code-reviewer, security-reviewer, verifier, qa-engineer |
 | Domain Experts | 35 | graphql-expert, kubernetes-expert, ddd-expert, redis-expert |
 | Architecture | 8 | architect, planner, clean-arch-expert, cqrs-expert |
@@ -224,7 +226,7 @@ Agent error → error-ledger.jsonl → skill-matrix.json
 | DevOps & Cloud | 12 | aws-expert, gcp-expert, azure-expert, terraform-expert |
 | Analysis | 11 | scout, sleuth, data-analyst, profiler, strategist, harvest |
 | Orchestration | 16 | nexus, sentinel, commander, neuron, vault, nitro |
-| Documentation | 5 | technical-writer, doc-updater, copywriter, api-doc-generator |
+| Documentation | 6 | technical-writer, doc-updater, copywriter, api-doc-generator, document-generator |
 | Learning | 7 | self-learner, canavar, reputation-engine, session-replay-analyzer |
 
 ---
@@ -233,7 +235,7 @@ Agent error → error-ledger.jsonl → skill-matrix.json
 
 | Feature | vibecosystem | Single Claude Code | Cursor | aider |
 |---------|:----------:|:------------------:|:------:|:-----:|
-| Specialized agents | **134** | 0 | 0 | 0 |
+| Specialized agents | **136** | 0 | 0 | 0 |
 | Self-learning | **Yes** | No | No | No |
 | Agent swarm coordination | **Yes** | No | No | No |
 | Cross-project learning | **Yes** | No | No | No |
@@ -250,8 +252,8 @@ Agent error → error-ledger.jsonl → skill-matrix.json
 
 | Component | Count | Description |
 |-----------|-------|-------------|
-| `agents/` | 134 | Markdown agent definitions with specialized prompts |
-| `skills/` | 246 | Reusable knowledge — TDD, security, patterns, frameworks |
+| `agents/` | 136 | Markdown agent definitions with specialized prompts |
+| `skills/` | 253 | Reusable knowledge — TDD, security, patterns, frameworks |
 | `hooks/src/` | 53 | TypeScript hooks — sensors, learners, validators |
 | `rules/` | 21 | Behavioral guidelines — coding style, safety, QA |
 
@@ -323,7 +325,7 @@ Contributions welcome! Areas where help is needed:
 
 ### Nedir?
 
-vibecosystem, Claude Code'u tam bir AI yazilim ekibine donusturur. Tek bir asistan degil — planlayan, gelistiren, review yapan, test eden ve her hatasindan ogrenen **134 uzman agent'lik bir ekip**.
+vibecosystem, Claude Code'u tam bir AI yazilim ekibine donusturur. Tek bir asistan degil — planlayan, gelistiren, review yapan, test eden ve her hatasindan ogrenen **136 uzman agent'lik bir ekip**.
 
 Ozel model yok. Ozel API yok. Sadece Claude Code'un hook + agent + rules sistemi, sonuna kadar kullanilmis.
 

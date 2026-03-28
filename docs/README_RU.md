@@ -6,7 +6,7 @@
 
 **Команда разработки на базе ИИ, построенная на Claude Code.**
 
-134 agents. 246 skills. 53 hooks. Ноль ручной работы.
+136 agents. 253 skills. 53 hooks. Ноль ручной работы.
 
 <img src="../assets/gif1-numbers.gif" alt="Ecosystem Numbers" width="700">
 
@@ -18,8 +18,8 @@
 
 | Показатель | Количество |
 |------------|------------|
-| Agents | **134** |
-| Skills | **246** |
+| Agents | **136** |
+| Skills | **253** |
 | Hooks | **53** |
 | Rules | **21** |
 | Ручная работа | **0** |
@@ -28,7 +28,7 @@
 
 ## Что это?
 
-vibecosystem превращает Claude Code в полноценную ИИ-команду разработки. Не одного ассистента -- **команду** из 134 специализированных агентов, которые планируют, создают, проверяют, тестируют и учатся на каждой ошибке.
+vibecosystem превращает Claude Code в полноценную ИИ-команду разработки. Не одного ассистента -- **команду** из 136 специализированных агентов, которые планируют, создают, проверяют, тестируют и учатся на каждой ошибке.
 
 Без собственной модели. Без собственного API. Только система hooks + agents + rules Claude Code, использованная на максимум.
 
@@ -124,7 +124,7 @@ Bug reproduction → replay          (backup: sleuth)
 │                                                         │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐              │
 │  │  Hooks   │  │  Agents  │  │  Skills  │              │
-│  │  (53)    │→ │  (134)   │← │  (246)   │              │
+│  │  (53)    │→ │  (136)   │← │  (253)   │              │
 │  └────┬─────┘  └────┬─────┘  └──────────┘              │
 │       │              │                                   │
 │       ▼              ▼                                   │
@@ -151,7 +151,7 @@ Bug reproduction → replay          (backup: sleuth)
 
 | Категория | Количество | Примеры |
 |-----------|------------|---------|
-| Core Dev | 13 | frontend-dev, backend-dev, kraken, spark, devops |
+| Core Dev | 14 | frontend-dev, backend-dev, kraken, spark, devops, website-cloner |
 | Review & QA | 8 | code-reviewer, security-reviewer, verifier, qa-engineer |
 | Domain Experts | 35 | graphql-expert, kubernetes-expert, ddd-expert, redis-expert |
 | Architecture | 8 | architect, planner, clean-arch-expert, cqrs-expert |
@@ -159,7 +159,7 @@ Bug reproduction → replay          (backup: sleuth)
 | DevOps & Cloud | 12 | aws-expert, gcp-expert, azure-expert, terraform-expert |
 | Analysis | 11 | scout, sleuth, data-analyst, profiler, strategist |
 | Orchestration | 16 | nexus, sentinel, commander, neuron, vault, nitro |
-| Documentation | 5 | technical-writer, doc-updater, copywriter, api-doc-generator |
+| Documentation | 6 | technical-writer, doc-updater, copywriter, api-doc-generator, document-generator |
 | Learning | 7 | self-learner, canavar, reputation-engine, session-replay-analyzer |
 
 ---

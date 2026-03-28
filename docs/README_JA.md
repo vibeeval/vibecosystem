@@ -4,21 +4,21 @@
 
 **Claude Code 上に構築された AI ソフトウェアチーム。**
 
-134 の Agent。246 の Skill。53 の Hook。手作業ゼロ。
+136 の Agent。253 の Skill。53 の Hook。手作業ゼロ。
 
 ## 一目でわかる概要
 
 | 指標 | 数 |
 |--------|-------|
-| Agents | **134** |
-| Skills | **246** |
+| Agents | **136** |
+| Skills | **253** |
 | Hooks | **53** |
 | Rules | **21** |
 | 手作業 | **0** |
 
 ## これは何？
 
-vibecosystem は Claude Code を完全な AI ソフトウェアチームに変えます。単なるアシスタントではなく、設計、構築、レビュー、テストを行い、あらゆるミスから学習する 134 の専門 agent からなる**チーム**です。
+vibecosystem は Claude Code を完全な AI ソフトウェアチームに変えます。単なるアシスタントではなく、設計、構築、レビュー、テストを行い、あらゆるミスから学習する 136 の専門 agent からなる**チーム**です。
 
 カスタムモデルなし。カスタム API なし。Claude Code の hook + agent + rules システムだけを、限界まで活用しています。
 
@@ -110,7 +110,7 @@ Bug reproduction → replay          (backup: sleuth)
 │                                                         │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐              │
 │  │  Hooks   │  │  Agents  │  │  Skills  │              │
-│  │  (53)    │→ │  (134)   │← │  (246)   │              │
+│  │  (53)    │→ │  (136)   │← │  (253)   │              │
 │  └────┬─────┘  └────┬─────┘  └──────────┘              │
 │       │              │                                   │
 │       ▼              ▼                                   │
@@ -135,7 +135,7 @@ Bug reproduction → replay          (backup: sleuth)
 
 | カテゴリ | 数 | 例 |
 |----------|-------|---------|
-| Core Dev | 13 | frontend-dev, backend-dev, kraken, spark, devops |
+| Core Dev | 14 | frontend-dev, backend-dev, kraken, spark, devops, website-cloner |
 | Review & QA | 8 | code-reviewer, security-reviewer, verifier, qa-engineer |
 | Domain Experts | 35 | graphql-expert, kubernetes-expert, ddd-expert, redis-expert |
 | Architecture | 8 | architect, planner, clean-arch-expert, cqrs-expert |
@@ -143,7 +143,7 @@ Bug reproduction → replay          (backup: sleuth)
 | DevOps & Cloud | 12 | aws-expert, gcp-expert, azure-expert, terraform-expert |
 | Analysis | 11 | scout, sleuth, data-analyst, profiler, strategist |
 | Orchestration | 16 | nexus, sentinel, commander, neuron, vault, nitro |
-| Documentation | 5 | technical-writer, doc-updater, copywriter, api-doc-generator |
+| Documentation | 6 | technical-writer, doc-updater, copywriter, api-doc-generator, document-generator |
 | Learning | 7 | self-learner, canavar, reputation-engine, session-replay-analyzer |
 
 ## 技術スタック

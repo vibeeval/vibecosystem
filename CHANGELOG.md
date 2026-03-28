@@ -12,6 +12,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Skill marketplace
 - Agent performance dashboard
 
+## [2.1.0] - 2026-03-29
+
+### Added
+- **7 new skills**: minimax-pdf, minimax-docx, minimax-xlsx, pptx-generator, frontend-dev (MiniMax), fullstack-dev (MiniMax), clone-website
+- **2 new agents**: document-generator (DOCFORGE), website-cloner (MIRAGE)
+- **Document generation**: Professional PDF, Word, Excel, PowerPoint creation with anti-AI-aesthetic design system
+- **Website cloning**: 5-phase pixel-perfect site cloning pipeline with Chrome MCP and git worktree isolation
+- **Enhanced frontend patterns**: Design dials (variance, motion, density), anti-AI-aesthetic rules, motion engine
+- **Enhanced fullstack patterns**: 1,037-line comprehensive guide with TypeScript, Python, and Go examples
+
+### Sources
+- [MiniMax-AI/skills](https://github.com/MiniMax-AI/skills) (6.8K stars) - document generation, frontend-dev, fullstack-dev
+- [JCodesMore/ai-website-cloner-template](https://github.com/JCodesMore/ai-website-cloner-template) (1.9K stars) - clone-website
+
 ## [2.0.0] - 2026-03-26
 
 ### Added

@@ -6,7 +6,7 @@
 
 **Equipe logicielle IA construite sur Claude Code.**
 
-134 agents. 246 skills. 53 hooks. Zero intervention manuelle.
+136 agents. 253 skills. 53 hooks. Zero intervention manuelle.
 
 <img src="../assets/gif1-numbers.gif" alt="Ecosystem Numbers" width="700">
 
@@ -18,8 +18,8 @@
 
 | Metrique | Nombre |
 |----------|--------|
-| Agents | **134** |
-| Skills | **246** |
+| Agents | **136** |
+| Skills | **253** |
 | Hooks | **53** |
 | Rules | **21** |
 | Travail manuel | **0** |
@@ -28,7 +28,7 @@
 
 ## C'est quoi ?
 
-vibecosystem transforme Claude Code en une veritable equipe logicielle IA. Pas un simple assistant -- une **equipe** de 134 agents specialises qui planifient, construisent, revisent, testent et apprennent de chaque erreur.
+vibecosystem transforme Claude Code en une veritable equipe logicielle IA. Pas un simple assistant -- une **equipe** de 136 agents specialises qui planifient, construisent, revisent, testent et apprennent de chaque erreur.
 
 Pas de modele personnalise. Pas d'API personnalisee. Juste le systeme de hooks + agents + rules de Claude Code, pousse a ses limites.
 
@@ -124,7 +124,7 @@ Bug reproduction → replay          (backup: sleuth)
 │                                                         │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐              │
 │  │  Hooks   │  │  Agents  │  │  Skills  │              │
-│  │  (53)    │→ │  (134)   │← │  (246)   │              │
+│  │  (53)    │→ │  (136)   │← │  (253)   │              │
 │  └────┬─────┘  └────┬─────┘  └──────────┘              │
 │       │              │                                   │
 │       ▼              ▼                                   │
@@ -151,7 +151,7 @@ Bug reproduction → replay          (backup: sleuth)
 
 | Categorie | Nombre | Exemples |
 |-----------|--------|----------|
-| Core Dev | 13 | frontend-dev, backend-dev, kraken, spark, devops |
+| Core Dev | 14 | frontend-dev, backend-dev, kraken, spark, devops, website-cloner |
 | Review & QA | 8 | code-reviewer, security-reviewer, verifier, qa-engineer |
 | Domain Experts | 35 | graphql-expert, kubernetes-expert, ddd-expert, redis-expert |
 | Architecture | 8 | architect, planner, clean-arch-expert, cqrs-expert |
@@ -159,7 +159,7 @@ Bug reproduction → replay          (backup: sleuth)
 | DevOps & Cloud | 12 | aws-expert, gcp-expert, azure-expert, terraform-expert |
 | Analysis | 11 | scout, sleuth, data-analyst, profiler, strategist |
 | Orchestration | 16 | nexus, sentinel, commander, neuron, vault, nitro |
-| Documentation | 5 | technical-writer, doc-updater, copywriter, api-doc-generator |
+| Documentation | 6 | technical-writer, doc-updater, copywriter, api-doc-generator, document-generator |
 | Learning | 7 | self-learner, canavar, reputation-engine, session-replay-analyzer |
 
 ---

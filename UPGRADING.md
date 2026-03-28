@@ -50,6 +50,30 @@ These are user data, never touch:
 
 ## Version History
 
+## Upgrading to v2.1
+
+### New Skills (7)
+
+| Skill | Category | What it does |
+|-------|----------|-------------|
+| minimax-pdf | Document | Professional PDF with 15 cover styles, token-based design system |
+| minimax-docx | Document | Word documents via OpenXML SDK, create/edit/reformat pipelines |
+| minimax-xlsx | Document | Excel with XML templates, financial formatting standards |
+| pptx-generator | Document | PowerPoint with PptxGenJS, theme contracts, QA process |
+| frontend-dev | Frontend | Design dials, anti-AI-aesthetic, motion engine, copywriting |
+| fullstack-dev | Backend | 1,037-line guide, mandatory 5-step workflow, TS/Python/Go |
+| clone-website | Tools | 5-phase website cloning, Chrome MCP, worktree isolation |
+
+### New Agents (2)
+
+| Agent | Codename | Purpose |
+|-------|----------|---------|
+| document-generator | DOCFORGE | Orchestrates PDF/DOCX/XLSX/PPTX generation |
+| website-cloner | MIRAGE | Coordinates 5-phase pixel-perfect website cloning |
+
+### No Breaking Changes
+This is a purely additive release. No existing skills, agents, or hooks were modified.
+
 ### v2.0.0 (2026-03-26)
 
 **Upgrading to v2.0**

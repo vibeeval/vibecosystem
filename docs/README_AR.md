@@ -4,21 +4,21 @@
 
 **فريق برمجيات ذكاء اصطناعي مبني على Claude Code.**
 
-134 Agent. 246 skill. 53 hook. بدون أي عمل يدوي.
+136 Agent. 253 skill. 53 hook. بدون أي عمل يدوي.
 
 ## نظرة سريعة
 
 | المقياس | العدد |
 |--------|-------|
-| Agents | **134** |
-| Skills | **246** |
+| Agents | **136** |
+| Skills | **253** |
 | Hooks | **53** |
 | Rules | **21** |
 | العمل اليدوي | **0** |
 
 ## ما هذا؟
 
-يحول vibecosystem أداة Claude Code إلى فريق برمجيات ذكاء اصطناعي متكامل. ليس مساعدا واحدا، بل **فريق** من 134 agent متخصصا يخطط ويبني ويراجع ويختبر ويتعلم من كل خطأ.
+يحول vibecosystem أداة Claude Code إلى فريق برمجيات ذكاء اصطناعي متكامل. ليس مساعدا واحدا، بل **فريق** من 136 agent متخصصا يخطط ويبني ويراجع ويختبر ويتعلم من كل خطأ.
 
 لا نموذج مخصص. لا واجهة برمجة مخصصة. فقط نظام hook + agent + rules في Claude Code، مستغل حتى أقصى حد.
 
@@ -110,7 +110,7 @@ Bug reproduction → replay          (backup: sleuth)
 │                                                         │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐              │
 │  │  Hooks   │  │  Agents  │  │  Skills  │              │
-│  │  (53)    │→ │  (134)   │← │  (246)   │              │
+│  │  (53)    │→ │  (136)   │← │  (253)   │              │
 │  └────┬─────┘  └────┬─────┘  └──────────┘              │
 │       │              │                                   │
 │       ▼              ▼                                   │
@@ -135,7 +135,7 @@ Bug reproduction → replay          (backup: sleuth)
 
 | الفئة | العدد | أمثلة |
 |----------|-------|---------|
-| Core Dev | 13 | frontend-dev, backend-dev, kraken, spark, devops |
+| Core Dev | 14 | frontend-dev, backend-dev, kraken, spark, devops, website-cloner |
 | Review & QA | 8 | code-reviewer, security-reviewer, verifier, qa-engineer |
 | Domain Experts | 35 | graphql-expert, kubernetes-expert, ddd-expert, redis-expert |
 | Architecture | 8 | architect, planner, clean-arch-expert, cqrs-expert |
@@ -143,7 +143,7 @@ Bug reproduction → replay          (backup: sleuth)
 | DevOps & Cloud | 12 | aws-expert, gcp-expert, azure-expert, terraform-expert |
 | Analysis | 11 | scout, sleuth, data-analyst, profiler, strategist |
 | Orchestration | 16 | nexus, sentinel, commander, neuron, vault, nitro |
-| Documentation | 5 | technical-writer, doc-updater, copywriter, api-doc-generator |
+| Documentation | 6 | technical-writer, doc-updater, copywriter, api-doc-generator, document-generator |
 | Learning | 7 | self-learner, canavar, reputation-engine, session-replay-analyzer |
 
 ## المكدس التقني

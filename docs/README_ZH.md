@@ -4,21 +4,21 @@
 
 **基于 Claude Code 构建的 AI 软件团队。**
 
-134 个 Agent。246 项 Skill。53 个 Hook。零人工干预。
+136 个 Agent。253 项 Skill。53 个 Hook。零人工干预。
 
 ## 概览
 
 | 指标 | 数量 |
 |--------|-------|
-| Agents | **134** |
-| Skills | **246** |
+| Agents | **136** |
+| Skills | **253** |
 | Hooks | **53** |
 | Rules | **21** |
 | 人工操作 | **0** |
 
 ## 这是什么？
 
-vibecosystem 将 Claude Code 变成了一支完整的 AI 软件团队。不是一个助手，而是由 134 个专业 agent 组成的**团队** -- 它们负责规划、构建、审查、测试，并从每一个错误中学习。
+vibecosystem 将 Claude Code 变成了一支完整的 AI 软件团队。不是一个助手，而是由 136 个专业 agent 组成的**团队** -- 它们负责规划、构建、审查、测试，并从每一个错误中学习。
 
 无需自定义模型。无需自定义 API。仅凭 Claude Code 的 hook + agent + rules 系统，发挥到极致。
 
@@ -110,7 +110,7 @@ Bug reproduction → replay          (backup: sleuth)
 │                                                         │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐              │
 │  │  Hooks   │  │  Agents  │  │  Skills  │              │
-│  │  (53)    │→ │  (134)   │← │  (246)   │              │
+│  │  (53)    │→ │  (136)   │← │  (253)   │              │
 │  └────┬─────┘  └────┬─────┘  └──────────┘              │
 │       │              │                                   │
 │       ▼              ▼                                   │
@@ -135,7 +135,7 @@ Bug reproduction → replay          (backup: sleuth)
 
 | 类别 | 数量 | 示例 |
 |----------|-------|---------|
-| Core Dev | 13 | frontend-dev, backend-dev, kraken, spark, devops |
+| Core Dev | 14 | frontend-dev, backend-dev, kraken, spark, devops, website-cloner |
 | Review & QA | 8 | code-reviewer, security-reviewer, verifier, qa-engineer |
 | Domain Experts | 35 | graphql-expert, kubernetes-expert, ddd-expert, redis-expert |
 | Architecture | 8 | architect, planner, clean-arch-expert, cqrs-expert |
@@ -143,7 +143,7 @@ Bug reproduction → replay          (backup: sleuth)
 | DevOps & Cloud | 12 | aws-expert, gcp-expert, azure-expert, terraform-expert |
 | Analysis | 11 | scout, sleuth, data-analyst, profiler, strategist |
 | Orchestration | 16 | nexus, sentinel, commander, neuron, vault, nitro |
-| Documentation | 5 | technical-writer, doc-updater, copywriter, api-doc-generator |
+| Documentation | 6 | technical-writer, doc-updater, copywriter, api-doc-generator, document-generator |
 | Learning | 7 | self-learner, canavar, reputation-engine, session-replay-analyzer |
 
 ## 技术栈
