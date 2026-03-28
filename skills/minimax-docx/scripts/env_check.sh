@@ -6,6 +6,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+export PROJECT_DIR
 DOTNET_DIR="$SCRIPT_DIR/dotnet"
 
 # Force English output for dotnet CLI

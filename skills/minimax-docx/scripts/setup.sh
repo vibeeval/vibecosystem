@@ -338,7 +338,7 @@ check_locale() {
     local current_lang="${LANG:-not set}"
     local current_lc="${LC_ALL:-not set}"
 
-    if echo "$current_lang" | grep -qi "utf-8\|utf8"; then
+    if echo "$current_lang $current_lc" | grep -qi "utf-8\|utf8"; then
         log "Locale supports UTF-8: LANG=$current_lang"
     else
         warn "Locale may not support UTF-8: LANG=$current_lang"
