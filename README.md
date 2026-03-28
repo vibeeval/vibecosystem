@@ -6,9 +6,9 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Agents](https://img.shields.io/badge/agents-136-blue.svg)](#agents)
-[![Skills](https://img.shields.io/badge/skills-253-green.svg)](#skills)
+[![Skills](https://img.shields.io/badge/skills-260-green.svg)](#skills)
 [![Hooks](https://img.shields.io/badge/hooks-53-orange.svg)](#hooks)
-[![Rules](https://img.shields.io/badge/rules-21-red.svg)](#rules)
+[![Rules](https://img.shields.io/badge/rules-22-red.svg)](#rules)
 [![Validate](https://github.com/vibeeval/vibecosystem/actions/workflows/validate.yml/badge.svg)](https://github.com/vibeeval/vibecosystem/actions/workflows/validate.yml)
 
 [Turkce](#turkce) | [English](#english) | [Espanol](docs/README_ES.md) | [Francais](docs/README_FR.md) | [Deutsch](docs/README_DE.md) | [Portugues](docs/README_PT.md) | [Italiano](docs/README_IT.md) | [Nederlands](docs/README_NL.md) | [中文](docs/README_ZH.md) | [日本語](docs/README_JA.md) | [한국어](docs/README_KO.md) | [العربية](docs/README_AR.md) | [हिन्दी](docs/README_HI.md) | [Русский](docs/README_RU.md)
@@ -23,6 +23,8 @@ vibecosystem turns Claude Code into a full AI software team — 136 specialized 
 
 > **v2.1**: 7 new skills (minimax-pdf, minimax-docx, minimax-xlsx, pptx-generator, frontend-dev, fullstack-dev, clone-website) + 2 new agents (document-generator, website-cloner). Document generation, pixel-perfect website cloning, and enhanced frontend/fullstack patterns.
 
+> **v2.1.1**: 7 new skills from oh-my-claudecode (smart-model-routing, deep-interview, agent-benchmark, visual-verdict, ai-slop-cleaner, factcheck-guard, notepad-system) + 1 new rule (commit-trailers).
+
 ## The Problem
 
 Claude Code is powerful, but it's one assistant. You prompt, it responds, you review. For complex projects you need a planner, a reviewer, a security auditor, a tester — and you end up being all of them yourself.
@@ -32,9 +34,9 @@ Claude Code is powerful, but it's one assistant. You prompt, it responds, you re
 vibecosystem is a complete [Claude Code](https://docs.anthropic.com/en/docs/claude-code) ecosystem that creates a self-organizing AI team:
 
 1. **136 agents** — specialized roles from frontend-dev to security-analyst
-2. **253 skills** — reusable knowledge from TDD workflows to Kubernetes patterns
+2. **260 skills** — reusable knowledge from TDD workflows to Kubernetes patterns
 3. **53 hooks** — TypeScript sensors that observe, filter, and inject context
-4. **21 rules** — behavioral guidelines that shape every agent's output
+4. **22 rules** — behavioral guidelines that shape every agent's output
 5. **Self-learning** — every error becomes a rule, automatically
 
 After setup, you say "build a feature" and 20+ agents coordinate across 5 phases.
@@ -190,13 +192,13 @@ Agent error → error-ledger.jsonl → skill-matrix.json
 │                                                         │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐              │
 │  │  Hooks   │  │  Agents  │  │  Skills  │              │
-│  │  (53)    │→ │  (136)   │← │  (253)   │              │
+│  │  (53)    │→ │  (136)   │← │  (260)   │              │
 │  └────┬─────┘  └────┬─────┘  └──────────┘              │
 │       │              │                                   │
 │       ▼              ▼                                   │
 │  ┌──────────┐  ┌──────────┐                              │
 │  │  Rules   │  │  Memory  │                              │
-│  │  (21)    │  │ (PgSQL)  │                              │
+│  │  (22)    │  │ (PgSQL)  │                              │
 │  └──────────┘  └──────────┘                              │
 │                                                         │
 │  ┌──────────────────────────────────────┐                │
@@ -253,9 +255,9 @@ Agent error → error-ledger.jsonl → skill-matrix.json
 | Component | Count | Description |
 |-----------|-------|-------------|
 | `agents/` | 136 | Markdown agent definitions with specialized prompts |
-| `skills/` | 253 | Reusable knowledge — TDD, security, patterns, frameworks |
+| `skills/` | 260 | Reusable knowledge — TDD, security, patterns, frameworks |
 | `hooks/src/` | 53 | TypeScript hooks — sensors, learners, validators |
-| `rules/` | 21 | Behavioral guidelines — coding style, safety, QA |
+| `rules/` | 22 | Behavioral guidelines — coding style, safety, QA |
 
 ---
 

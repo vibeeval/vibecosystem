@@ -12,6 +12,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Skill marketplace
 - Agent performance dashboard
 
+## [2.1.1] - 2026-03-29
+
+### Added
+- **7 new skills** from oh-my-claudecode (14.6K stars) adaptation:
+  - smart-model-routing: Dynamic model selection based on task complexity scoring
+  - deep-interview: Socratic spec generation with ambiguity scoring (replaces discovery-interview)
+  - agent-benchmark: Framework for measuring agent quality and detecting regressions
+  - visual-verdict: Screenshot comparison QA with structured scoring
+  - ai-slop-cleaner: Post-implementation cleanup with regression-safe passes
+  - factcheck-guard: Runtime claim verification protocol
+  - notepad-system: Compaction-resistant notes for context preservation
+- **1 new rule**: commit-trailers (structured git trailers for decision context)
+
+### Sources
+- [Yeachan-Heo/oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) (14.6K stars)
+
 ## [2.1.0] - 2026-03-29
 
 ### Added

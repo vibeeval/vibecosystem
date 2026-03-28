@@ -50,6 +50,27 @@ These are user data, never touch:
 
 ## Version History
 
+## Upgrading to v2.1.1
+
+### New Skills (7)
+| Skill | Category | What it does |
+|-------|----------|-------------|
+| smart-model-routing | Orchestration | Dynamic Opus/Sonnet/Haiku selection based on task complexity |
+| deep-interview | Specification | Socratic questioning with ambiguity scoring, PRD generation |
+| agent-benchmark | Quality | Agent quality measurement, regression detection, baselines |
+| visual-verdict | Frontend QA | Screenshot comparison scoring (PASS/REVISE/FAIL) |
+| ai-slop-cleaner | Code Quality | Post-implementation cleanup, 7 regression-safe passes |
+| factcheck-guard | Verification | Runtime claim verification protocol (existence/absence/behavior) |
+| notepad-system | Context | Compaction-resistant notes for session continuity |
+
+### New Rule (1)
+| Rule | Purpose |
+|------|---------|
+| commit-trailers | Structured git trailers: Constraint, Rejected, Confidence, Scope-risk, Not-tested |
+
+### No Breaking Changes
+Purely additive release. Existing skills and agents unchanged.
+
 ## Upgrading to v2.1
 
 ### New Skills (7)
