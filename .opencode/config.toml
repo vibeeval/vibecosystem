@@ -1,0 +1,9 @@
+# vibecosystem - OpenCode CLI configuration
+# https://github.com/vibeeval/vibecosystem
+
+[project]
+# OpenCode reads instructions from this file
+instructions_file = "AGENTS.md"
+
+[model]
+default = "anthropic/claude-sonnet-4-20250514"

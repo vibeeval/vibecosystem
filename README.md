@@ -10,6 +10,8 @@
 [![Hooks](https://img.shields.io/badge/hooks-53-orange.svg)](#hooks)
 [![Rules](https://img.shields.io/badge/rules-22-red.svg)](#rules)
 [![Validate](https://github.com/vibeeval/vibecosystem/actions/workflows/validate.yml/badge.svg)](https://github.com/vibeeval/vibecosystem/actions/workflows/validate.yml)
+[![Works with Codex CLI](https://img.shields.io/badge/works%20with-Codex%20CLI-10a37f.svg)](#codex-cli)
+[![Works with OpenCode](https://img.shields.io/badge/works%20with-OpenCode-purple.svg)](#codex-cli)
 
 [Turkce](#turkce) | [English](#english) | [Espanol](docs/README_ES.md) | [Francais](docs/README_FR.md) | [Deutsch](docs/README_DE.md) | [Portugues](docs/README_PT.md) | [Italiano](docs/README_IT.md) | [Nederlands](docs/README_NL.md) | [中文](docs/README_ZH.md) | [日本語](docs/README_JA.md) | [한국어](docs/README_KO.md) | [العربية](docs/README_AR.md) | [हिन्दी](docs/README_HI.md) | [Русский](docs/README_RU.md)
 
@@ -294,6 +296,27 @@ implicit coordination through context.
 - No network requests, no telemetry, no cloud sync
 - Self-learned rules go to `~/.claude/rules/`
 - Hooks run locally via Claude Code's native hook system
+
+---
+
+<a name="codex-cli"></a>
+
+## Multi-CLI Support
+
+vibecosystem skills work with multiple AI coding CLIs:
+
+| CLI | Installer | Instructions File | Skills |
+|-----|-----------|-------------------|--------|
+| **Claude Code** | `./install.sh` | `CLAUDE.md` | Full support (agents + skills + hooks + rules) |
+| **Codex CLI** (OpenAI) | `./install-codex.sh` | `AGENTS.md` | Skills only (260 skills) |
+| **OpenCode** | Manual | `AGENTS.md` | Skills only |
+
+```bash
+# For Codex CLI users:
+./install-codex.sh
+```
+
+See [docs/codex-setup.md](docs/codex-setup.md) for detailed Codex CLI setup instructions.
 
 ---
 
