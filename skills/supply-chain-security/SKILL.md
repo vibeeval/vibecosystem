@@ -257,4 +257,61 @@ npm shrinkwrap
 }
 ```
 
+## Dependency Risk Scoring
+
+Score each dependency on a 0-100 risk scale before adoption:
+
+| Signal | Low Risk (0-2) | Medium Risk (3-5) | High Risk (6-10) |
+|--------|---------------|-------------------|------------------|
+| Age | > 3 years | 1-3 years | < 1 year |
+| Maintainers | 3+ active | 1-2 active | 1 inactive |
+| Downloads | > 1M/week | 100K-1M/week | < 100K/week |
+| GitHub stars | > 5K | 500-5K | < 500 |
+| Last commit | < 3 months | 3-12 months | > 12 months |
+| Open issues | < 50 | 50-200 | > 200 unresolved |
+| Install scripts | None | postinstall (build) | preinstall + network |
+| Dependencies | < 5 | 5-20 | > 20 transitive |
+| CVE history | 0 unfixed | Fixed promptly | Unfixed > 30 days |
+| License | MIT/Apache/BSD | LGPL/MPL | GPL/AGPL/Unknown |
+
+### Risk Assessment Template
+
+```
+Package: <name>@<version>
+Purpose: <why we need it>
+Alternatives: <what else we considered>
+
+Signals:
+  Age: X years (score: N)
+  Maintainers: X active (score: N)
+  Downloads: X/week (score: N)
+  Last commit: X days ago (score: N)
+  Dependencies: X transitive (score: N)
+  CVEs: X unfixed (score: N)
+
+Total Risk Score: XX/100
+Decision: [ADOPT | REVIEW | REJECT]
+Reviewed by: <name>
+Date: <date>
+```
+
+### Automated Risk Check
+
+```bash
+# npm: check package metadata
+npm show <package> time modified maintainers repository
+
+# Check download stats
+curl -s "https://api.npmjs.org/downloads/point/last-week/<package>" | jq .downloads
+
+# Check for known vulnerabilities
+npm audit --json | jq '.vulnerabilities["<package>"]'
+
+# Python: check PyPI metadata
+pip show <package>
+pip-audit -r requirements.txt --format json
+```
+
 **Rule**: Never `npm install <unknown-package>` in production without running `npm audit`, checking install scripts, and verifying the package name against known typosquats.
+
+Dependency risk scoring adapted from [Trail of Bits](https://github.com/trailofbits/skills) supply-chain-risk-auditor plugin.

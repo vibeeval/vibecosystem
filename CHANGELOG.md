@@ -17,10 +17,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 - **1 new agent**: paywall-planner (AI paywall strategy planner with category benchmarks, RevenueCat/Adapty config generation)
 - **3 new skills**: paywall-strategy (15 category benchmarks, model selection), revenuecat-patterns (SDK integration for Swift/Kotlin/RN/Flutter), subscription-pricing (tier design, PPP, churn reduction)
-- RevenueCat added to Inspired By section
+- **6 new skills** adapted from Trail of Bits (4.1K stars): differential-review (blast radius, risk-adaptive depth), insecure-defaults (fail-open detection), variant-analysis (bug sibling hunting), sharp-edges (API footgun detection), fp-check (false positive verification), property-based-testing (PBT patterns for fast-check/Hypothesis/gopter)
+- Dependency risk scoring merged into existing supply-chain-security skill
+- RevenueCat and Trail of Bits added to Inspired By section
 
 ### Changed
-- Updated counts across all files: 137 agents, 263 skills
+- Updated counts across all files: 137 agents, 269 skills
 - Regenerated gif1-numbers.gif with updated counts
 
 ## [2.1.1] - 2026-03-29

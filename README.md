@@ -37,7 +37,7 @@ Claude Code is powerful, but it's one assistant. You prompt, it responds, you re
 vibecosystem is a complete [Claude Code](https://docs.anthropic.com/en/docs/claude-code) ecosystem that creates a self-organizing AI team:
 
 1. **137 agents** — specialized roles from frontend-dev to security-analyst
-2. **263 skills** — reusable knowledge from TDD workflows to Kubernetes patterns
+2. **269 skills** — reusable knowledge from TDD workflows to Kubernetes patterns
 3. **53 hooks** — TypeScript sensors that observe, filter, and inject context
 4. **22 rules** — behavioral guidelines that shape every agent's output
 5. **Self-learning** — every error becomes a rule, automatically
@@ -195,7 +195,7 @@ Agent error → error-ledger.jsonl → skill-matrix.json
 │                                                         │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐              │
 │  │  Hooks   │  │  Agents  │  │  Skills  │              │
-│  │  (53)    │→ │  (137)   │← │  (263)   │              │
+│  │  (53)    │→ │  (137)   │← │  (269)   │              │
 │  └────┬─────┘  └────┬─────┘  └──────────┘              │
 │       │              │                                   │
 │       ▼              ▼                                   │
@@ -310,7 +310,7 @@ vibecosystem works with multiple AI coding tools:
 |-----|-----------|-------------------|--------------|
 | **Claude Code** | `./install.sh` | `CLAUDE.md` | Full support (agents + skills + hooks + rules) |
 | **Cursor IDE** | `./install-cursor.sh` | `AGENTS.md` + `.cursor/rules/` | 6 MDC rules + AGENTS.md + skills |
-| **Codex CLI** (OpenAI) | `./install-codex.sh` | `AGENTS.md` | Skills only (263 skills) |
+| **Codex CLI** (OpenAI) | `./install-codex.sh` | `AGENTS.md` | Skills only (269 skills) |
 | **OpenCode** | Manual | `AGENTS.md` | Skills only |
 
 ```bash
@@ -336,6 +336,7 @@ vibecosystem stands on the shoulders of great open-source projects:
 - **[Pyxel](https://github.com/kitao/pyxel)** by kitao — Retro game engine patterns, pixel art constraints, MML audio
 - **[copilot-orchestra](https://github.com/ShepAlderson/copilot-orchestra)** by ShepAlderson -- Phase-gated commits, plan documentation trail, 90% confidence threshold
 - **[RevenueCat](https://www.revenuecat.com/)** -- Subscription infrastructure, category benchmarks, paywall patterns
+- **[Trail of Bits Skills](https://github.com/trailofbits/skills)** by trailofbits -- Security audit patterns, variant analysis, false positive verification, sharp edges detection
 
 ---
 
