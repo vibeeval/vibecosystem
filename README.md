@@ -195,7 +195,7 @@ Agent error → error-ledger.jsonl → skill-matrix.json
 │                                                         │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐              │
 │  │  Hooks   │  │  Agents  │  │  Skills  │              │
-│  │  (53)    │→ │  (136)   │← │  (260)   │              │
+│  │  (53)    │→ │  (137)   │← │  (263)   │              │
 │  └────┬─────┘  └────┬─────┘  └──────────┘              │
 │       │              │                                   │
 │       ▼              ▼                                   │
@@ -240,7 +240,7 @@ Agent error → error-ledger.jsonl → skill-matrix.json
 
 | Feature | vibecosystem | Single Claude Code | Cursor | aider |
 |---------|:----------:|:------------------:|:------:|:-----:|
-| Specialized agents | **136** | 0 | 0 | 0 |
+| Specialized agents | **137** | 0 | 0 | 0 |
 | Self-learning | **Yes** | No | No | No |
 | Agent swarm coordination | **Yes** | No | No | No |
 | Cross-project learning | **Yes** | No | No | No |

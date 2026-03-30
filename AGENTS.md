@@ -1,6 +1,6 @@
 # vibecosystem
 
-**AI Software Team** -- 136 agents, 260 skills, 53 hooks, 22 rules
+**AI Software Team** -- 137 agents, 263 skills, 53 hooks, 22 rules
 
 This file is for **Codex CLI** (OpenAI). If you're using Claude Code, see `CLAUDE.md` or just run `./install.sh`.
 
@@ -18,7 +18,7 @@ This copies all skills to `~/.codex/skills/` where Codex CLI auto-discovers them
 
 ## Available Skills
 
-All 260 skills in `skills/` follow the standard SKILL.md format. Key categories:
+All 263 skills in `skills/` follow the standard SKILL.md format. Key categories:
 
 | Category | Examples |
 |----------|---------|
