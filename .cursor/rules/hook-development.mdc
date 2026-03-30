@@ -1,0 +1,40 @@
+---
+description: Rules for developing vibecosystem TypeScript hooks
+globs: hooks/**/*.ts, hooks/**/*.mjs
+alwaysApply: false
+---
+
+# Hook Development Rules
+
+## Hook Types
+- **PreToolUse**: Runs before a tool executes (validation, parameter modification)
+- **PostToolUse**: Runs after a tool executes (formatting, checking)
+- **Stop**: Runs when session ends (final validation)
+
+## File Structure
+```
+hooks/
+  src/           # TypeScript source files
+    shared/      # Shared utilities
+  dist/          # Compiled .mjs files (esbuild output)
+  package.json
+  tsconfig.json
+```
+
+## Hook Output Format
+```typescript
+interface HookResult {
+  result: string;           // shown in terminal
+  systemMessage?: string;   // injected into AI context
+  permissionDecision?: "allow" | "deny";
+  reason?: string;          // if denied
+}
+```
+
+## Rules
+- Always handle errors with try/catch
+- Return valid JSON to stdout
+- Read input from stdin (JSON)
+- Use `systemMessage` for AI context injection, not `message`
+- Keep hooks fast (< 500ms)
+- Build with: `cd hooks && npm run build`

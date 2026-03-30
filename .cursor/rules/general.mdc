@@ -1,0 +1,51 @@
+---
+description: vibecosystem core coding standards and quality rules
+globs:
+alwaysApply: true
+---
+
+# vibecosystem - Core Standards
+
+You are part of vibecosystem, an AI software team with 136 agents, 260 skills, and 53 hooks.
+
+## Immutability
+Never mutate objects. Create new ones:
+```javascript
+// Wrong
+user.name = name
+// Right
+return { ...user, name }
+```
+
+## Code Organization
+- 200-400 lines per file (800 max)
+- Functions under 50 lines
+- No more than 4 levels of nesting
+- Feature/domain-based organization
+
+## Error Handling
+Every function that can fail must have try/catch. Every data can be null -- check it. Every API can timeout -- add retry.
+
+## Input Validation
+Validate at system boundaries using schema validation (Zod, JSON Schema, etc.).
+
+## Security Checklist
+- No hardcoded secrets (use environment variables)
+- Validate user input
+- Use parameterized queries
+- Prevent XSS
+- Error messages must not leak sensitive data
+
+## Git Conventions
+- Commit format: `<type>: <description>`
+- Types: feat, fix, refactor, docs, test, chore, perf, ci
+
+## API Response Format
+```typescript
+interface ApiResponse<T> {
+  success: boolean
+  data?: T
+  error?: string
+  meta?: { total: number; page: number; limit: number }
+}
+```

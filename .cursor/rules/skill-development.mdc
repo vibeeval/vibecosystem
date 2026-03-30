@@ -1,0 +1,45 @@
+---
+description: Rules for creating and editing vibecosystem skills
+globs: skills/**/*.md
+alwaysApply: false
+---
+
+# Skill Development Rules
+
+## Skill Directory Structure
+
+Each skill lives in its own directory under `skills/`:
+
+```
+skills/
+  coding-standards/
+    SKILL.md      # Skill metadata + trigger description
+    prompt.md     # Full skill content
+```
+
+## SKILL.md Format
+
+```yaml
+---
+name: skill-name
+description: When and why to use this skill. Used for auto-discovery.
+---
+```
+
+Followed by the skill content in Markdown.
+
+## prompt.md Format
+
+The full prompt/knowledge content. No frontmatter needed.
+
+## Naming Conventions
+- Directory name: `kebab-case` (e.g., `coding-standards`)
+- SKILL.md name field: same as directory name
+- Description: explains WHEN to trigger, not just WHAT it does
+
+## Quality Rules
+- Description must clearly indicate trigger conditions
+- Content should be actionable, not theoretical
+- Include code examples where applicable
+- Keep skills focused on one domain/topic
+- Cross-reference related skills in content

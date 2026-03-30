@@ -1,0 +1,29 @@
+---
+description: TDD workflow and testing standards
+globs:
+alwaysApply: false
+---
+
+# Testing Standards
+
+## TDD Workflow (Required)
+1. Write test (RED) - test must FAIL first
+2. Minimal implementation (GREEN) - just enough to pass
+3. Refactor (IMPROVE) - clean up while tests pass
+4. Coverage must be 80%+
+
+## Test Types
+- **Unit**: Individual functions, utilities
+- **Integration**: API endpoints, database operations
+- **E2E**: Critical user flows (Playwright)
+
+## Naming Convention
+- Test files: `*.test.ts` or `*.spec.ts`
+- Test names: describe what behavior is expected
+- Use `describe` for grouping, `it` for individual cases
+
+## Rules
+- No `console.log` in tests
+- No hardcoded test data -- use factories/fixtures
+- Mock external services, not internal modules
+- Each test must be independent (no shared state)

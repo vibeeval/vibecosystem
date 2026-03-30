@@ -1,0 +1,40 @@
+---
+description: Rules for creating and editing vibecosystem agent definitions
+globs: agents/**/*.md
+alwaysApply: false
+---
+
+# Agent Development Rules
+
+## Agent File Format
+
+Each agent is a Markdown file with YAML frontmatter:
+
+```yaml
+---
+name: agent-name
+description: One-line description of what the agent does
+tools: [Read, Write, Edit, Bash, Grep, Glob]
+---
+```
+
+Followed by the agent's system prompt in Markdown.
+
+## Naming Conventions
+- Filename: `kebab-case.md` (e.g., `code-reviewer.md`)
+- Name field: same as filename without extension
+- Description: starts with a verb (e.g., "Reviews code for...")
+
+## Agent Categories
+- Core Dev: frontend-dev, backend-dev, kraken, spark, devops
+- Review & QA: code-reviewer, security-reviewer, verifier, qa-engineer
+- Domain Experts: graphql-expert, kubernetes-expert, ddd-expert
+- Architecture: architect, planner, clean-arch-expert
+- Testing: tdd-guide, e2e-runner, arbiter, mocksmith
+- Analysis: scout, sleuth, data-analyst, profiler
+
+## Quality Rules
+- Every agent must have a clear, specific purpose
+- Avoid overlapping responsibilities between agents
+- Keep system prompts focused and actionable
+- Include specific output format expectations

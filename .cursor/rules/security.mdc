@@ -1,0 +1,31 @@
+---
+description: Security rules for code review and vulnerability prevention
+globs:
+alwaysApply: false
+---
+
+# Security Rules
+
+## Before Every Commit
+- [ ] No hardcoded secrets (API keys, passwords, tokens)
+- [ ] User input is validated
+- [ ] SQL injection prevented (parameterized queries)
+- [ ] XSS prevented
+- [ ] Error messages don't leak sensitive data
+- [ ] CSRF protection in place
+- [ ] Rate limiting on API endpoints
+
+## Secret Management
+```typescript
+// WRONG
+const apiKey = "sk-proj-xxxxx"
+
+// RIGHT
+const apiKey = process.env.OPENAI_API_KEY
+if (!apiKey) throw new Error('OPENAI_API_KEY not configured')
+```
+
+## Dependencies
+- Check for CVEs before adding new packages
+- Keep dependencies up to date
+- Audit with `npm audit` regularly
