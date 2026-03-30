@@ -36,8 +36,8 @@ Claude Code is powerful, but it's one assistant. You prompt, it responds, you re
 
 vibecosystem is a complete [Claude Code](https://docs.anthropic.com/en/docs/claude-code) ecosystem that creates a self-organizing AI team:
 
-1. **136 agents** — specialized roles from frontend-dev to security-analyst
-2. **260 skills** — reusable knowledge from TDD workflows to Kubernetes patterns
+1. **137 agents** — specialized roles from frontend-dev to security-analyst
+2. **263 skills** — reusable knowledge from TDD workflows to Kubernetes patterns
 3. **53 hooks** — TypeScript sensors that observe, filter, and inject context
 4. **22 rules** — behavioral guidelines that shape every agent's output
 5. **Self-learning** — every error becomes a rule, automatically
@@ -225,7 +225,7 @@ Agent error → error-ledger.jsonl → skill-matrix.json
 |----------|-------|---------|
 | Core Dev | 14 | frontend-dev, backend-dev, kraken, spark, devops, browser-agent, website-cloner |
 | Review & QA | 8 | code-reviewer, security-reviewer, verifier, qa-engineer |
-| Domain Experts | 35 | graphql-expert, kubernetes-expert, ddd-expert, redis-expert |
+| Domain Experts | 36 | graphql-expert, kubernetes-expert, ddd-expert, redis-expert, paywall-planner |
 | Architecture | 8 | architect, planner, clean-arch-expert, cqrs-expert |
 | Testing | 6 | tdd-guide, e2e-runner, arbiter, mocksmith |
 | DevOps & Cloud | 12 | aws-expert, gcp-expert, azure-expert, terraform-expert |
@@ -310,7 +310,7 @@ vibecosystem works with multiple AI coding tools:
 |-----|-----------|-------------------|--------------|
 | **Claude Code** | `./install.sh` | `CLAUDE.md` | Full support (agents + skills + hooks + rules) |
 | **Cursor IDE** | `./install-cursor.sh` | `AGENTS.md` + `.cursor/rules/` | 6 MDC rules + AGENTS.md + skills |
-| **Codex CLI** (OpenAI) | `./install-codex.sh` | `AGENTS.md` | Skills only (260 skills) |
+| **Codex CLI** (OpenAI) | `./install-codex.sh` | `AGENTS.md` | Skills only (263 skills) |
 | **OpenCode** | Manual | `AGENTS.md` | Skills only |
 
 ```bash
@@ -335,6 +335,7 @@ vibecosystem stands on the shoulders of great open-source projects:
 - **[Skill Gateway](https://github.com/buraksu42/skill-gateway)** by buraksu42 — Invisible skill routing, external catalog, one-question rule
 - **[Pyxel](https://github.com/kitao/pyxel)** by kitao — Retro game engine patterns, pixel art constraints, MML audio
 - **[copilot-orchestra](https://github.com/ShepAlderson/copilot-orchestra)** by ShepAlderson -- Phase-gated commits, plan documentation trail, 90% confidence threshold
+- **[RevenueCat](https://www.revenuecat.com/)** -- Subscription infrastructure, category benchmarks, paywall patterns
 
 ---
 
