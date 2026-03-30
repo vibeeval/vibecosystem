@@ -334,6 +334,7 @@ vibecosystem stands on the shoulders of great open-source projects:
 - **[Game Studios](https://github.com/Donchitos/game-studios)** by Donchitos — Context resilience, incremental writing, gate-check system
 - **[Skill Gateway](https://github.com/buraksu42/skill-gateway)** by buraksu42 — Invisible skill routing, external catalog, one-question rule
 - **[Pyxel](https://github.com/kitao/pyxel)** by kitao — Retro game engine patterns, pixel art constraints, MML audio
+- **[copilot-orchestra](https://github.com/ShepAlderson/copilot-orchestra)** by ShepAlderson -- Phase-gated commits, plan documentation trail, 90% confidence threshold
 
 ---
 
