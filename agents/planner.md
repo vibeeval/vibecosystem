@@ -3,6 +3,7 @@ name: planner
 description: Expert planning specialist for complex features and refactoring. Use PROACTIVELY when users request feature implementation, architectural changes, or complex refactoring. Automatically activated for planning tasks.
 tools: ["Bash", "Read", "Grep", "Glob"]
 model: opus
+memory: user
 ---
 
 You are an expert planning specialist focused on creating comprehensive, actionable implementation plans.
@@ -117,3 +118,9 @@ Create detailed steps with:
 - Performance bottlenecks
 
 **Remember**: A great plan is specific, actionable, and considers both the happy path and edge cases. The best plans enable confident, incremental implementation.
+
+## Recommended Skills
+- `deep-interview` - Socratic spec generation with ambiguity scoring
+- `smart-model-routing` - Complexity-based model selection
+- `premortem` - Risk analysis before implementation
+- `test-strategy` - Test pyramid decision matrix

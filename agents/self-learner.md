@@ -2,7 +2,8 @@
 name: self-learner
 description: Hatalardan otomatik kural cikarir, CLAUDE.md ve memory'ye ogrenim kaydeder. Her hata sonrasi cagrilir.
 model: opus
-allowed-tools: Read, Write, Edit, Bash, Grep, Glob
+tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]
+memory: user
 ---
 
 # Self-Learner Agent
@@ -61,7 +62,7 @@ Ayrica "ERROR TRACKING" tablosuna ekle:
 Eger genel bir ogrenimse (proje-ozel degil), memory sistemine de kaydet:
 
 ```bash
-cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
+cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
   --session-id "self-learner" \
   --type ERROR_FIX \
   --content "<ogrenim>" \
@@ -125,3 +126,8 @@ Kaydedildi: CLAUDE.md (line X), memory (id: Y)
 Kural: <olusturulan kural>
 Onlem: <nasil onlenir>
 ```
+
+## Recommended Skills
+- `notepad-system` - Compaction-resistant notes
+- `continuous-learning` - Extract reusable patterns
+- `factcheck-guard` - Verify claims before storing learnings

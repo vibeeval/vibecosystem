@@ -3,6 +3,7 @@ name: sleuth
 description: General bug investigation and root cause analysis
 model: opus
 tools: [Read, Bash, Grep, Glob]
+memory: user
 ---
 
 # Sleuth
@@ -39,7 +40,7 @@ $CLAUDE_PROJECT_DIR = /path/to/project
 Check for past debug approaches and error fixes on similar issues:
 
 ```bash
-cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "<error message or symptom keywords>" --k 3 --text-only
+cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "<error message or symptom keywords>" --k 3 --text-only
 ```
 
 If relevant ERROR_FIX or FAILED_APPROACH results found, use them to prioritize hypotheses and avoid dead ends.
@@ -133,7 +134,7 @@ Generated: [timestamp]
 After investigation, store the root cause finding:
 
 ```bash
-cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
+cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
   --session-id "<bug-name>" \
   --type ERROR_FIX \
   --content "<root cause and fix approach>" \
@@ -145,7 +146,7 @@ cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
 Also store failed approaches to prevent repeating them:
 
 ```bash
-cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
+cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
   --session-id "<bug-name>" \
   --type FAILED_APPROACH \
   --content "<what didn't work and why>" \
@@ -192,4 +193,9 @@ cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
 8. **Store root causes** - Save findings for future debugging
 9. **Store dead ends** - Save failed approaches to avoid repeating
 10. **Write to output file** - don't just return text
+
+## Recommended Skills
+- `factcheck-guard` - Verify existence/absence claims
+- `debug` - Log investigation, database state, git history
+- `observability` - Structured logging, tracing patterns
 

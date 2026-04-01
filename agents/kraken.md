@@ -3,6 +3,7 @@ name: kraken
 description: Implementation and refactoring agent using TDD workflow
 model: opus
 tools: [Read, Edit, Write, Bash, Grep, Glob]
+memory: user
 ---
 
 # Kraken
@@ -93,7 +94,7 @@ Once tests pass:
 Before starting implementation, check for relevant past learnings:
 
 ```bash
-cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "<task keywords>" --k 3 --text-only
+cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "<task keywords>" --k 3 --text-only
 ```
 
 If relevant results found, apply them to your implementation plan:
@@ -265,7 +266,7 @@ When resuming (via `resume: "session-id"` in task prompt):
 After completing the task, if you discovered something worth remembering (new pattern, error fix, insight), store it:
 
 ```bash
-cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
+cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
   --session-id "<task-name>" \
   --content "<what you learned>" \
   --context "<what it relates to>" \
@@ -292,4 +293,10 @@ Do NOT store trivial or obvious information.
 8. **Checkpoint at phase boundaries** - Enable resume after clears
 9. **Validate before advancing** - Never skip validation step
 10. **Store learnings** - Save non-trivial insights for future sessions
+
+## Recommended Skills
+- `tdd-workflow` - Test-driven development enforcement
+- `coding-standards` - Universal code quality patterns
+- `ai-slop-cleaner` - Post-implementation cleanup
+- `factcheck-guard` - Verify claims about codebase
 

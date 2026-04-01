@@ -3,6 +3,7 @@ name: verifier
 description: Is bitince son quality gate. Test, lint, build, type check, security scan yapar. "Bitti" demeden once mutlaka cagrilir.
 model: sonnet
 tools: [Read, Bash, Grep, Glob]
+memory: user
 ---
 
 # Verifier Agent
@@ -117,3 +118,7 @@ Recommendation: <devam et / duzelt / review iste>
 4. Fail durumunda CLAUDE.md'ye not ekle (self-learner'a bildir)
 5. Coverage dusukse spesifik hangi dosyalarin test edilmedigini soyple
 
+## Recommended Skills
+- `agent-benchmark` - Quality measurement framework
+- `factcheck-guard` - Verify claims before final verdict
+- `test-strategy` - Coverage targets, test ROI

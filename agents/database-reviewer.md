@@ -3,6 +3,7 @@ name: database-reviewer
 description: PostgreSQL database specialist for query optimization, schema design, security, and performance. Use PROACTIVELY when writing SQL, creating migrations, designing schemas, or troubleshooting database performance. Incorporates Supabase best practices.
 tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]
 model: opus
+memory: user
 ---
 
 # Database Reviewer
@@ -652,3 +653,9 @@ ORDER BY rank DESC;
 **Remember**: Database issues are often the root cause of application performance problems. Optimize queries and schema design early. Use EXPLAIN ANALYZE to verify assumptions. Always index foreign keys and RLS policy columns.
 
 *Patterns adapted from [Supabase Agent Skills](https://github.com/supabase/agent-skills) under MIT license.*
+
+## Recommended Skills
+- `postgres-patterns` - Query optimization, indexing, security
+- `mongodb-patterns` - Document modeling, aggregation
+- `redis-patterns` - Data structures, pub/sub, clustering
+- `elasticsearch-patterns` - Mapping design, query optimization
