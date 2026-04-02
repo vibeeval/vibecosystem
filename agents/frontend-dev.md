@@ -166,3 +166,11 @@ Select.Item = SelectItem
 10. **cn() utility** - Conditional class'lar icin clsx + tailwind-merge
 11. **Performance budget** - LCP<2.5s, CLS<0.1, INP<200ms esiklerini as, uyar
 12. **shadcn extend** - shadcn/ui component'larini extend et, fork etme
+
+## Recommended Skills
+- `frontend-dev` - Design dials, anti-AI-aesthetic, motion engine
+- `frontend-patterns` - React, Next.js, state management
+- `animation-patterns` - Framer Motion, scroll-linked animations
+- `design-to-code` - Figma-to-code, design tokens
+- `visual-verdict` - Screenshot comparison QA
+- `form-validation` - React Hook Form + Zod patterns

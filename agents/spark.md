@@ -39,7 +39,7 @@ $CLAUDE_PROJECT_DIR = /path/to/project
 Quick check for past fixes on similar issues:
 
 ```bash
-cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "<fix topic>" --k 3 --text-only
+cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "<fix topic>" --k 3 --text-only
 ```
 
 ## Step 3: Quick Analysis
@@ -98,7 +98,7 @@ Generated: [timestamp]
 If you fixed a non-trivial error, store it:
 
 ```bash
-cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
+cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
   --session-id "<fix-name>" \
   --type ERROR_FIX \
   --content "<what the fix was and why>" \
@@ -117,4 +117,8 @@ cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
 6. **Know limits** - escalate to Kraken if change grows in scope
 7. **Write to output file** - don't just return text
 8. **Store non-trivial fixes** - Save error fixes for future sessions
+
+## Recommended Skills
+- `coding-standards` - Universal code quality patterns
+- `ai-slop-cleaner` - Post-implementation cleanup
 

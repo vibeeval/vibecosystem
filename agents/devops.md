@@ -28,12 +28,12 @@ Bu pattern'lara uymayan config YAZMA. Uymadigini farkedersen duzelt.
 
 ### Recall
 ```bash
-cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "<infra/devops keywords>" --k 3 --text-only
+cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "<infra/devops keywords>" --k 3 --text-only
 ```
 
 ### Store
 ```bash
-cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
+cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
   --session-id "<task-name>" \
   --content "<what you learned>" \
   --context "<infrastructure component>" \
@@ -84,3 +84,10 @@ cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
 4. **Secrets safe** - Never in code or logs
 5. **Monitor first** - Alerting before deployment
 6. **Store learnings** - Save infra patterns for future sessions
+
+## Recommended Skills
+- `docker-ops` - Dockerfile best practices, multi-stage builds
+- `ci-cd-pipeline` - GitHub Actions, matrix builds, caching
+- `kubernetes-patterns` - Pod design, rolling updates
+- `terraform-patterns` - Module composition, state management
+- `canary-deploy-patterns` - Traffic splitting, rollback

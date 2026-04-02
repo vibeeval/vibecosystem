@@ -186,3 +186,8 @@ db.query_many([item.id for item in items])
 5. **Check concurrency** - races are subtle
 6. **Verify cleanup** - memory leaks hide
 7. **Write to output file** - don't just return text
+
+## Recommended Skills
+- `performance-testing` - k6/Artillery, response time thresholds
+- `load-testing-patterns` - Load profiles, SLO validation
+- `observability` - Structured logging, metrics collection

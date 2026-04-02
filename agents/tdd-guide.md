@@ -279,3 +279,9 @@ npm test -- --coverage --ci
 
 **Remember**: No code without tests. Tests are not optional. They are the safety net that enables confident refactoring, rapid development, and production reliability.
 
+## Recommended Skills
+- `tdd-workflow` - TDD enforcement with 80%+ coverage
+- `test-strategy` - Test pyramid, mock vs real decisions
+- `python-testing` - pytest strategies (Python projects)
+- `golang-testing` - Table-driven tests (Go projects)
+

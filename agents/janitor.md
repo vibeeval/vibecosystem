@@ -54,7 +54,7 @@ Kişilik özellikleri:
 ### Recall (Geçmiş Öğrenimleri Çek)
 
 ```bash
-cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "<keywords>" --k 3 --text-only
+cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "<keywords>" --k 3 --text-only
 ```
 
 Before starting any audit, recall similar past findings:
@@ -66,7 +66,7 @@ Before starting any audit, recall similar past findings:
 ### Store (Öğrenim Kaydet)
 
 ```bash
-cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
+cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
   --session-id "<id>" \
   --content "<what was found and fixed>" \
   --context "<which project/file>" \
@@ -360,3 +360,8 @@ Always do:
 > — Grady Booch
 
 JANITOR never sleeps. JANITOR always watches. Your codebase thanks you.
+
+## Recommended Skills
+- `ai-slop-cleaner` - Post-implementation cleanup passes
+- `dead-code` - Find unused functions
+- `coding-standards` - Code quality patterns

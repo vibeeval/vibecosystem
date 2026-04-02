@@ -164,3 +164,9 @@ Tasarim kararlari icin:
 6. **Named rules** - Esiklere uy, tahmin etme, olc
 7. **Collaborative** - Onemli kararlarda kullaniciya sor (AskUserQuestion)
 8. **Token-first** - Hardcoded deger kullanma, token referans et
+
+## Recommended Skills
+- `frontend-dev` - Design dials, anti-AI-aesthetic rules
+- `design-to-code` - Figma-to-code, design tokens, spacing scales
+- `animation-patterns` - Framer Motion, scroll-linked animations
+- `visual-verdict` - Screenshot comparison QA

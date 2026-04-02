@@ -28,12 +28,12 @@ Bu pattern'lara uymayan test YAZMA. Uymadigini farkedersen duzelt.
 
 ### Recall
 ```bash
-cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "<test/qa keywords>" --k 3 --text-only
+cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "<test/qa keywords>" --k 3 --text-only
 ```
 
 ### Store
 ```bash
-cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
+cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
   --session-id "<test-task>" \
   --content "<testing insight or bug pattern>" \
   --context "<feature/component tested>" \
@@ -83,3 +83,9 @@ cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
 4. **Bug reports are reproducible** - Steps, expected, actual
 5. **Coverage is quality** - 80% meaningful > 100% meaningless
 6. **Store bug patterns** - Save recurring bugs for future sessions
+
+## Recommended Skills
+- `test-strategy` - Test pyramid, coverage targets
+- `visual-verdict` - Screenshot comparison QA
+- `e2e` - Playwright test generation
+- `agent-benchmark` - Agent quality measurement

@@ -31,14 +31,14 @@ Bu pattern'lara uymayan kod YAZMA. Uymadigini farkedersen duzelt.
 Göreve başlamadan önce ilgili geçmiş çözümleri kontrol et:
 
 ```bash
-cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "<backend task keywords>" --k 3 --text-only
+cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "<backend task keywords>" --k 3 --text-only
 ```
 
 ### Store
 Görev sonunda non-trivial çözümleri kaydet:
 
 ```bash
-cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
+cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
   --session-id "<task-name>" \
   --content "<what you learned>" \
   --context "<backend component>" \
@@ -115,3 +115,11 @@ Her görevi teslim ettiğinde şunu raporla:
 4. **Reversible migrations** - Always write down migrations
 5. **Security by default** - Never skip security checks
 6. **Store learnings** - Save non-trivial solutions for future sessions
+
+## Recommended Skills
+- `fullstack-dev` - 1037-line comprehensive backend guide
+- `backend-patterns` - API design, database optimization
+- `api-patterns` - Versioning, testing, schema validation
+- `postgres-patterns` - Query optimization, schema design
+- `caching-patterns` - Redis strategies, TTL management
+- `event-driven-patterns` - Message queues, saga, outbox
