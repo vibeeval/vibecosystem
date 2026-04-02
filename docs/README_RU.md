@@ -6,7 +6,7 @@
 
 **Команда разработки на базе ИИ, построенная на Claude Code.**
 
-137 agents. 269 skills. 53 hooks. Ноль ручной работы.
+137 agents. 271 skills. 60 hooks. Ноль ручной работы.
 
 <img src="../assets/gif1-numbers.gif" alt="Ecosystem Numbers" width="700">
 

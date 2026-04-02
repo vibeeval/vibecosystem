@@ -12,6 +12,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Skill marketplace
 - Agent performance dashboard
 
+## [2.2.0] - 2026-04-02
+
+### Added
+- **5 new features** reverse-engineered from Claude Code source:
+  - **Agent Memory**: persistent per-agent memory with user/project/local scopes (agent-memory-loader, agent-memory-saver hooks)
+  - **Magic Docs**: auto-updating docs via `# MAGIC DOC:` header detection (magic-doc-tracker, magic-doc-updater hooks)
+  - **Dream Consolidation**: cross-session memory cleanup on 24h+3session threshold with lock mechanism (dream-consolidator hook)
+  - **Smart Memory Recall**: frontmatter-based keyword+recency scoring for memory file selection (smart-memory-recall hook)
+  - **Plugin Toggle**: CLI-based hook/skill enable/disable registry (plugin-registry hook + shared/plugin-check module)
+- **7 new hooks**: agent-memory-loader, agent-memory-saver, magic-doc-tracker, magic-doc-updater, dream-consolidator, smart-memory-recall, plugin-registry
+- **1 new shared module**: shared/plugin-check.ts (lightweight enable/disable checker)
+- **Skill references** added to 21 agents (Recommended Skills sections)
+- `memory: user` frontmatter field added to 10 core agents
+- magic-docs/ directory with customizable prompt template
+- plugin-config.json for hook/skill toggle state
+
+### Sources
+- [Claude Code source](https://github.com/anthropics/claude-code) — agentMemory.ts, MagicDocs, autoDream, findRelevantMemories, builtinPlugins
+
+### Changed
+- Updated counts: 137 agents, 271 skills, 60 hooks, 23 rules
+
 ## [2.1.2] - 2026-03-30
 
 ### Added

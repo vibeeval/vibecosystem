@@ -4,7 +4,7 @@
 
 **Claude Code पर बनी AI सॉफ्टवेयर टीम।**
 
-137 Agent। 269 skill। 53 hook। शून्य मैनुअल काम।
+137 Agent। 271 skill। 60 hook। शून्य मैनुअल काम।
 
 ## एक नज़र में
 
@@ -59,7 +59,7 @@ Phase 5 (Final):        self-learner + technical-writer
 
 ### 3. एडैप्टिव Hook लोडिंग
 
-53 hook मौजूद हैं लेकिन सभी एक साथ नहीं चलते। उपयोगकर्ता की मंशा तय करती है कि कौन से hook सक्रिय होंगे।
+60 hook मौजूद हैं लेकिन सभी एक साथ नहीं चलते। उपयोगकर्ता की मंशा तय करती है कि कौन से hook सक्रिय होंगे।
 
 <img src="../assets/gif4-hooks.gif" alt="Adaptive Hooks" width="700">
 

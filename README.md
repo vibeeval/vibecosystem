@@ -5,10 +5,10 @@
 **Your AI software team. Built on Claude Code.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Agents](https://img.shields.io/badge/agents-136-blue.svg)](#agents)
-[![Skills](https://img.shields.io/badge/skills-260-green.svg)](#skills)
-[![Hooks](https://img.shields.io/badge/hooks-53-orange.svg)](#hooks)
-[![Rules](https://img.shields.io/badge/rules-22-red.svg)](#rules)
+[![Agents](https://img.shields.io/badge/agents-137-blue.svg)](#agents)
+[![Skills](https://img.shields.io/badge/skills-271-green.svg)](#skills)
+[![Hooks](https://img.shields.io/badge/hooks-60-orange.svg)](#hooks)
+[![Rules](https://img.shields.io/badge/rules-23-red.svg)](#rules)
 [![Validate](https://github.com/vibeeval/vibecosystem/actions/workflows/validate.yml/badge.svg)](https://github.com/vibeeval/vibecosystem/actions/workflows/validate.yml)
 [![Works with Cursor](https://img.shields.io/badge/works%20with-Cursor-00b4d8.svg)](#multi-cli)
 [![Works with Codex CLI](https://img.shields.io/badge/works%20with-Codex%20CLI-10a37f.svg)](#multi-cli)
@@ -20,13 +20,15 @@
 
 </div>
 
-vibecosystem turns Claude Code into a full AI software team — 136 specialized agents that plan, build, review, test, and learn from every mistake. No configuration needed — just install and code.
+vibecosystem turns Claude Code into a full AI software team — 137 specialized agents that plan, build, review, test, and learn from every mistake. No configuration needed — just install and code.
 
 > **v2.0**: 13 new agents (sast-scanner, mutation-tester, graph-analyst, mcp-manager, community-manager, benchmark, dependency-auditor, api-designer, incident-responder, data-modeler, test-architect, release-engineer, documentation-architect) + 23 new skills (SAST, compliance, product, marketing, MCP) + 4 new hooks + Agent Monitoring Dashboard + GitHub Actions CI/CD + MCP Auto-Discovery. See [UPGRADING.md](UPGRADING.md) for details.
 
 > **v2.1**: 7 new skills (minimax-pdf, minimax-docx, minimax-xlsx, pptx-generator, frontend-dev, fullstack-dev, clone-website) + 2 new agents (document-generator, website-cloner). Document generation, pixel-perfect website cloning, and enhanced frontend/fullstack patterns.
 
 > **v2.1.1**: 7 new skills from oh-my-claudecode (smart-model-routing, deep-interview, agent-benchmark, visual-verdict, ai-slop-cleaner, factcheck-guard, notepad-system) + 1 new rule (commit-trailers).
+
+> **v2.2**: 5 features from Claude Code source — Agent Memory (persistent per-agent memory), Magic Docs (auto-updating docs), Dream Consolidation (cross-session memory cleanup), Smart Recall (frontmatter-based memory scoring), Plugin Toggle (hook enable/disable CLI). +7 hooks, skill references for 21 agents.
 
 ## The Problem
 
@@ -37,9 +39,9 @@ Claude Code is powerful, but it's one assistant. You prompt, it responds, you re
 vibecosystem is a complete [Claude Code](https://docs.anthropic.com/en/docs/claude-code) ecosystem that creates a self-organizing AI team:
 
 1. **137 agents** — specialized roles from frontend-dev to security-analyst
-2. **269 skills** — reusable knowledge from TDD workflows to Kubernetes patterns
-3. **53 hooks** — TypeScript sensors that observe, filter, and inject context
-4. **22 rules** — behavioral guidelines that shape every agent's output
+2. **271 skills** — reusable knowledge from TDD workflows to Kubernetes patterns
+3. **60 hooks** — TypeScript sensors that observe, filter, and inject context
+4. **23 rules** — behavioral guidelines that shape every agent's output
 5. **Self-learning** — every error becomes a rule, automatically
 
 After setup, you say "build a feature" and 20+ agents coordinate across 5 phases.
@@ -179,7 +181,7 @@ Agent error → error-ledger.jsonl → skill-matrix.json
 
 ### Adaptive Hook Loading
 
-53 hooks exist but they don't all run at once. Intent determines which hooks fire.
+60 hooks exist but they don't all run at once. Intent determines which hooks fire.
 
 ![Hooks](assets/gif4-hooks.gif)
 
@@ -195,13 +197,13 @@ Agent error → error-ledger.jsonl → skill-matrix.json
 │                                                         │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐              │
 │  │  Hooks   │  │  Agents  │  │  Skills  │              │
-│  │  (53)    │→ │  (137)   │← │  (269)   │              │
+│  │  (60)    │→ │  (137)   │← │  (271)   │              │
 │  └────┬─────┘  └────┬─────┘  └──────────┘              │
 │       │              │                                   │
 │       ▼              ▼                                   │
 │  ┌──────────┐  ┌──────────┐                              │
 │  │  Rules   │  │  Memory  │                              │
-│  │  (22)    │  │ (PgSQL)  │                              │
+│  │  (23)    │  │ (PgSQL)  │                              │
 │  └──────────┘  └──────────┘                              │
 │                                                         │
 │  ┌──────────────────────────────────────┐                │
@@ -310,7 +312,7 @@ vibecosystem works with multiple AI coding tools:
 |-----|-----------|-------------------|--------------|
 | **Claude Code** | `./install.sh` | `CLAUDE.md` | Full support (agents + skills + hooks + rules) |
 | **Cursor IDE** | `./install-cursor.sh` | `AGENTS.md` + `.cursor/rules/` | 6 MDC rules + AGENTS.md + skills |
-| **Codex CLI** (OpenAI) | `./install-codex.sh` | `AGENTS.md` | Skills only (269 skills) |
+| **Codex CLI** (OpenAI) | `./install-codex.sh` | `AGENTS.md` | Skills only (271 skills) |
 | **OpenCode** | Manual | `AGENTS.md` | Skills only |
 
 ```bash

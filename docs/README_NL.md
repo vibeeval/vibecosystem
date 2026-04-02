@@ -6,7 +6,7 @@
 
 **AI-softwareteam gebouwd op Claude Code.**
 
-137 agents. 269 skills. 53 hooks. Nul handmatig werk.
+137 agents. 271 skills. 60 hooks. Nul handmatig werk.
 
 <img src="../assets/gif1-numbers.gif" alt="Ecosystem Numbers" width="700">
 
@@ -71,7 +71,7 @@ Phase 5 (Final):        self-learner + technical-writer
 
 ### 3. Adaptief laden van hooks
 
-Er bestaan 53 hooks, maar ze draaien niet allemaal tegelijk. De intentie bepaalt welke hooks worden geactiveerd.
+Er bestaan 60 hooks, maar ze draaien niet allemaal tegelijk. De intentie bepaalt welke hooks worden geactiveerd.
 
 <img src="../assets/gif4-hooks.gif" alt="Adaptive Hooks" width="700">
 
