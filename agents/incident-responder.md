@@ -23,12 +23,12 @@ Sen production incident response uzmanisin. Incident tespit, siniflandirma, muda
 
 ### Recall
 ```bash
-cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "incident production error root cause" --k 5 --text-only
+cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "incident production error root cause" --k 5 --text-only
 ```
 
 ### Store
 ```bash
-cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
+cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
   --session-id "<incident-id>" \
   --type ERROR_FIX \
   --content "<root cause and resolution>" \

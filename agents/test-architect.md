@@ -24,12 +24,12 @@ Sen test stratejisi ve mimarisi uzmanisin. Saglam, hizli ve guvenilir test altya
 
 ### Recall
 ```bash
-cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "test strategy architecture flaky" --k 3 --text-only
+cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "test strategy architecture flaky" --k 3 --text-only
 ```
 
 ### Store
 ```bash
-cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
+cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
   --session-id "<session>" \
   --type WORKING_SOLUTION \
   --content "<test strategy decision>" \

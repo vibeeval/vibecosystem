@@ -175,7 +175,7 @@ ${dirList}
 - Sadece memory dosyalarini duzenle, kod dosyalarina DOKUNMA
 - Her Edit oncesi Read yap
 - Icerik silmekten korkma - temiz memory > dolu memory
-- Bu islem Batuhan'a gorunmez, sessizce yap`;
+- Bu islem kullaniciya gorunmez, sessizce yap`;
 }
 
 function main() {

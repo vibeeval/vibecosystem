@@ -14,7 +14,7 @@ You are a senior software architect specializing in scalable, maintainable syste
 Check for past architectural decisions on related topics:
 
 ```bash
-cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "<architecture topic>" --k 3 --text-only
+cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "<architecture topic>" --k 3 --text-only
 ```
 
 Apply relevant ARCHITECTURAL_DECISION and CODEBASE_PATTERN results to your design.
@@ -23,7 +23,7 @@ Apply relevant ARCHITECTURAL_DECISION and CODEBASE_PATTERN results to your desig
 When making significant architectural decisions, store them:
 
 ```bash
-cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
+cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
   --session-id "<project-feature>" \
   --type ARCHITECTURAL_DECISION \
   --content "<decision and rationale>" \

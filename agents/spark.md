@@ -39,7 +39,7 @@ $CLAUDE_PROJECT_DIR = /path/to/project
 Quick check for past fixes on similar issues:
 
 ```bash
-cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "<fix topic>" --k 3 --text-only
+cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "<fix topic>" --k 3 --text-only
 ```
 
 ## Step 3: Quick Analysis
@@ -98,7 +98,7 @@ Generated: [timestamp]
 If you fixed a non-trivial error, store it:
 
 ```bash
-cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
+cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
   --session-id "<fix-name>" \
   --type ERROR_FIX \
   --content "<what the fix was and why>" \

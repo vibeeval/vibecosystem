@@ -31,14 +31,14 @@ Bu pattern'lara uymayan kod YAZMA. Uymadigini farkedersen duzelt.
 Göreve başlamadan önce ilgili geçmiş çözümleri kontrol et:
 
 ```bash
-cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "<backend task keywords>" --k 3 --text-only
+cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "<backend task keywords>" --k 3 --text-only
 ```
 
 ### Store
 Görev sonunda non-trivial çözümleri kaydet:
 
 ```bash
-cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
+cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
   --session-id "<task-name>" \
   --content "<what you learned>" \
   --context "<backend component>" \

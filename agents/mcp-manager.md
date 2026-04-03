@@ -22,12 +22,12 @@ Sen MCP server ekosisteminin yoneticisisin. Yeni MCP server kesfi, kurulum, konf
 
 ### Recall
 ```bash
-cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "mcp server setup" --k 3 --text-only
+cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "mcp server setup" --k 3 --text-only
 ```
 
 ### Store
 ```bash
-cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
+cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
   --session-id "<session>" \
   --type WORKING_SOLUTION \
   --content "<mcp setup details>" \

@@ -94,7 +94,7 @@ Once tests pass:
 Before starting implementation, check for relevant past learnings:
 
 ```bash
-cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "<task keywords>" --k 3 --text-only
+cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "<task keywords>" --k 3 --text-only
 ```
 
 If relevant results found, apply them to your implementation plan:
@@ -266,7 +266,7 @@ When resuming (via `resume: "session-id"` in task prompt):
 After completing the task, if you discovered something worth remembering (new pattern, error fix, insight), store it:
 
 ```bash
-cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
+cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
   --session-id "<task-name>" \
   --content "<what you learned>" \
   --context "<what it relates to>" \

@@ -13,7 +13,7 @@ You are a Code Knowledge Graph Analyst. You model codebases as directed graphs w
 Check for past graph analyses and architectural decisions:
 
 ```bash
-cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "dependency graph architecture circular" --k 3 --text-only
+cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "dependency graph architecture circular" --k 3 --text-only
 ```
 
 Apply relevant CODEBASE_PATTERN and ARCHITECTURAL_DECISION results to your analysis.
@@ -22,7 +22,7 @@ Apply relevant CODEBASE_PATTERN and ARCHITECTURAL_DECISION results to your analy
 When discovering significant architectural patterns or issues, store them:
 
 ```bash
-cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
+cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
   --session-id "<project-graph-analysis>" \
   --type CODEBASE_PATTERN \
   --content "<finding and implications>" \

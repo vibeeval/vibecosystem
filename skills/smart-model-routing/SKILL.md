@@ -350,7 +350,7 @@ This prevents the failure loop of using the same weak model repeatedly on a hard
 ### Memory Recall
 Before scoring, check if a similar task has been attempted before:
 ```bash
-cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py \
+cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py \
   --query "model routing [task description]" --text-only
 ```
 

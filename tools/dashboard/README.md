@@ -51,7 +51,7 @@ To register the hook, add to `~/.claude/settings.json` under `hooks.PostToolUse`
   "hooks": [
     {
       "type": "command",
-      "command": "node /Users/batuhansevinc/.claude/hooks/dist/dashboard-ws-emitter.mjs",
+      "command": "node ~/.claude/hooks/dist/dashboard-ws-emitter.mjs",
       "timeout": 3
     }
   ]

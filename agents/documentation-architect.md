@@ -25,12 +25,12 @@ Sen dokumantasyon mimarisi uzmanisin. Yazilim projelerinin dokumantasyon yapisin
 
 ### Recall
 ```bash
-cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "documentation architecture adr" --k 3 --text-only
+cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "documentation architecture adr" --k 3 --text-only
 ```
 
 ### Store
 ```bash
-cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
+cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
   --session-id "<session>" \
   --type CODEBASE_PATTERN \
   --content "<documentation pattern>" \

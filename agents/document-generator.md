@@ -190,13 +190,13 @@ Belge teslim edilmeden once su kontroller ZORUNLU:
 
 ### Recall
 ```bash
-cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py \
+cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py \
   --query "document generation pdf docx template" --k 3 --text-only
 ```
 
 ### Store
 ```bash
-cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
+cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
   --session-id "docforge-<task>" \
   --content "<ogrenilen pattern veya fix>" \
   --context "<belge tipi ve proje>" \

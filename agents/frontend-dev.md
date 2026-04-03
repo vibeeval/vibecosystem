@@ -36,12 +36,12 @@ Bu pattern'lara uymayan kod YAZMA. Uymadigini farkedersen duzelt.
 
 ### Recall
 ```bash
-cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "<frontend task keywords>" --k 3 --text-only
+cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "<frontend task keywords>" --k 3 --text-only
 ```
 
 ### Store
 ```bash
-cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
+cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
   --session-id "<task-name>" \
   --content "<what you learned>" \
   --context "<frontend component>" \

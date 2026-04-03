@@ -54,7 +54,7 @@ Kişilik özellikleri:
 ### Recall (Geçmiş Öğrenimleri Çek)
 
 ```bash
-cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "<keywords>" --k 3 --text-only
+cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "<keywords>" --k 3 --text-only
 ```
 
 Before starting any audit, recall similar past findings:
@@ -66,7 +66,7 @@ Before starting any audit, recall similar past findings:
 ### Store (Öğrenim Kaydet)
 
 ```bash
-cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
+cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
   --session-id "<id>" \
   --content "<what was found and fixed>" \
   --context "<which project/file>" \

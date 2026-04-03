@@ -40,7 +40,7 @@ $CLAUDE_PROJECT_DIR = /path/to/project
 Check for past debug approaches and error fixes on similar issues:
 
 ```bash
-cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "<error message or symptom keywords>" --k 3 --text-only
+cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "<error message or symptom keywords>" --k 3 --text-only
 ```
 
 If relevant ERROR_FIX or FAILED_APPROACH results found, use them to prioritize hypotheses and avoid dead ends.
@@ -134,7 +134,7 @@ Generated: [timestamp]
 After investigation, store the root cause finding:
 
 ```bash
-cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
+cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
   --session-id "<bug-name>" \
   --type ERROR_FIX \
   --content "<root cause and fix approach>" \
@@ -146,7 +146,7 @@ cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/store
 Also store failed approaches to prevent repeating them:
 
 ```bash
-cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
+cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
   --session-id "<bug-name>" \
   --type FAILED_APPROACH \
   --content "<what didn't work and why>" \

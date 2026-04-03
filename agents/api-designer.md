@@ -24,12 +24,12 @@ Sen API tasarim uzmanisin. Tutarli, olceklenebilir ve iyi dokumante edilmis API'
 
 ### Recall
 ```bash
-cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "api design patterns" --k 3 --text-only
+cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py --query "api design patterns" --k 3 --text-only
 ```
 
 ### Store
 ```bash
-cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
+cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
   --session-id "<session>" \
   --type ARCHITECTURAL_DECISION \
   --content "<api design decision>" \

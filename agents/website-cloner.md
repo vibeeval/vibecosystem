@@ -235,13 +235,13 @@ const fonts = await chrome.evaluate(`
 
 ### Recall
 ```bash
-cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py \
+cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/recall_learnings.py \
   --query "website clone pixel-perfect chrome mcp" --k 3 --text-only
 ```
 
 ### Store
 ```bash
-cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
+cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
   --session-id "mirage-<site>" \
   --content "<ogrenilen pattern veya teknik>" \
   --context "<klonlanan site veya component>" \

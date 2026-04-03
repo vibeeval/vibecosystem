@@ -62,7 +62,7 @@ Ayrica "ERROR TRACKING" tablosuna ekle:
 Eger genel bir ogrenimse (proje-ozel degil), memory sistemine de kaydet:
 
 ```bash
-cd /Users/batuhansevinc/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
+cd ~/.claude && PYTHONPATH=scripts python3 scripts/core/store_learning.py \
   --session-id "self-learner" \
   --type ERROR_FIX \
   --content "<ogrenim>" \
