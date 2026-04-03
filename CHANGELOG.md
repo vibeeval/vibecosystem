@@ -32,7 +32,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - [Claude Code source](https://github.com/anthropics/claude-code) — agentMemory.ts, MagicDocs, autoDream, findRelevantMemories, builtinPlugins
 
 ### Changed
-- Updated counts: 137 agents, 271 skills, 60 hooks, 23 rules
+- Updated counts: 137 agents, 269 skills, 60 hooks, 23 rules
 
 ## [2.1.2] - 2026-03-30
 

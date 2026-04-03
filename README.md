@@ -6,7 +6,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Agents](https://img.shields.io/badge/agents-137-blue.svg)](#agents)
-[![Skills](https://img.shields.io/badge/skills-271-green.svg)](#skills)
+[![Skills](https://img.shields.io/badge/skills-269-green.svg)](#skills)
 [![Hooks](https://img.shields.io/badge/hooks-60-orange.svg)](#hooks)
 [![Rules](https://img.shields.io/badge/rules-23-red.svg)](#rules)
 [![Validate](https://github.com/vibeeval/vibecosystem/actions/workflows/validate.yml/badge.svg)](https://github.com/vibeeval/vibecosystem/actions/workflows/validate.yml)
@@ -39,7 +39,7 @@ Claude Code is powerful, but it's one assistant. You prompt, it responds, you re
 vibecosystem is a complete [Claude Code](https://docs.anthropic.com/en/docs/claude-code) ecosystem that creates a self-organizing AI team:
 
 1. **137 agents** — specialized roles from frontend-dev to security-analyst
-2. **271 skills** — reusable knowledge from TDD workflows to Kubernetes patterns
+2. **269 skills** — reusable knowledge from TDD workflows to Kubernetes patterns
 3. **60 hooks** — TypeScript sensors that observe, filter, and inject context
 4. **23 rules** — behavioral guidelines that shape every agent's output
 5. **Self-learning** — every error becomes a rule, automatically
@@ -312,7 +312,7 @@ vibecosystem works with multiple AI coding tools:
 |-----|-----------|-------------------|--------------|
 | **Claude Code** | `./install.sh` | `CLAUDE.md` | Full support (agents + skills + hooks + rules) |
 | **Cursor IDE** | `./install-cursor.sh` | `AGENTS.md` + `.cursor/rules/` | 6 MDC rules + AGENTS.md + skills |
-| **Codex CLI** (OpenAI) | `./install-codex.sh` | `AGENTS.md` | Skills only (271 skills) |
+| **Codex CLI** (OpenAI) | `./install-codex.sh` | `AGENTS.md` | Skills only (269 skills) |
 | **OpenCode** | Manual | `AGENTS.md` | Skills only |
 
 ```bash

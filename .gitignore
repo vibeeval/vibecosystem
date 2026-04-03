@@ -16,3 +16,4 @@ node_modules/
 .idea/
 .vscode/settings.json
 package-lock.json
+plugin-config.json
