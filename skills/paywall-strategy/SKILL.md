@@ -1,384 +1,216 @@
 ---
 name: paywall-strategy
-description: Mobile app paywall strategy framework with category-specific benchmarks, model selection (hard/soft/freemium), trial optimization, and placement mapping. Use when planning monetization for mobile apps or when the user asks about paywalls, subscriptions, or in-app purchases.
+description: Mobil uygulama paywall strateji rehberi. 14 kategori benchmark database, 4 paywall modeli, trial optimizasyonu, placement mapping, pricing psychology, regional pricing (PPP) ve Apple/Google compliance checklist.
 ---
 
-# Paywall Strategy Framework
+# Paywall Strategy
 
-Data-driven paywall strategy for mobile apps. Covers model selection, category benchmarks, trial optimization, placement mapping, and compliance.
-
-## Paywall Models
+## Paywall Modelleri
 
 ### Hard Paywall
-Content locked immediately upon app open. User must subscribe to access anything.
-
-- **Median conversion**: 12.11%
-- **Top 10%**: 38.7%
-- **Best for**: News, finance, productivity apps with clear immediate value
-- **Risk**: High bounce rate if value prop is unclear
-- **Rule**: Must have strong brand recognition or unique content
+- **Tanim**: Uygulamayi kullanmak icin odeme ZORUNLU (trial dahil)
+- **Median conversion**: 12.11% | Top 10%: 38.7%
+- **En iyi**: Yuksek niyet, net deger teklifi olan uygulamalar (business, finance, premium tools)
+- **Risk**: Kullanici akisini keser, viral growth'u yok eder
+- **Apple notu**: Kabul edilir AMA deger teklifi bastan net olmali
 
 ### Soft Paywall
-Some content/features free, premium features behind paywall. Most common model.
-
-- **Conversion**: Varies by category (typically 5-15%)
-- **Best for**: Fitness, education, lifestyle, photo/video
-- **Strength**: Users experience value before paying
-- **Rule**: Free tier must hook users, premium must feel essential
+- **Tanim**: Uygulama kullanilabilir, belirli feature'lar premium
+- **Conversion**: 5-15% (kategoriye gore degisir)
+- **En iyi**: Cogu uygulama icin en guvenli secenek
+- **Avantaj**: Kullanici aktivasyonu + odeme niyeti birlikte calisir
 
 ### Freemium
-Core app fully functional, advanced features premium.
-
-- **Median conversion**: 2.18%
-- **Best for**: Games, social, photo/video with network effects
-- **Strength**: Maximum user base, viral potential
-- **Risk**: Low conversion; need high volume
-- **Rule**: 23% of conversions happen after 6+ weeks; patience required
+- **Tanim**: Core uygulama tamamen ucretsiz, premium ekstra deger katar
+- **Median conversion**: 2.18% (ama yuksek hacim)
+- **En iyi**: Network effect'li, viral buyume gereken uygulamalar
+- **Onemli**: Conversion'in %23'u 6+ hafta sonra olur (sabir gerekli)
 
 ### Metered
-N free uses, then paywall. Hybrid between soft and hard.
+- **Tanim**: N kez ucretsiz kullanim, sonra odeme
+- **En iyi**: AI araclari, utility uygulamalar, content uygulamalar
+- **Ornek**: "Gunluk 3 ucretsiz analiz, daha fazlasi icin premium"
 
-- **Best for**: AI tools, translation, document editors
-- **Strength**: Users prove value to themselves through usage
-- **Rule**: Free quota must be enough to create habit but not enough to satisfy
+---
 
-## Category Benchmark Database
+## Kategori Benchmark Database
 
-### Health & Fitness
-```
-Model:              Soft paywall
-Trial duration:     7 days
-Best plan type:     Annual (60.6% revenue share)
-Trial-to-paid:      35% (highest across categories)
-First renewal rate: 30.3% (lowest -- high churn risk)
-Avg pricing:        Weekly $4.99 / Monthly $12.99 / Annual $49.99
-Paywall placement:  Onboarding + workout gate
-Message strategy:   Transformation messaging ("Transform your body in 30 days")
-Warning:            Push annual hard; weekly churn is extreme
-```
+| Kategori | Onerilen Model | Trial-to-Paid | Avg Monthly | Avg Annual | Optimal Trial | Not |
+|----------|---------------|---------------|-------------|------------|---------------|-----|
+| Health & Fitness | Soft | 35% | $9.99-14.99 | $59.99-79.99 | 7 gun | Annual %60.6 revenue share, churn riski yuksek ilk ayda |
+| Games | Soft/Metered | 8-15% | $4.99-9.99 | $29.99-49.99 | 3 gun | Weekly plan iyi calisir, battle pass alternatif |
+| Productivity | Soft | 20-30% | $4.99-9.99 | $39.99-59.99 | 7 gun | Feature-gate etkili, B2B icin higher pricing |
+| Education | Freemium/Soft | 15-25% | $9.99-19.99 | $59.99-99.99 | 7 gun | Content-gate etkili, seasonal demand |
+| Photo & Video | Soft | 12-20% | $4.99-7.99 | $29.99-49.99 | 3-7 gun | Export watermark etkili gate |
+| Finance | Hard/Soft | 25-35% | $4.99-14.99 | $49.99-99.99 | 7 gun | Yuksek LTV, guclu retention |
+| Travel | Freemium | 5-10% | $4.99-9.99 | $29.99-49.99 | - | Seasonal, trip-based upsell |
+| Dating | Soft | 10-20% | $14.99-29.99 | $79.99-149.99 | 7 gun | Weekly plan yuksek conversion, en yuksek ARPU |
+| Streaming/Media | Soft/Hard | 30-40% | $9.99-14.99 | $99.99-149.99 | 7 gun | Content library belirleyici |
+| Food & Drink | Freemium | 5-12% | $4.99-9.99 | $29.99-49.99 | - | Delivery fee savings hook |
+| Music | Freemium | 8-15% | $4.99-9.99 | $49.99-79.99 | 30 gun | Ads-free hook, offline listening |
+| Weather | Soft | 15-25% | $1.99-4.99 | $14.99-29.99 | 7 gun | Widget + radar premium gate |
+| News | Metered/Soft | 5-15% | $9.99-14.99 | $79.99-149.99 | - | Article limit etkili (5/ay free) |
+| Lifestyle | Soft | 10-18% | $4.99-9.99 | $29.99-49.99 | 7 gun | Genel kategori, niche'e gore ayarla |
 
-### Games
-```
-Model:              Freemium + IAP
-Trial duration:     3 days (if subscription)
-Best plan type:     Weekly (impulse purchases dominate)
-Trial-to-paid:      15-20%
-First renewal rate: 45%
-Avg pricing:        Weekly $1.99 / Monthly $4.99 / Annual $29.99
-Paywall placement:  Session-count (after 3-5 sessions)
-Message strategy:   Progress unlocking ("Unlock unlimited lives")
-Warning:            IAP often outperforms subscriptions in games
-```
+---
 
-### Business / Productivity
-```
-Model:              Hard or soft paywall
-Trial duration:     14 days
-Best plan type:     Annual (B2B buyers prefer annual)
-Trial-to-paid:      25-30%
-First renewal rate: 55% (highest retention)
-Avg pricing:        Monthly $9.99 / Annual $79.99
-Paywall placement:  Onboarding (high-intent users)
-Message strategy:   ROI messaging ("Save 2 hours every day")
-Warning:            Offer team/enterprise tiers for B2B upsell
-```
+## Trial Duration Optimizasyonu
 
-### Education
-```
-Model:              Soft paywall
-Trial duration:     7 days
-Best plan type:     Annual (learning is a long-term commitment)
-Trial-to-paid:      20-25%
-First renewal rate: 40%
-Avg pricing:        Monthly $9.99 / Annual $59.99
-Paywall placement:  Session-count (after 2-3 lessons)
-Message strategy:   Progress messaging ("Learn 10x faster")
-Warning:            Completion rates drop after trial; send progress emails
-```
+| Sure | Oran | En Iyi Icin |
+|------|------|-------------|
+| 3 gun | %18 | Aninda deger veren uygulamalar (oyun, foto editor) |
+| 5 gun | %22 | Kisa aktivasyon sureli (productivity, weather) |
+| 7 gun | %52 | Cogu uygulama icin STANDART (en yaygin) |
+| 14 gun | %6 | Yavas aktivasyon (education, habit tracking) |
+| 30 gun | %2 | Sadece music/streaming (uzun aliskanllik gereken) |
 
-### Photo & Video
-```
-Model:              Freemium or soft
-Trial duration:     3-7 days
-Best plan type:     Annual
-Trial-to-paid:      15-20%
-First renewal rate: 38%
-Avg pricing:        Weekly $2.99 / Monthly $7.99 / Annual $39.99
-Paywall placement:  Feature-gate (advanced filters, export quality)
-Message strategy:   Quality messaging ("Professional-grade editing")
-Warning:            Strong free tier needed; competition is intense
-```
+**Kural**: Kullanicinin "aha moment"ine ulasma suresinin 2 kati trial suresi olmali.
+- Fitness app: "aha" = ilk antrenman tamamlama (1-2 gun) -> 7 gun trial
+- Education app: "aha" = ilk modul bitirme (3-5 gun) -> 14 gun trial
+- Game: "aha" = ilk level gecme (dakikalar) -> 3 gun trial
 
-### Finance
-```
-Model:              Hard or soft paywall
-Trial duration:     7-14 days
-Best plan type:     Annual
-Trial-to-paid:      28-35%
-First renewal rate: 50%
-Avg pricing:        Monthly $7.99 / Annual $59.99
-Paywall placement:  Onboarding or feature-gate
-Message strategy:   Control messaging ("Take control of your money")
-Warning:            Security trust signals critical on paywall
-```
+---
 
-### Travel
-```
-Model:              Freemium
-Trial duration:     7 days
-Best plan type:     Annual (for frequent travelers)
-Trial-to-paid:      10-15%
-First renewal rate: 35%
-Avg pricing:        Monthly $4.99 / Annual $29.99
-Paywall placement:  Feature-gate (offline maps, premium guides)
-Message strategy:   Experience messaging ("Travel like a local")
-Warning:            Seasonal usage; consider lifetime deals
-```
+## Paywall Placement Mapping
 
-### Social / Dating
-```
-Model:              Freemium
-Trial duration:     3-7 days
-Best plan type:     Weekly or monthly
-Trial-to-paid:      8-12%
-First renewal rate: 30%
-Avg pricing:        Weekly $4.99 / Monthly $14.99 / Annual $79.99
-Paywall placement:  Feature-gate (unlimited swipes, see who liked)
-Message strategy:   FOMO messaging ("See who already liked you")
-Warning:            Weekly works well here; impulse driven
-```
+| Placement | Aciklama | En Iyi Icin | Conversion Etkisi |
+|-----------|----------|-------------|-------------------|
+| Onboarding | Kayit/intro sonrasi hemen | Yuksek niyet uygulamalar (finance, business) | En yuksek (kullanici kararsizken) |
+| Feature-gate | Premium feature'a tiklandiginda | Cogu uygulama | Orta-yuksek (deger gorulmus) |
+| Usage-limit | N kez kullanim sonrasi | AI tools, metered uygulamalar | Yuksek (aliskanllik olusmus) |
+| Session-count | X oturum sonrasi | Games, education | Orta (engagement kanitlanmis) |
+| Time-delay | N gun sonra | Utility, lifestyle | Orta-dusuk (aktivasyon gerektirmez) |
+| Event-triggered | Belirli basari/event sonrasi | Fitness (ilk antrenman), education (ilk quiz) | Yuksek (momentum aninda) |
 
-### Entertainment / Streaming
-```
-Model:              Hard paywall (content) or freemium (tools)
-Trial duration:     7-30 days
-Best plan type:     Monthly (flexibility preferred)
-Trial-to-paid:      20-25%
-First renewal rate: 48%
-Avg pricing:        Monthly $9.99 / Annual $79.99
-Paywall placement:  Content gate (after free episodes/content)
-Message strategy:   Exclusive messaging ("Watch ad-free, download offline")
-Warning:            Content quality is everything; tech alone won't convert
-```
+**Multi-placement stratejisi**: Tek paywall degil, birden fazla tetikleyici kullan:
+1. Onboarding'de soft goster (skip'lenebilir)
+2. Feature-gate'te tekrar goster (deger gorulmus)
+3. 3. oturumda hatirlatma (engagement kanitlanmis)
 
-### Food & Drink
-```
-Model:              Soft paywall
-Trial duration:     7 days
-Best plan type:     Annual
-Trial-to-paid:      15-20%
-First renewal rate: 35%
-Avg pricing:        Monthly $4.99 / Annual $29.99
-Paywall placement:  Feature-gate (meal plans, grocery lists)
-Message strategy:   Lifestyle messaging ("Eat better without the effort")
-Warning:            Recipe apps face strong free competition
-```
-
-### Music
-```
-Model:              Freemium
-Trial duration:     30 days (industry standard)
-Best plan type:     Monthly
-Trial-to-paid:      18-22%
-First renewal rate: 52%
-Avg pricing:        Monthly $9.99 / Annual $99.99
-Paywall placement:  Usage-limit (shuffle-only, limited skips)
-Message strategy:   Freedom messaging ("Play any song, anytime")
-Warning:            Licensing costs make margins thin; need scale
-```
-
-### Weather
-```
-Model:              Freemium or soft
-Trial duration:     3-7 days
-Best plan type:     Annual
-Trial-to-paid:      12-18%
-First renewal rate: 45%
-Avg pricing:        Monthly $2.99 / Annual $19.99
-Paywall placement:  Feature-gate (radar, severe alerts, widget)
-Message strategy:   Safety messaging ("Never get caught in the rain")
-Warning:            Low willingness to pay; keep prices low
-```
-
-### News / Magazines
-```
-Model:              Hard paywall (metered)
-Trial duration:     7-14 days
-Best plan type:     Monthly or annual
-Trial-to-paid:      22-28%
-First renewal rate: 42%
-Avg pricing:        Monthly $9.99 / Annual $79.99
-Paywall placement:  Usage-limit (5-10 free articles/month)
-Message strategy:   Quality messaging ("Journalism worth paying for")
-Warning:            Metered model with article count works best
-```
-
-### Lifestyle
-```
-Model:              Soft paywall
-Trial duration:     7 days
-Best plan type:     Annual
-Trial-to-paid:      12-18%
-First renewal rate: 33%
-Avg pricing:        Monthly $4.99 / Annual $29.99
-Paywall placement:  Time-delay (after 3-5 days of use)
-Message strategy:   Habit messaging ("Your daily companion")
-Warning:            High churn; engagement hooks critical
-```
-
-### AI Tools
-```
-Model:              Metered
-Trial duration:     N/A (usage-based gating)
-Best plan type:     Monthly (usage varies)
-Trial-to-paid:      20-30%
-First renewal rate: 40%
-Avg pricing:        Monthly $9.99-$19.99 / Annual $99.99
-Paywall placement:  Usage-limit (N free generations/translations/queries)
-Message strategy:   Productivity messaging ("10x your workflow with AI")
-Warning:            API costs per-user; monitor unit economics carefully
-```
-
-## Trial Best Practices
-
-### Duration
-- 52% of all trials are 5-9 days
-- 3 days: Games, impulse apps
-- 7 days: Most categories (standard)
-- 14 days: B2B, productivity, complex apps
-- 30 days: Music streaming (industry norm)
-
-### Conversion Timing
-- Freemium: 23% of conversions happen after 6+ weeks
-- Short trials: Higher conversion rate but smaller pool
-- Long trials: Lower rate but users are more committed when they convert
-
-### Plan Performance
-- Weekly plans convert 1.7-7.4x better than annual
-- Exception: Health & Fitness (annual dominates with 60.6%)
-- Annual plans have best LTV despite lower initial conversion
-- Monthly is the safe middle ground
-
-### Trial Types
-- **Free trial**: No charge until end. Highest conversion. Most common.
-- **Introductory offer**: Discounted first period ($0.99/first month). Good for price-sensitive markets.
-- **Pay-up-front**: Charge at trial start, refund if canceled. Lowest volume, highest quality.
-
-### Opt-in vs Opt-out
-- **Opt-in** (user manually subscribes after trial): Lower conversion, higher satisfaction
-- **Opt-out** (auto-renews after trial): Higher conversion, compliance-sensitive
-- Apple requires clear disclosure for opt-out trials
-
-## Paywall Placement Map
-
-| Placement | Trigger | Best For | Conversion Impact |
-|-----------|---------|----------|-------------------|
-| Onboarding | App first open | High-intent (business, finance) | Highest if value is clear |
-| Feature-gate | User taps locked feature | Most apps | Best balance of UX and conversion |
-| Usage-limit | After N free uses | AI tools, news, metered | Users prove value to themselves |
-| Session-count | After X app sessions | Games, education | Builds habit before asking |
-| Time-delay | After N days | Lifestyle, utility | Shows value over time |
-| Event-triggered | After achievement/milestone | Fitness, education, games | Capitalizes on motivation peak |
+---
 
 ## Pricing Psychology
 
-### Price Anchoring
-Show the most expensive plan first. Users anchor to the high price and see other plans as deals.
+### Anchoring (Cipalama)
+- ONCE en pahali plani goster, sonra ucuzunu
+- Annual plani VURGULA: "Monthly $9.99/mo vs Annual $4.99/mo (Save 50%)"
+- Orta plan "Most Popular" badge'i al (decoy effect)
 
 ### Charm Pricing
-$9.99 converts better than $10.00. Always use .99 endings.
+- $9.99 > $10.00 (sol rakam etkisi)
+- $49.99/yil > $50/yil
+- $X.99 her zaman kullan, tam rakam KULLANMA
 
 ### Per-Day Framing
-"$0.27/day" feels cheaper than "$99.99/year". Use for annual plan promotion.
+- "$49.99/yil" yerine "Gunluk sadece 14 sent"
+- "$9.99/ay" yerine "Gunluk sadece 33 sent"
+- Kahve karsilastirmasi: "Bir kahveden ucuz"
+
+### Decoy Effect (Yem Etkisi)
+3 plan sun:
+```
+Basic:   $4.99/ay  (sinirli)
+Pro:     $9.99/ay  (en populer - HEDEF)
+Premium: $14.99/ay (hersey)
+```
+Basic, Pro'yu ucuz gostermek icin var (decoy).
 
 ### Savings Highlight
-"Save 60% with annual" -- always show the percentage saved vs monthly.
+- "Save 60%" yesil badge ile vurgula
+- Annual vs monthly karsilastirmayi ACIKCA goster
+- Strikethrough pricing: ~~$119.88~~ $49.99/year
 
-### Decoy Effect
-Three plans where the middle plan is intentionally less attractive to push users toward annual.
+---
 
-### Regional Pricing (PPP)
-Adjust prices for purchasing power:
-- Turkey: 40-60% lower
-- India: 50-70% lower
-- Brazil: 30-50% lower
-- Southeast Asia: 40-60% lower
-Use Apple/Google's regional pricing tiers.
+## Regional Pricing (PPP - Purchasing Power Parity)
 
-## Compliance Requirements
+| Bolge | ABD Fiyatinin %'si | Ornek ($9.99 ABD) |
+|-------|-------------------|-------------------|
+| ABD/Kanada/Avustralya | %100 | $9.99 |
+| Bati Avrupa (UK, DE, FR) | %90-100 | $8.99-9.99 |
+| Dogu Avrupa (PL, CZ, RO) | %50-60 | $4.99-5.99 |
+| Turkiye | %30-35 | $2.99-3.49 |
+| Hindistan | %25-30 | $2.49-2.99 |
+| Brezilya | %40-45 | $3.99-4.49 |
+| Guneydogu Asya | %35-45 | $3.49-4.49 |
+| Latin Amerika | %40-50 | $3.99-4.99 |
+| Afrika | %25-35 | $2.49-3.49 |
+| Orta Dogu | %50-60 | $4.99-5.99 |
+| Japonya/Guney Kore | %85-95 | $8.49-9.49 |
+| Cin | %40-50 | $3.99-4.99 |
 
-### Apple App Store
-- [ ] Restore Purchases button visible and functional
-- [ ] Subscription terms shown: price, period, auto-renewal
-- [ ] Cancel instructions accessible
-- [ ] Privacy policy linked
-- [ ] Terms of Service linked
-- [ ] Toggle paywall NOT used (rejected since January 2026)
-- [ ] Paywall dismissible (hard paywall only with clear value proposition)
-- [ ] Trial end-price clearly stated before purchase
-- [ ] No dark patterns (hidden cancel, confusing copy)
+**Uygulama**: RevenueCat'te country-based Offerings olustur:
+- `default` offering: ABD fiyatlari
+- `tr_offering`: Turkiye fiyatlari
+- `in_offering`: Hindistan fiyatlari
+- Kullanicinin locale'ine gore offering sec
 
-### Google Play
-- [ ] Subscription terms clearly displayed
-- [ ] Cancel flow accessible
-- [ ] Free trial terms stated upfront
-- [ ] Grace period handling implemented
-- [ ] Account hold support
+---
 
-## RevenueCat Config Template
+## Apple/Google Compliance Checklist
 
-```json
-{
-  "offerings": [{
-    "identifier": "default",
-    "packages": [
-      { "identifier": "weekly", "product": "$rc_weekly" },
-      { "identifier": "monthly", "product": "$rc_monthly" },
-      { "identifier": "annual", "product": "$rc_annual" }
-    ]
-  }],
-  "paywalls": [{
-    "template": "template_5",
-    "offering_id": "default",
-    "config": {
-      "header": "Unlock Premium",
-      "cta": "Start Free Trial",
-      "trial_text": "7-day free trial, then $49.99/year"
-    }
-  }]
-}
+### Apple App Store (KRITIK)
+
+```
+[ZORUNLU] Restore Purchases butonu paywall'da gorunur
+[ZORUNLU] Abonelik sartlari gorunur (fiyat + sure + otomatik yenileme)
+[ZORUNLU] Iptal/yonetim linki mevcut
+[ZORUNLU] Gizlilik politikasi linki mevcut
+[ZORUNLU] Kullanim sartlari linki mevcut
+[ZORUNLU] Paywall kapatilabilir (hard paywall haricinde dismiss butonu)
+[ZORUNLU] Trial bitis fiyati acikca belirtilmis
+[YASAK]   Toggle paywall KULLANMA (Ocak 2026'dan beri reject ediliyor)
+[YASAK]   Sahte kitlik/urgency (fake countdown, "limited slots")
+[YASAK]   Karmasik iptal sureci (dark pattern)
+[YASAK]   Dismiss butonunu gizleme/kuculme
+[DIKKAT]  Onboarding paywall: deger teklifi ONCE gosterilmeli
 ```
 
-## Adapty Config Template
+### Google Play Store
 
-```json
-{
-  "paywall_id": "main_paywall",
-  "products": [
-    { "vendor_product_id": "weekly_sub", "introductory_offer_eligibility": true },
-    { "vendor_product_id": "monthly_sub", "introductory_offer_eligibility": true },
-    { "vendor_product_id": "annual_sub", "introductory_offer_eligibility": true }
-  ],
-  "remote_config": {
-    "header_text": "Unlock Premium",
-    "cta_text": "Start Free Trial",
-    "features": ["Feature 1", "Feature 2", "Feature 3"]
-  }
-}
+```
+[ZORUNLU] Abonelik sartlari acik ve okunabilir
+[ZORUNLU] Iptal sureci kolayca erisilebilir
+[ZORUNLU] Ucretsiz deneme sartlari net
+[YASAK]   Yaniltici abonelik ifadeleri
+[YASAK]   Gizli ucretler
+[DIKKAT]  Grace period destegi oner (odeme sorunu icin)
 ```
 
-## Key Statistics Reference
+---
 
-| Metric | Value | Source |
-|--------|-------|--------|
-| Install-to-trial | 10.9% | Business of Apps 2026 |
-| Trial-to-paid (overall) | 25.6% | Business of Apps 2026 |
-| Hard paywall median | 12.11% | Airbridge Analysis |
-| Hard paywall top 10% | 38.7% | Airbridge Analysis |
-| Freemium median | 2.18% | Airbridge Analysis |
-| Trial duration 5-9 days | 52% | RevenueCat 2025 |
-| Freemium late conversion | 23% after 6+ weeks | Adapty 2026 |
-| Weekly vs annual conversion | 1.7-7.4x better | Adapty 2026 |
-| Toggle paywall status | Rejected by Apple | RevenueCat Jan 2026 |
+## Karar Agaci
 
-**Remember**: A paywall is a product decision, not just a UI element. The right model, placement, and pricing depend on your category, audience, and value proposition. Always A/B test before committing.
+```
+Uygulamam ne tur?
+
+├── Aninda net deger veriyor (business tool, finance tracker)
+│   └── HARD PAYWALL + 7 gun trial
+│       - Onboarding'de goster
+│       - Annual vurgula (%40-60 indirimli)
+│
+├── Genis kitle, viral buyume onemli (social, communication)
+│   └── FREEMIUM
+│       - Core free, premium ekstra deger
+│       - 6+ hafta sabret (conversion yavastir)
+│       - Feature-gate placement
+│
+├── AI/utility, olculebilir deger (AI writer, photo editor)
+│   └── METERED + Soft paywall
+│       - N kez free, sonra gate
+│       - Usage-limit placement
+│       - Weekly plan dusun
+│
+├── Oyun
+│   └── SOFT PAYWALL + Battle Pass alternatifi
+│       - 3 gun trial
+│       - Session-count placement
+│       - Weekly plan yuksek conversion
+│       - In-app purchase hybrid dusun
+│
+└── Diger (fitness, education, lifestyle)
+    └── SOFT PAYWALL + 7 gun trial
+        - Feature-gate + Event-triggered
+        - Annual vurgula
+        - Category benchmark'larina bak
+```
