@@ -6,7 +6,7 @@
 
 **AI-softwareteam gebouwd op Claude Code.**
 
-138 agents. 271 skills. 60 hooks. Nul handmatig werk.
+139 agents. 274 skills. 60 hooks. Nul handmatig werk.
 
 <img src="../assets/gif1-numbers.gif" alt="Ecosystem Numbers" width="700">
 
@@ -19,7 +19,7 @@
 | Metriek | Aantal |
 |---------|--------|
 | Agents | **137** |
-| Skills | **269** |
+| Skills | **274** |
 | Hooks | **53** |
 | Rules | **22** |
 | Handmatig werk | **0** |
@@ -124,7 +124,7 @@ Bug reproduction → replay          (backup: sleuth)
 │                                                         │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐              │
 │  │  Hooks   │  │  Agents  │  │  Skills  │              │
-│  │  (53)    │→ │  (137)   │← │  (269)   │              │
+│  │  (53)    │→ │  (139)   │← │  (274)   │              │
 │  └────┬─────┘  └────┬─────┘  └──────────┘              │
 │       │              │                                   │
 │       ▼              ▼                                   │

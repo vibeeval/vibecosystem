@@ -12,6 +12,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Skill marketplace
 - Agent performance dashboard
 
+## [2.2.2] - 2026-04-05
+
+### Added
+- **1 new agent**: resource-manager (token budget tracking, agent cost analysis, ROI reporting)
+- **3 new skills**: knowledge-management (4-layer knowledge organization, progressive summarization, ADR templates), agent-qa-testing (agent protocol compliance testing, role boundary verification, personality drift detection), token-budget (per-agent cost tracking, budget planning, optimization strategies)
+
+### Changed
+- Updated counts: 139 agents, 274 skills
+
 ## [2.2.1] - 2026-04-04
 
 ### Added

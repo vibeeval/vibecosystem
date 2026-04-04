@@ -1,6 +1,6 @@
 # MCP Server Integrations
 
-vibecosystem extends its capabilities through MCP (Model Context Protocol) servers. These provide specialized tools that all 138 agents can leverage.
+vibecosystem extends its capabilities through MCP (Model Context Protocol) servers. These provide specialized tools that all 139 agents can leverage.
 
 ## Active MCP Servers
 

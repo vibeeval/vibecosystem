@@ -7,7 +7,7 @@
  ║   ─────────────────────────                   ║
  ║   AI Software Team · v2.0                     ║
  ║                                               ║
- ║   138 agents  ·  271 skills  ·  60 hooks      ║
+ ║   139 agents  ·  274 skills  ·  60 hooks      ║
  ║                                               ║
  ║   by @vibeeval                                ║
  ║                                               ║

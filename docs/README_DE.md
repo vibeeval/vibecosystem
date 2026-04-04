@@ -6,7 +6,7 @@
 
 **KI-Softwareteam auf Basis von Claude Code.**
 
-138 Agents. 271 skills. 60 hooks. Null manuelle Arbeit.
+139 Agents. 274 skills. 60 hooks. Null manuelle Arbeit.
 
 <img src="../assets/gif1-numbers.gif" alt="Ecosystem Numbers" width="700">
 
@@ -19,7 +19,7 @@
 | Kennzahl | Anzahl |
 |----------|--------|
 | Agents | **137** |
-| Skills | **269** |
+| Skills | **274** |
 | Hooks | **53** |
 | Rules | **22** |
 | Manuelle Arbeit | **0** |
@@ -124,7 +124,7 @@ Bug reproduction → replay          (backup: sleuth)
 │                                                         │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐              │
 │  │  Hooks   │  │  Agents  │  │  Skills  │              │
-│  │  (53)    │→ │  (137)   │← │  (269)   │              │
+│  │  (53)    │→ │  (139)   │← │  (274)   │              │
 │  └────┬─────┘  └────┬─────┘  └──────────┘              │
 │       │              │                                   │
 │       ▼              ▼                                   │
