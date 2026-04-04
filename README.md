@@ -5,8 +5,8 @@
 **Your AI software team. Built on Claude Code.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Agents](https://img.shields.io/badge/agents-137-blue.svg)](#agents)
-[![Skills](https://img.shields.io/badge/skills-269-green.svg)](#skills)
+[![Agents](https://img.shields.io/badge/agents-138-blue.svg)](#agents)
+[![Skills](https://img.shields.io/badge/skills-245-green.svg)](#skills)
 [![Hooks](https://img.shields.io/badge/hooks-60-orange.svg)](#hooks)
 [![Rules](https://img.shields.io/badge/rules-23-red.svg)](#rules)
 [![Validate](https://github.com/vibeeval/vibecosystem/actions/workflows/validate.yml/badge.svg)](https://github.com/vibeeval/vibecosystem/actions/workflows/validate.yml)
@@ -20,7 +20,7 @@
 
 </div>
 
-vibecosystem turns Claude Code into a full AI software team — 137 specialized agents that plan, build, review, test, and learn from every mistake. No configuration needed — just install and code.
+vibecosystem turns Claude Code into a full AI software team — 138 specialized agents that plan, build, review, test, and learn from every mistake. No configuration needed — just install and code.
 
 > **v2.0**: 13 new agents (sast-scanner, mutation-tester, graph-analyst, mcp-manager, community-manager, benchmark, dependency-auditor, api-designer, incident-responder, data-modeler, test-architect, release-engineer, documentation-architect) + 23 new skills (SAST, compliance, product, marketing, MCP) + 4 new hooks + Agent Monitoring Dashboard + GitHub Actions CI/CD + MCP Auto-Discovery. See [UPGRADING.md](UPGRADING.md) for details.
 
@@ -30,6 +30,8 @@ vibecosystem turns Claude Code into a full AI software team — 137 specialized 
 
 > **v2.2**: 5 features from Claude Code source — Agent Memory (persistent per-agent memory), Magic Docs (auto-updating docs), Dream Consolidation (cross-session memory cleanup), Smart Recall (frontmatter-based memory scoring), Plugin Toggle (hook enable/disable CLI). +7 hooks, skill references for 21 agents.
 
+> **v2.2.1**: Monetization stack — 1 new agent (monetization-expert), 2 new skills (paywall-optimizer, codex-orchestration), 3 updated skills (revenuecat-patterns, paywall-strategy, subscription-pricing). AI-powered paywall optimization with 14-category benchmarks, RevenueCat SDK patterns, Codex + Claude Code orchestration.
+
 ## The Problem
 
 Claude Code is powerful, but it's one assistant. You prompt, it responds, you review. For complex projects you need a planner, a reviewer, a security auditor, a tester — and you end up being all of them yourself.
@@ -38,8 +40,8 @@ Claude Code is powerful, but it's one assistant. You prompt, it responds, you re
 
 vibecosystem is a complete [Claude Code](https://docs.anthropic.com/en/docs/claude-code) ecosystem that creates a self-organizing AI team:
 
-1. **137 agents** — specialized roles from frontend-dev to security-analyst
-2. **269 skills** — reusable knowledge from TDD workflows to Kubernetes patterns
+1. **138 agents** — specialized roles from frontend-dev to security-analyst
+2. **245 skills** — reusable knowledge from TDD workflows to Kubernetes patterns
 3. **60 hooks** — TypeScript sensors that observe, filter, and inject context
 4. **23 rules** — behavioral guidelines that shape every agent's output
 5. **Self-learning** — every error becomes a rule, automatically
@@ -259,10 +261,10 @@ Agent error → error-ledger.jsonl → skill-matrix.json
 
 | Component | Count | Description |
 |-----------|-------|-------------|
-| `agents/` | 136 | Markdown agent definitions with specialized prompts |
-| `skills/` | 260 | Reusable knowledge — TDD, security, patterns, frameworks |
-| `hooks/src/` | 53 | TypeScript hooks — sensors, learners, validators |
-| `rules/` | 22 | Behavioral guidelines — coding style, safety, QA |
+| `agents/` | 138 | Markdown agent definitions with specialized prompts |
+| `skills/` | 245 | Reusable knowledge — TDD, security, patterns, frameworks |
+| `hooks/src/` | 60 | TypeScript hooks — sensors, learners, validators |
+| `rules/` | 23 | Behavioral guidelines — coding style, safety, QA |
 
 ---
 

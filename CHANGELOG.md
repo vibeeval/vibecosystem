@@ -12,6 +12,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Skill marketplace
 - Agent performance dashboard
 
+## [2.2.1] - 2026-04-04
+
+### Added
+- **1 new agent**: monetization-expert (Kerem Bozkurt persona, 7-step paywall pipeline orchestrator)
+- **2 new skills**: paywall-optimizer (AI-powered A/B testing, churn prediction, push strategies, "kapali carsi esnafi" sales techniques), codex-orchestration (Codex CLI + Claude Code dual workflow patterns, GitHub Actions examples)
+- **3 updated skills**: revenuecat-patterns (expanded SDK patterns for 4 platforms), paywall-strategy (14-category benchmarks, regional pricing for 18 countries), subscription-pricing (3-tier framework, win-back campaigns, A/B methodology)
+
+### Changed
+- Updated counts: 138 agents, 245 skills, 60 hooks, 23 rules
+- agent-assignment-matrix updated with monetization task routing
+
 ## [2.2.0] - 2026-04-02
 
 ### Added
@@ -32,7 +43,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - [Claude Code source](https://github.com/anthropics/claude-code) — agentMemory.ts, MagicDocs, autoDream, findRelevantMemories, builtinPlugins
 
 ### Changed
-- Updated counts: 137 agents, 269 skills, 60 hooks, 23 rules
+- Updated counts: 137 agents, 269 skills, 60 hooks, 23 rules (see v2.2.1 for current)
 
 ## [2.1.2] - 2026-03-30
 
