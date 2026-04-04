@@ -20,7 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **3 updated skills**: revenuecat-patterns (expanded SDK patterns for 4 platforms), paywall-strategy (14-category benchmarks, regional pricing for 18 countries), subscription-pricing (3-tier framework, win-back campaigns, A/B methodology)
 
 ### Changed
-- Updated counts: 138 agents, 245 skills, 60 hooks, 23 rules
+- Updated counts: 138 agents, 271 skills, 60 hooks, 23 rules
 - agent-assignment-matrix updated with monetization task routing
 
 ## [2.2.0] - 2026-04-02
@@ -43,7 +43,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - [Claude Code source](https://github.com/anthropics/claude-code) — agentMemory.ts, MagicDocs, autoDream, findRelevantMemories, builtinPlugins
 
 ### Changed
-- Updated counts: 137 agents, 269 skills, 60 hooks, 23 rules (see v2.2.1 for current)
+- Updated counts: 138 agents, 271 skills, 60 hooks, 23 rules (see v2.2.1 for current)
 
 ## [2.1.2] - 2026-03-30
 
@@ -55,7 +55,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - RevenueCat and Trail of Bits added to Inspired By section
 
 ### Changed
-- Updated counts across all files: 137 agents, 269 skills
+- Updated counts across all files: 138 agents, 271 skills
 - Regenerated gif1-numbers.gif with updated counts
 
 ## [2.1.1] - 2026-03-29

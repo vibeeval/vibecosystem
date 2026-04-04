@@ -13,7 +13,7 @@ description: OpenAI Codex CLI + Claude Code (Hizir) birlikte kullanim rehberi. I
 | Maliyet | Ucuz (~$1.10/1M input) | Pahalı (opus pricing) | Codex |
 | Context window | Sinirli | 1M token | Claude Code |
 | Multi-agent | YOK (tek agent) | 134+ agent swarm | Claude Code |
-| Hook/self-learning | YOK | Tam destek (53 hook) | Claude Code |
+| Hook/self-learning | YOK | Tam destek (60 hook) | Claude Code |
 | Memory/state | Stateless (her cagri bagimsiz) | Persistent memory | Claude Code |
 | Code review | Basit lint | Derinlemesine + security | Claude Code |
 | Bulk refactoring | Cok iyi (hiz+ucuz) | Iyi ama pahali | Codex |
