@@ -22,7 +22,7 @@ cd vibecosystem
 ./install-codex.sh
 ```
 
-This copies all 274 skills to `~/.codex/skills/`.
+This copies all 279 skills to `~/.codex/skills/`.
 
 ### Option 2: Manual setup
 

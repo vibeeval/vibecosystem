@@ -12,6 +12,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Skill marketplace
 - Agent performance dashboard
 
+## [2.2.3] - 2026-04-05
+
+### Added
+- **5 new skills**: agent-linter (agent/skill file validation with 10+ rule categories), experiment-engine (autonomous modify-verify-keep/discard optimization loop), cognitive-modes (5 thinking modes: analytical/creative/systematic/rapid/debug), autonomous-pr (self-fixing PR lifecycle with CI retry and budget controls), circuit-breaker (agent error tolerance with fallback chains and exponential backoff)
+
+### Changed
+- Updated counts: 139 agents, 279 skills
+
 ## [2.2.2] - 2026-04-05
 
 ### Added

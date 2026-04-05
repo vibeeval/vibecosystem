@@ -6,7 +6,7 @@
 
 **Equipe logicielle IA construite sur Claude Code.**
 
-139 agents. 274 skills. 60 hooks. Zero intervention manuelle.
+139 agents. 279 skills. 60 hooks. Zero intervention manuelle.
 
 <img src="../assets/gif1-numbers.gif" alt="Ecosystem Numbers" width="700">
 
@@ -19,7 +19,7 @@
 | Metrique | Nombre |
 |----------|--------|
 | Agents | **137** |
-| Skills | **274** |
+| Skills | **279** |
 | Hooks | **53** |
 | Rules | **22** |
 | Travail manuel | **0** |
@@ -124,7 +124,7 @@ Bug reproduction → replay          (backup: sleuth)
 │                                                         │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐              │
 │  │  Hooks   │  │  Agents  │  │  Skills  │              │
-│  │  (53)    │→ │  (139)   │← │  (274)   │              │
+│  │  (53)    │→ │  (139)   │← │  (279)   │              │
 │  └────┬─────┘  └────┬─────┘  └──────────┘              │
 │       │              │                                   │
 │       ▼              ▼                                   │
