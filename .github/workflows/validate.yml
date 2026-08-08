@@ -11,7 +11,7 @@ jobs:
     name: Validate Agents
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Check agent frontmatter
         run: |
@@ -80,7 +80,7 @@ jobs:
     name: Validate Skills
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Check skill frontmatter
         run: |
@@ -125,7 +125,7 @@ jobs:
     name: Validate Install Script
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Syntax check install.sh
         run: bash -n install.sh
@@ -141,7 +141,7 @@ jobs:
     name: Test Hooks
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v4
         with:
@@ -172,7 +172,7 @@ jobs:
     name: Markdown Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Lint markdown
         uses: DavidAnson/markdownlint-cli2-action@v19
