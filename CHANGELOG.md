@@ -19,6 +19,8 @@ This version is being prepared in source. No npm publication, release tag or dep
 
 ### Fixed
 
+- Independent follow-up review found two additional regressions before publication: executable skill permissions are preserved (including legacy repair and user-mode conflicts), and agent-memory paths reject symlink escapes before reads/writes. A bounded cooperative lock protects append/retention from lost parallel updates.
+
 - Remote installer update failures stop without removing the checkout. Normal Claude and Codex installs reconcile unchanged owned files, preserve modified/unmanaged files and back up replacements.
 - The installed CLI and npm `vibeco` alias are available through explicit launchers; profile changes use the recorded source repository.
 - Hook input readers accept canonical stdin events and `tool_response`. Agent memory honors user/project/local scopes, and recall requires relevant content.

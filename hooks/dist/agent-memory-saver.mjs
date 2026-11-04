@@ -1,6 +1,5 @@
 // src/agent-memory-saver.ts
-import { readFileSync as readFileSync3, writeFileSync, existsSync as existsSync2, mkdirSync, appendFileSync } from "fs";
-import { join as join3 } from "path";
+import { appendFileSync, constants as constants2, fstatSync as fstatSync2, ftruncateSync, readSync, writeFileSync as writeFileSync2 } from "node:fs";
 
 // src/shared/hook-input.ts
 import { readFileSync } from "node:fs";
@@ -52,7 +51,7 @@ function readHookInput(raw = readFileSync(0, "utf-8")) {
 }
 
 // src/shared/agent-memory.ts
-import { existsSync, readFileSync as readFileSync2 } from "node:fs";
+import { closeSync, constants, fstatSync, lstatSync, mkdirSync, openSync, readFileSync as readFileSync2, realpathSync, unlinkSync, writeFileSync } from "node:fs";
 import { join as join2, resolve as resolve2 } from "node:path";
 import { homedir } from "node:os";
 function sanitizeAgentType(agentType) {
@@ -61,27 +60,99 @@ function sanitizeAgentType(agentType) {
 function agentProjectDir(cwd) {
   return resolve2(cwd || process.env.CLAUDE_PROJECT_DIR || process.cwd());
 }
+function safeDirectory(anchor, parts, create = false) {
+  try {
+    const root = realpathSync(anchor);
+    if (!lstatSync(root).isDirectory()) return;
+    let path = root;
+    for (const part of parts) {
+      if (!part || part === "." || part === ".." || /[/\\]/.test(part)) return;
+      path = join2(path, part);
+      try {
+        if (create) mkdirSync(path, { mode: 448 });
+      } catch (error) {
+        if (error.code !== "EEXIST") throw error;
+      }
+      const stat = lstatSync(path);
+      if (stat.isSymbolicLink() || !stat.isDirectory()) return;
+    }
+    if (realpathSync(path) !== path) return;
+    return { path, anchor: root, parts };
+  } catch {
+    return;
+  }
+}
+function getSafeAgentMemoryDir(agentType, scope2, cwd, create = false) {
+  const anchor = scope2 === "user" ? homedir() : agentProjectDir(cwd);
+  return safeDirectory(anchor, [".claude", scope2 === "local" ? "agent-memory-local" : "agent-memory", sanitizeAgentType(agentType)], create);
+}
+function isSafeAgentMemoryDir(dir) {
+  return safeDirectory(dir.anchor, dir.parts)?.path === dir.path;
+}
+function withAgentMemoryFile(dir, name, flags, use) {
+  let fd;
+  try {
+    if (!name || name === "." || name === ".." || /[/\\]/.test(name) || !isSafeAgentMemoryDir(dir)) return false;
+    if (typeof constants.O_NOFOLLOW !== "number") return false;
+    const path = join2(dir.path, name);
+    fd = openSync(path, flags | constants.O_NOFOLLOW | constants.O_NONBLOCK, 384);
+    const opened = fstatSync(fd);
+    if (!opened.isFile() || !isSafeAgentMemoryDir(dir)) return false;
+    const current = lstatSync(path);
+    if (!current.isFile() || current.isSymbolicLink() || current.dev !== opened.dev || current.ino !== opened.ino) return false;
+    use(fd);
+    return true;
+  } catch {
+    return false;
+  } finally {
+    if (fd !== void 0) closeSync(fd);
+  }
+}
+function withAgentMemoryLock(dir, use) {
+  const name = ".learnings.lock";
+  const deadline = Date.now() + 1500;
+  const pause = new Int32Array(new SharedArrayBuffer(4));
+  do {
+    let acquired = false;
+    const success = withAgentMemoryFile(dir, name, constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL, (fd) => {
+      acquired = true;
+      const lock = fstatSync(fd);
+      try {
+        writeFileSync(fd, JSON.stringify({ pid: process.pid }), "utf-8");
+        use();
+      } finally {
+        if (isSafeAgentMemoryDir(dir)) {
+          const current = lstatSync(join2(dir.path, name));
+          if (current.isFile() && current.dev === lock.dev && current.ino === lock.ino) unlinkSync(join2(dir.path, name));
+        }
+      }
+    });
+    if (acquired) return success;
+    if (!isSafeAgentMemoryDir(dir)) return false;
+    try {
+      const current = lstatSync(join2(dir.path, name));
+      if (!current.isFile() || current.isSymbolicLink()) return false;
+    } catch (error) {
+      if (error.code !== "ENOENT") return false;
+    }
+    Atomics.wait(pause, 0, 0, 10);
+  } while (Date.now() < deadline);
+  return false;
+}
 function getAgentMemoryScope(agentType, cwd) {
   if (!/^[a-zA-Z0-9_:-]+$/.test(agentType)) return "user";
-  const files = [
-    join2(agentProjectDir(cwd), ".claude", "agents", `${agentType}.md`),
-    join2(homedir(), ".claude", "agents", `${agentType}.md`)
-  ];
-  for (const file of files) {
-    if (!existsSync(file)) continue;
-    try {
-      const frontmatter = readFileSync2(file, "utf-8").match(/^---\r?\n([\s\S]*?)\r?\n---/);
-      const scope2 = frontmatter?.[1].match(/^memory:\s*['"]?(user|project|local)['"]?\s*$/m)?.[1];
-      if (scope2) return scope2;
-    } catch {
-    }
+  for (const anchor of [agentProjectDir(cwd), homedir()]) {
+    const dir = safeDirectory(anchor, [".claude", "agents"]);
+    if (!dir) continue;
+    let scope2;
+    withAgentMemoryFile(dir, `${agentType}.md`, constants.O_RDONLY, (fd) => {
+      if (fstatSync(fd).size > 1e5) return;
+      const frontmatter = readFileSync2(fd, "utf-8").match(/^---\r?\n([\s\S]*?)\r?\n---/);
+      scope2 = frontmatter?.[1].match(/^memory:\s*['"]?(user|project|local)['"]?\s*$/m)?.[1];
+    });
+    if (scope2) return scope2;
   }
   return "user";
-}
-function getAgentMemoryDir(agentType, scope2, cwd) {
-  const name = sanitizeAgentType(agentType);
-  if (scope2 === "user") return join2(homedir(), ".claude", "agent-memory", name);
-  return join2(agentProjectDir(cwd), ".claude", scope2 === "local" ? "agent-memory-local" : "agent-memory", name);
 }
 
 // src/agent-memory-saver.ts
@@ -109,11 +180,6 @@ var SUCCESS_SIGNALS = [
   /\bimplemented\b/i,
   /\brefactored\b/i
 ];
-function ensureDir(dir) {
-  if (!existsSync2(dir)) {
-    mkdirSync(dir, { recursive: true });
-  }
-}
 function getTimestamp() {
   return (/* @__PURE__ */ new Date()).toISOString().replace(/[:.]/g, "-").substring(0, 19);
 }
@@ -151,12 +217,11 @@ function main() {
     const hasSuccess = hasSuccessSignal(output);
     if (!hasLearning && !hasSuccess) return;
     const scope2 = getAgentMemoryScope(agentType, input.cwd);
-    const memoryDir = getAgentMemoryDir(agentType, scope2, input.cwd);
-    ensureDir(memoryDir);
+    const memoryDir = getSafeAgentMemoryDir(agentType, scope2, input.cwd, true);
+    if (!memoryDir) return;
     const timestamp = getTimestamp();
     const keyInfo = extractKeyInfo(output);
-    if (hasLearning || hasSuccess) {
-      const journalPath = join3(memoryDir, "learnings.md");
+    const locked = withAgentMemoryLock(memoryDir, () => {
       const entry = `
 ## ${timestamp} - ${description || "Agent task"}
 
@@ -164,19 +229,26 @@ ${keyInfo}
 
 ---
 `;
-      appendFileSync(journalPath, entry, "utf-8");
-      try {
-        const content = readFileSync3(journalPath, "utf-8");
-        if (content.length > 5e4) {
-          const truncated = content.substring(content.length - 4e4);
-          const firstNewline = truncated.indexOf("\n## ");
-          writeFileSync(journalPath, firstNewline > 0 ? truncated.substring(firstNewline) : truncated, "utf-8");
+      const saved = withAgentMemoryFile(memoryDir, "learnings.md", constants2.O_RDWR | constants2.O_CREAT | constants2.O_APPEND, (fd) => {
+        appendFileSync(fd, entry, "utf-8");
+        const size = fstatSync2(fd).size;
+        if (size <= 5e4) return;
+        const bytes = Buffer.alloc(size);
+        let offset = 0;
+        while (offset < size) {
+          const count = readSync(fd, bytes, offset, size - offset, offset);
+          if (count === 0) break;
+          offset += count;
         }
-      } catch {
-      }
-    }
-    const memoryMdPath = join3(memoryDir, "MEMORY.md");
-    if (!existsSync2(memoryMdPath)) {
+        const content = bytes.subarray(0, offset).toString("utf-8");
+        if (content.length <= 5e4) return;
+        const truncated = content.substring(content.length - 4e4);
+        const firstNewline = truncated.indexOf("\n## ");
+        const next = firstNewline > 0 ? truncated.substring(firstNewline) : truncated;
+        ftruncateSync(fd, 0);
+        writeFileSync2(fd, next, "utf-8");
+      });
+      if (!saved) return;
       const initialContent = `# ${agentType} Agent Memory
 
 Bu dosya ${agentType} agent'inin kalici bellegidir. Otomatik guncellenir.
@@ -184,8 +256,11 @@ Bu dosya ${agentType} agent'inin kalici bellegidir. Otomatik guncellenir.
 ## Ogrenimler
 - [learnings.md](learnings.md) - Tespit edilen sorunlar, patternler, kararlar
 `;
-      writeFileSync(memoryMdPath, initialContent, "utf-8");
-    }
+      withAgentMemoryFile(memoryDir, "MEMORY.md", constants2.O_WRONLY | constants2.O_CREAT | constants2.O_EXCL, (fd) => {
+        writeFileSync2(fd, initialContent, "utf-8");
+      });
+    });
+    if (!locked) process.stderr.write("[agent-memory] Optional save skipped: journal lock busy or unsafe. Review .learnings.lock after all writers stop; remove only an abandoned lock.\n");
   } catch {
   }
 }

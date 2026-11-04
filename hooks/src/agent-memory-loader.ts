@@ -12,11 +12,10 @@
  *   project: <cwd>/.claude/agent-memory/<agent-type>/MEMORY.md
  *   local:   <cwd>/.claude/agent-memory-local/<agent-type>/MEMORY.md
  */
-import { readFileSync, existsSync, readdirSync, statSync } from 'fs';
-import { join } from 'path';
+import { constants, fstatSync, readFileSync, readdirSync } from 'node:fs';
 import { budgetHookOutput } from './shared/context-budget.js';
 import { readHookInput } from './shared/hook-input.js';
-import { getAgentMemoryScope, getAgentMemoryDir } from './shared/agent-memory.js';
+import { getAgentMemoryScope, getSafeAgentMemoryDir, isSafeAgentMemoryDir, withAgentMemoryFile, type AgentMemoryDirectory } from './shared/agent-memory.js';
 
 interface PreToolInput {
   cwd?: string;
@@ -34,28 +33,25 @@ const MAX_FILES = 10;
 /**
  * Bir dizindeki memory dosyalarini tara ve iceriklerini topla
  */
-function scanMemoryDir(dir: string): string[] {
-  if (!existsSync(dir)) return [];
+function scanMemoryDir(dir: AgentMemoryDirectory): string[] {
+  if (!isSafeAgentMemoryDir(dir)) return [];
 
   const results: string[] = [];
   try {
-    const files = readdirSync(dir)
+    const files = readdirSync(dir.path)
       .filter(f => f.endsWith('.md'))
       .slice(0, MAX_FILES);
 
     for (const file of files) {
-      const filePath = join(dir, file);
-      try {
-        const stat = statSync(filePath);
+      withAgentMemoryFile(dir, file, constants.O_RDONLY, fd => {
+        const stat = fstatSync(fd);
         if (stat.isFile() && stat.size > 0 && stat.size < 50000) {
-          const content = readFileSync(filePath, 'utf-8').trim();
+          const content = readFileSync(fd, 'utf-8').trim();
           if (content) {
             results.push(`### ${file}\n${content}`);
           }
         }
-      } catch {
-        // skip unreadable files
-      }
+      });
     }
   } catch {
     // skip unreadable dirs
@@ -75,7 +71,8 @@ function main() {
 
     // Agent'in memory scope'unu kontrol et
     const effectiveScope = getAgentMemoryScope(agentType, input.cwd);
-    const memoryDir = getAgentMemoryDir(agentType, effectiveScope, input.cwd);
+    const memoryDir = getSafeAgentMemoryDir(agentType, effectiveScope, input.cwd);
+    if (!memoryDir) return;
 
     // Memory dosyalarini tara
     const memories = scanMemoryDir(memoryDir);
@@ -94,7 +91,7 @@ Bu agent'in onceki session'lardan biriktirdigi kalici bellek:
 ${combined}
 
 ---
-Bu memory'yi guncelle: Yeni ogrenimler varsa ${memoryDir}/ dizinine yaz.
+Bu memory'yi guncelle: Yeni ogrenimler varsa ${memoryDir.path}/ dizinine yaz.
 Memory guncelleme zorunlu DEGiL - sadece gercekten yeni ve degerli bilgi varsa kaydet.`;
 
     const result = {

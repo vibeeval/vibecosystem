@@ -11,10 +11,9 @@
  *
  * Claude Code kaynak kodundan (extractMemories.ts) ilham alinmistir.
  */
-import { readFileSync, writeFileSync, existsSync, mkdirSync, appendFileSync } from 'fs';
-import { join } from 'path';
+import { appendFileSync, constants, fstatSync, ftruncateSync, readSync, writeFileSync } from 'node:fs';
 import { readHookInput, hookResponseText } from './shared/hook-input.js';
-import { getAgentMemoryScope, getAgentMemoryDir } from './shared/agent-memory.js';
+import { getAgentMemoryScope, getSafeAgentMemoryDir, withAgentMemoryFile, withAgentMemoryLock } from './shared/agent-memory.js';
 
 interface PostToolInput {
   cwd?: string;
@@ -56,12 +55,6 @@ const SUCCESS_SIGNALS = [
   /\bimplemented\b/i,
   /\brefactored\b/i,
 ];
-
-function ensureDir(dir: string): void {
-  if (!existsSync(dir)) {
-    mkdirSync(dir, { recursive: true });
-  }
-}
 
 function getTimestamp(): string {
   return new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);
@@ -124,16 +117,14 @@ function main() {
 
     // Memory dizini olustur
     const scope = getAgentMemoryScope(agentType, input.cwd);
-    const memoryDir = getAgentMemoryDir(agentType, scope, input.cwd);
-    ensureDir(memoryDir);
+    const memoryDir = getSafeAgentMemoryDir(agentType, scope, input.cwd, true);
+    if (!memoryDir) return;
 
     const timestamp = getTimestamp();
     const keyInfo = extractKeyInfo(output);
 
-    if (hasLearning || hasSuccess) {
+    const locked = withAgentMemoryLock(memoryDir, () => {
       // Ogrenimler journal'a ekle (append mode)
-      const journalPath = join(memoryDir, 'learnings.md');
-
       const entry = `
 ## ${timestamp} - ${description || 'Agent task'}
 
@@ -141,24 +132,31 @@ ${keyInfo}
 
 ---
 `;
-      appendFileSync(journalPath, entry, 'utf-8');
-
-      // Journal dosyasi cok buyuduyse truncate et (son 50KB tut)
-      try {
-        const content = readFileSync(journalPath, 'utf-8');
-        if (content.length > 50000) {
-          const truncated = content.substring(content.length - 40000);
-          const firstNewline = truncated.indexOf('\n## ');
-          writeFileSync(journalPath, firstNewline > 0 ? truncated.substring(firstNewline) : truncated, 'utf-8');
+      // Keep one verified descriptor through read, append and bounded rewrite.
+      const saved = withAgentMemoryFile(memoryDir, 'learnings.md', constants.O_RDWR | constants.O_CREAT | constants.O_APPEND, fd => {
+        appendFileSync(fd, entry, 'utf-8');
+        // Ordinary appends stay atomic and do not rewrite prior journal content.
+        const size = fstatSync(fd).size;
+        if (size <= 50000) return;
+        const bytes = Buffer.alloc(size);
+        let offset = 0;
+        while (offset < size) {
+          const count = readSync(fd, bytes, offset, size - offset, offset);
+          if (count === 0) break;
+          offset += count;
         }
-      } catch {
-        // ignore truncation errors
-      }
-    }
+        const content = bytes.subarray(0, offset).toString('utf-8');
+        if (content.length <= 50000) return;
+        const truncated = content.substring(content.length - 40000);
+        const firstNewline = truncated.indexOf('\n## ');
+        const next = firstNewline > 0 ? truncated.substring(firstNewline) : truncated;
+        // All cooperative savers hold the same lock while replacing retained text.
+        ftruncateSync(fd, 0);
+        writeFileSync(fd, next, 'utf-8');
+      });
+      if (!saved) return;
 
-    // MEMORY.md index'ini guncelle (yoksa olustur)
-    const memoryMdPath = join(memoryDir, 'MEMORY.md');
-    if (!existsSync(memoryMdPath)) {
+      // MEMORY.md index'ini guncelle (yoksa olustur)
       const initialContent = `# ${agentType} Agent Memory
 
 Bu dosya ${agentType} agent'inin kalici bellegidir. Otomatik guncellenir.
@@ -166,8 +164,11 @@ Bu dosya ${agentType} agent'inin kalici bellegidir. Otomatik guncellenir.
 ## Ogrenimler
 - [learnings.md](learnings.md) - Tespit edilen sorunlar, patternler, kararlar
 `;
-      writeFileSync(memoryMdPath, initialContent, 'utf-8');
-    }
+      withAgentMemoryFile(memoryDir, 'MEMORY.md', constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL, fd => {
+        writeFileSync(fd, initialContent, 'utf-8');
+      });
+    });
+    if (!locked) process.stderr.write('[agent-memory] Optional save skipped: journal lock busy or unsafe. Review .learnings.lock after all writers stop; remove only an abandoned lock.\n');
 
     // Sessiz basari - stdout'a hicbir sey yazma (hook'u engellemez)
   } catch {

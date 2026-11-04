@@ -80,17 +80,18 @@ Completed locally on macOS arm64 with Node.js 22.23.2 and npm 10.9.8:
 | --- | --- |
 | Clean hook dependency install | `npm ci --ignore-scripts` passed with the repaired lockfile |
 | Hook TypeScript check and build | Passed; all 74 emitted ESM entrypoints rebuilt |
-| Hook suite | 257 tests in 15 files passed |
-| Installer and packed-runtime suite | 13 tests passed, including a real npm tarball extracted without source dependencies |
+| Hook suite | 280 tests in 16 files passed |
+| Installer and packed-runtime suite | 14 tests passed, including a real npm tarball extracted without source dependencies and executable helper modes |
 | Claude installer shell validation | Passed using temporary HOME |
 | Codex installer shell validation | Passed, including generated JSON/TOML and macOS Bash 3.2 cases |
 | Dashboard suite | 8 tests passed: real loopback HTTP/WebSocket, distributed emitter and safe UI fixtures |
 | Revised skill metadata | 20 entrypoints parse; all 138 agent metadata records are readable, including CRLF files |
-| Independent review | Installer preservation, dashboard UI/wiring and context-exhaustion fixes rechecked; no remaining P1/P2 found in that review scope |
+| Independent review | Two fresh exact-commit reviews found and verified repairs for executable permissions and memory symlink escapes; see [review record](independent-review.md) |
+| ShellCheck | All repository shell scripts passed at warning severity |
 | Media | New GIF decoded and inspected at 1, 3 and 7 seconds; HyperFrames check reported no errors/warnings |
 
 The skill-creator Python validator was unavailable because this environment lacks PyYAML. The repository's frontmatter parser, metadata checks and independent workflow simulations were used instead. This does not establish model-level quality or complete YAML-schema validation.
 
-Live Claude/Codex sessions, real provider billing, PostgreSQL, working native SQLite and real TLDR services were not exercised. Protocol fixtures and optional-dependency absence were tested in isolated state; they do not prove those external integrations work in every environment. The dashboard intentionally trusts other local processes, and regex credential filtering is not a sandbox. Session budget counters persist in a small hashed cache.
+Live Claude/Codex sessions, real provider billing, PostgreSQL, working native SQLite and real TLDR services were not exercised. Protocol fixtures and optional-dependency absence were tested in isolated state; they do not prove those external integrations work in every environment. The dashboard intentionally trusts other local processes, and regex credential filtering is not a sandbox. Session budget counters persist in a small hashed cache. An abandoned agent-memory write lock skips optional learning with an explicit diagnostic until reviewed after writers stop.
 
 GitHub Actions, release publication and repository social-preview settings are separate from these local checks. No npm version or release tag was published by this work.

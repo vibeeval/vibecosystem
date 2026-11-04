@@ -1,6 +1,5 @@
 // src/agent-memory-loader.ts
-import { readFileSync as readFileSync4, existsSync as existsSync3, readdirSync, statSync as statSync2 } from "fs";
-import { join as join3 } from "path";
+import { constants as constants2, fstatSync as fstatSync2, readFileSync as readFileSync4, readdirSync } from "node:fs";
 
 // src/shared/context-budget.ts
 import {
@@ -204,7 +203,7 @@ function readHookInput(raw = readFileSync2(0, "utf-8")) {
 }
 
 // src/shared/agent-memory.ts
-import { existsSync as existsSync2, readFileSync as readFileSync3 } from "node:fs";
+import { closeSync, constants, fstatSync, lstatSync, mkdirSync as mkdirSync2, openSync, readFileSync as readFileSync3, realpathSync, unlinkSync, writeFileSync as writeFileSync2 } from "node:fs";
 import { join as join2, resolve as resolve2 } from "node:path";
 import { homedir as homedir2 } from "node:os";
 function sanitizeAgentType(agentType) {
@@ -213,50 +212,89 @@ function sanitizeAgentType(agentType) {
 function agentProjectDir(cwd) {
   return resolve2(cwd || process.env.CLAUDE_PROJECT_DIR || process.cwd());
 }
+function safeDirectory(anchor, parts, create = false) {
+  try {
+    const root = realpathSync(anchor);
+    if (!lstatSync(root).isDirectory()) return;
+    let path = root;
+    for (const part of parts) {
+      if (!part || part === "." || part === ".." || /[/\\]/.test(part)) return;
+      path = join2(path, part);
+      try {
+        if (create) mkdirSync2(path, { mode: 448 });
+      } catch (error) {
+        if (error.code !== "EEXIST") throw error;
+      }
+      const stat = lstatSync(path);
+      if (stat.isSymbolicLink() || !stat.isDirectory()) return;
+    }
+    if (realpathSync(path) !== path) return;
+    return { path, anchor: root, parts };
+  } catch {
+    return;
+  }
+}
+function getSafeAgentMemoryDir(agentType, scope2, cwd, create = false) {
+  const anchor = scope2 === "user" ? homedir2() : agentProjectDir(cwd);
+  return safeDirectory(anchor, [".claude", scope2 === "local" ? "agent-memory-local" : "agent-memory", sanitizeAgentType(agentType)], create);
+}
+function isSafeAgentMemoryDir(dir) {
+  return safeDirectory(dir.anchor, dir.parts)?.path === dir.path;
+}
+function withAgentMemoryFile(dir, name, flags, use) {
+  let fd;
+  try {
+    if (!name || name === "." || name === ".." || /[/\\]/.test(name) || !isSafeAgentMemoryDir(dir)) return false;
+    if (typeof constants.O_NOFOLLOW !== "number") return false;
+    const path = join2(dir.path, name);
+    fd = openSync(path, flags | constants.O_NOFOLLOW | constants.O_NONBLOCK, 384);
+    const opened = fstatSync(fd);
+    if (!opened.isFile() || !isSafeAgentMemoryDir(dir)) return false;
+    const current = lstatSync(path);
+    if (!current.isFile() || current.isSymbolicLink() || current.dev !== opened.dev || current.ino !== opened.ino) return false;
+    use(fd);
+    return true;
+  } catch {
+    return false;
+  } finally {
+    if (fd !== void 0) closeSync(fd);
+  }
+}
 function getAgentMemoryScope(agentType, cwd) {
   if (!/^[a-zA-Z0-9_:-]+$/.test(agentType)) return "user";
-  const files = [
-    join2(agentProjectDir(cwd), ".claude", "agents", `${agentType}.md`),
-    join2(homedir2(), ".claude", "agents", `${agentType}.md`)
-  ];
-  for (const file of files) {
-    if (!existsSync2(file)) continue;
-    try {
-      const frontmatter = readFileSync3(file, "utf-8").match(/^---\r?\n([\s\S]*?)\r?\n---/);
-      const scope2 = frontmatter?.[1].match(/^memory:\s*['"]?(user|project|local)['"]?\s*$/m)?.[1];
-      if (scope2) return scope2;
-    } catch {
-    }
+  for (const anchor of [agentProjectDir(cwd), homedir2()]) {
+    const dir = safeDirectory(anchor, [".claude", "agents"]);
+    if (!dir) continue;
+    let scope2;
+    withAgentMemoryFile(dir, `${agentType}.md`, constants.O_RDONLY, (fd) => {
+      if (fstatSync(fd).size > 1e5) return;
+      const frontmatter = readFileSync3(fd, "utf-8").match(/^---\r?\n([\s\S]*?)\r?\n---/);
+      scope2 = frontmatter?.[1].match(/^memory:\s*['"]?(user|project|local)['"]?\s*$/m)?.[1];
+    });
+    if (scope2) return scope2;
   }
   return "user";
-}
-function getAgentMemoryDir(agentType, scope2, cwd) {
-  const name = sanitizeAgentType(agentType);
-  if (scope2 === "user") return join2(homedir2(), ".claude", "agent-memory", name);
-  return join2(agentProjectDir(cwd), ".claude", scope2 === "local" ? "agent-memory-local" : "agent-memory", name);
 }
 
 // src/agent-memory-loader.ts
 var MAX_MEMORY_SIZE = 8e3;
 var MAX_FILES = 10;
 function scanMemoryDir(dir) {
-  if (!existsSync3(dir)) return [];
+  if (!isSafeAgentMemoryDir(dir)) return [];
   const results = [];
   try {
-    const files = readdirSync(dir).filter((f) => f.endsWith(".md")).slice(0, MAX_FILES);
+    const files = readdirSync(dir.path).filter((f) => f.endsWith(".md")).slice(0, MAX_FILES);
     for (const file of files) {
-      const filePath = join3(dir, file);
-      try {
-        const stat = statSync2(filePath);
+      withAgentMemoryFile(dir, file, constants2.O_RDONLY, (fd) => {
+        const stat = fstatSync2(fd);
         if (stat.isFile() && stat.size > 0 && stat.size < 5e4) {
-          const content = readFileSync4(filePath, "utf-8").trim();
+          const content = readFileSync4(fd, "utf-8").trim();
           if (content) {
             results.push(`### ${file}
 ${content}`);
           }
         }
-      } catch {
-      }
+      });
     }
   } catch {
   }
@@ -269,7 +307,8 @@ function main() {
     const agentType = input.tool_input?.subagent_type;
     if (!agentType) return;
     const effectiveScope = getAgentMemoryScope(agentType, input.cwd);
-    const memoryDir = getAgentMemoryDir(agentType, effectiveScope, input.cwd);
+    const memoryDir = getSafeAgentMemoryDir(agentType, effectiveScope, input.cwd);
+    if (!memoryDir) return;
     const memories = scanMemoryDir(memoryDir);
     if (memories.length === 0) return;
     let combined = memories.join("\n\n");
@@ -283,7 +322,7 @@ Bu agent'in onceki session'lardan biriktirdigi kalici bellek:
 ${combined}
 
 ---
-Bu memory'yi guncelle: Yeni ogrenimler varsa ${memoryDir}/ dizinine yaz.
+Bu memory'yi guncelle: Yeni ogrenimler varsa ${memoryDir.path}/ dizinine yaz.
 Memory guncelleme zorunlu DEGiL - sadece gercekten yeni ve degerli bilgi varsa kaydet.`;
     const result = {
       hookSpecificOutput: { hookEventName: "PreToolUse", additionalContext: context }

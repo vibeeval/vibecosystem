@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -37,6 +37,8 @@ test('packed npm layout installs and runs core plus opt-in bundles without sourc
       return result;
     };
     run(join(packageRoot, 'bin/cli.mjs'), ['init', '--profile', 'core']);
+    assert(statSync(join(home, '.claude/skills/strategic-compact/suggest-compact.sh')).mode & 0o111,
+      'packed core helper must retain direct-execution permissions');
     assert.match(run(join(packageRoot, 'bin/cli.mjs'), ['doctor']).stdout, /0 failed/);
     const cli = join(home, '.claude/tools/vibeco/vibeco.mjs');
     assert.match(run(cli, ['version']).stdout, new RegExp(metadata.version.replaceAll('.', '\\.')));
