@@ -3,6 +3,7 @@
  * Bash ciktisinda hata tespit ederse error-ledger.jsonl'e yazar.
  * Tum agent'lar session basinda bu hatalardan haberdar olur.
  */
+import { hookResponseText } from './shared/hook-response.js';
 import { readFileSync, appendFileSync, mkdirSync, existsSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
@@ -20,9 +21,10 @@ interface PostToolInput {
     description?: string;
     prompt?: string;
   };
-  tool_response?: string;
+
   // Agent tool çıktısı
   tool_output?: string;
+  tool_response?: unknown;
 }
 
 interface ErrorEntry {
@@ -155,12 +157,7 @@ function main() {
     ? (input.tool_input?.subagent_type || 'unknown-agent')
     : (process.env.CLAUDE_AGENT_TYPE || 'main');
 
-  // Çıktıyı al: Agent tool için tool_output, Bash için tool_response
-  const output = isAgentTool
-    ? (typeof input.tool_output === 'string' ? input.tool_output : '')
-    : (typeof input.tool_response === 'string'
-        ? input.tool_response
-        : JSON.stringify(input.tool_response || ''));
+  const output = hookResponseText(input);
 
   if (!output || output.length < 10) {
     console.log('{}');

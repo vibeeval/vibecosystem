@@ -6,10 +6,11 @@
  * Node tipleri: error, instinct, session, file
  * Edge tipleri: caused_by, related_to, learned_from, fixed_by
  */
-import { readFileSync, existsSync } from 'fs';
+import { readFileSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
-import Database from 'better-sqlite3';
+import type Database from 'better-sqlite3';
+import { loadOptionalSqlite, reportSqliteUnavailable } from './shared/optional-sqlite.js';
 
 interface ErrorEntry {
   ts: string;
@@ -36,8 +37,11 @@ interface MatureInstinct {
 
 const DB_PATH = join(homedir(), '.claude', 'cache', 'memory-graph.db');
 
-function getDb(): Database.Database {
-  const db = new Database(DB_PATH);
+function getDb(): Database.Database | null {
+  const Sqlite = loadOptionalSqlite('memory-graph');
+  if (!Sqlite) return null;
+  mkdirSync(join(homedir(), '.claude', 'cache'), { recursive: true });
+  const db = new Sqlite(DB_PATH);
   db.pragma('journal_mode = WAL');
   db.pragma('busy_timeout = 5000');
 
@@ -114,14 +118,15 @@ function main() {
   const ledgerPath = join(canavarDir, 'error-ledger.jsonl');
   const maturePath = join(claudeDir, 'mature-instincts.json');
 
-  let db: Database.Database;
+  let db: Database.Database | null;
   try {
     db = getDb();
-  } catch (e) {
-    // better-sqlite3 yuklu degilse sessizce cik
-    console.log(JSON.stringify({ result: 'Memory graph: DB baglantisi basarisiz' }));
+  } catch {
+    reportSqliteUnavailable('memory-graph');
+    console.log('{}');
     return;
   }
+  if (!db) { console.log('{}'); return; }
 
   try {
     // Session node

@@ -8,6 +8,7 @@
  * Saves to: ~/.claude/palace/{project}.jsonl
  */
 
+import { hookResponseText } from './shared/hook-response.js';
 import { readFileSync, writeFileSync, appendFileSync, existsSync, mkdirSync } from 'node:fs';
 import { join, resolve, sep } from 'node:path';
 import { homedir } from 'node:os';
@@ -18,6 +19,7 @@ interface ToolEvent {
   tool_name: string;
   tool_input?: Record<string, unknown>;
   tool_output?: string;
+  tool_response?: unknown;
   session_id?: string;
 }
 
@@ -139,11 +141,11 @@ function runHook(): void {
   } catch { return; }
 
   // Only process Agent completions with significant output
-  if (event.tool_name !== 'Agent' || !event.tool_output) {
+  if (event.tool_name !== 'Agent') {
     return;
   }
 
-  const output = String(event.tool_output);
+  const output = hookResponseText(event);
   if (!isSignificantOutput(output)) {
     return;
   }

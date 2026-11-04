@@ -1,19 +1,21 @@
+import { readHookInput } from './shared/hook-input.js';
 /**
  * TLDR Read Enforcer Hook - BLOCKING VERSION (DAEMON)
  *
  * Intercepts Read tool calls for code files and BLOCKS with TLDR context.
  * Instead of reading 1000+ line files, returns structured L1 AST context.
  *
- * Uses TLDR daemon for fast cached responses (50ms vs 500ms CLI).
- *
- * Result: 95% token savings (50-500 tokens vs 3000-20000 raw)
+ * Uses the optional TLDR daemon for structured context.
+ * Payload sizes depend on the source and retrieval mode.
  */
 
 import { readFileSync, existsSync, statSync } from 'fs';
-import { basename, extname } from 'path';
+import { basename, extname, join, resolve } from 'path';
 import { queryDaemonSync, trackHookActivitySync } from './daemon-client.js';
 import { budgetHookOutput, isRelevantForIntent } from './shared/context-budget.js';
 import { startTimer, endTimer } from './shared/hook-profiler.js';
+import { homedir } from 'node:os';
+import { createHash } from 'node:crypto';
 
 // Search context from smart-search-router
 interface SearchContext {
@@ -27,15 +29,16 @@ interface SearchContext {
   callers?: string[];           // Cross-file: where the symbol is called/used
 }
 
-const CONTEXT_DIR = '/tmp/claude-search-context';
+const CONTEXT_DIR = join(homedir(), '.claude', 'cache', 'search-context');
 const CONTEXT_MAX_AGE_MS = 30000; // 30 seconds - context expires after this
 
 /**
  * Read search context from smart-search-router (if recent)
  */
-function getSearchContext(sessionId: string): SearchContext | null {
+function getSearchContext(sessionId: string, project: string): SearchContext | null {
   try {
-    const contextPath = `${CONTEXT_DIR}/${sessionId}.json`;
+    const key = createHash('sha256').update(JSON.stringify([resolve(project), sessionId])).digest('hex');
+    const contextPath = join(CONTEXT_DIR, `${key}.json`);
     if (!existsSync(contextPath)) return null;
 
     const context: SearchContext = JSON.parse(readFileSync(contextPath, 'utf-8'));
@@ -72,6 +75,7 @@ interface HookOutput {
     hookEventName: string;
     permissionDecision: 'allow' | 'deny' | 'ask';
     permissionDecisionReason?: string;
+    additionalContext?: string;
   };
 }
 
@@ -123,9 +127,9 @@ function detectLanguage(filePath: string): string {
  * Choose TLDR mode based on context signals.
  *
  * Simple logic: trust search-router, otherwise use structure.
- * - 'structure': Just function/class names (99% savings) - default
- * - 'context': Entry point focused (87% savings) - when search found target
- * - 'extract': Full AST dump (26% savings) - when advanced analysis needed
+ * - 'structure': Just function/class names - default
+ * - 'context': Entry point focused - when search found target
+ * - 'extract': Full AST dump - when advanced analysis needed
  */
 type TldrMode = 'structure' | 'context' | 'extract';
 
@@ -146,7 +150,7 @@ function chooseTldrMode(
     return { mode: 'extract', reason: 'flow analysis' };
   }
 
-  // Default: structure for navigation (99% savings)
+  // Default: structure for navigation
   return { mode: 'structure', reason: 'navigation' };
 }
 
@@ -172,7 +176,7 @@ function getTldrContext(
     results.push(`Mode: ${mode} (${reason})`);
     results.push('');
 
-    // MODE: context - focused on target function (87% savings)
+    // MODE: context - focused on target function
     if (mode === 'context' && target) {
       const contextResp = queryDaemonSync(
         { cmd: 'context', entry: target, language, depth: 2 },
@@ -191,7 +195,7 @@ function getTldrContext(
       // Fall through to extract if context fails
     }
 
-    // MODE: structure - just names (99% savings)
+    // MODE: structure - just names
     // Note: use 'extract' for single files (structure is for directories)
     if (mode === 'structure') {
       const extractResp = queryDaemonSync(
@@ -234,7 +238,7 @@ function getTldrContext(
       // Fall through to extract if failed
     }
 
-    // MODE: extract - full AST (26% savings) - fallback and for editing
+    // MODE: extract - full AST  - fallback and for editing
     // L1/L2: Extract file info (AST + Call Graph) using daemon
     // Pass session ID for token tracking (P7)
     if (layers.includes('ast') || layers.includes('call_graph') || mode === 'extract') {
@@ -355,7 +359,7 @@ function getTldrContext(
       }
     }
 
-    return results.length > 3 ? results.join('\n') : null;  // > 3 means we have more than just header
+    return results.length > 4 ? results.join('\n') : null;  // Four header entries are not retrieved context
   } catch {
     return null;
   }
@@ -367,7 +371,7 @@ function readStdin(): string {
 
 async function main() {
   const _perfStart = startTimer();
-  const input: HookInput = JSON.parse(readStdin());
+  const input = readHookInput<HookInput>();
 
   if (!isRelevantForIntent('tldr-read-enforcer')) {
     console.log('{}');
@@ -421,7 +425,7 @@ async function main() {
   let contextSource = 'default';
 
   // Check for search context from smart-search-router (Bayesian: P(intent | current action))
-  const searchContext = getSearchContext(input.session_id);
+  const searchContext = getSearchContext(input.session_id, input.cwd || process.cwd());
   if (searchContext) {
     layers = searchContext.suggestedLayers;
     target = searchContext.target;
@@ -484,7 +488,8 @@ ${callerLines.join('\n')}${searchContext.callers.length > 10 ? `\n  ... and ${se
     hookSpecificOutput: {
       hookEventName: 'PreToolUse',
       permissionDecision: 'deny',
-      permissionDecisionReason: `📊 TLDR Context (${layerNames}) - 95% token savings:
+      permissionDecisionReason: 'Structured code context is provided below. Use Read with offset/limit for source lines.',
+      additionalContext: `TLDR Context (${layerNames}):
 ${searchContext ? `🔗 Context: ${contextSource}` : ''}${definitionSection}
 
 ${tldrContext}${crossFileSection}
@@ -495,7 +500,10 @@ To read full file anyway, use: Read ${basename(filePath)} (test files bypass thi
   };
 
   endTimer(_perfStart, 'tldr-read-enforcer', 'PreToolUse');
-  console.log(JSON.stringify(budgetHookOutput(output, 'tldr-read-enforcer', 'PreToolUse:Read')));
+  const bounded = budgetHookOutput(output, 'tldr-read-enforcer', 'PreToolUse:Read');
+  // This denial routes to a replacement summary; it is not a safety decision.
+  // Without replacement context, let the original Read follow normal permissions.
+  console.log(JSON.stringify(bounded.hookSpecificOutput?.additionalContext ? bounded : {}));
 }
 
 main().catch((err) => {

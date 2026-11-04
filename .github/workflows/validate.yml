@@ -148,7 +148,7 @@ jobs:
           node-version: '22'
 
       - name: Install dependencies
-        run: cd hooks && npm install
+        run: cd hooks && npm ci
 
       - name: Type check
         run: cd hooks && npx tsc --noEmit
@@ -158,7 +158,7 @@ jobs:
 
       - name: Verify dist is up to date
         run: |
-          cd hooks && npm run build
+          cd hooks
           if ! git diff --quiet dist/; then
             echo "ERROR: dist/ is out of date. Run 'cd hooks && npm run build' and commit."
             git diff --stat dist/
@@ -167,6 +167,20 @@ jobs:
 
       - name: Run tests
         run: cd hooks && npm test
+
+      - name: Test installer and packed runtime boundaries
+        run: npm test && npm run test:installers
+
+      - name: Install optional dashboard dependencies
+        run: npm ci --ignore-scripts --prefix tools/dashboard
+
+      - name: Test local dashboard and distributed event pipeline
+        run: npm test --prefix tools/dashboard
+
+      - name: Verify generated dashboard CSS
+        run: |
+          npm run build:css --prefix tools/dashboard
+          git diff --exit-code -- tools/dashboard/dashboard.css
 
   markdown-lint:
     name: Markdown Lint

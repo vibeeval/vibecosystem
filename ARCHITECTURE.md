@@ -1,438 +1,91 @@
 # Architecture
 
-## 1. Overview
+## Runtime boundary
 
-vibecosystem extends Claude Code with four component types that work together through implicit coordination: **hooks** observe tool calls and session events, **agents** execute specialized tasks, **skills** provide domain knowledge, and **rules** shape session-wide behavior. Codex uses a separate bounded adapter: the repository-scoped `luna_worker` is the single model authority and runs `gpt-5.6-luna` with `max` reasoning. Claude-only agent frontmatter may still name `opus` or `sonnet`; Codex never reads those fields. There is no RPC, no message bus, no service discovery. The coordination mechanism is context injection -- hooks read the environment, decide what context is relevant, and inject it into Claude Code's prompt window where agents and skills can act on it.
+vibecosystem is a file-based extension for coding hosts. The Claude adapter installs selected agents, skills, rules and bundled hooks. The Codex adapter installs skills and optionally a bounded TOML worker. There is no central agent executor, RPC mesh or guarantee that every instruction will be followed by a model.
 
-## 2. Component Interaction
+A catalog entry is not an active component. The profile controls what the installer copies and registers. The host controls lifecycle events, permissions, agent execution and model context.
+
+## Sources of truth
+
+| Concern | Source |
+| --- | --- |
+| Profile inheritance, aliases and context limits | `profiles/runtime-manifest.json` |
+| Domain-specific legacy profiles | `profiles/frontend.json`, `backend.json`, `fullstack.json`, `devops.json` |
+| Claude hook registrations | `hooks/hooks.json` |
+| Hook implementation | `hooks/src/` |
+| Shipped hook bundles | `hooks/dist/` |
+| Installer state and ownership | `~/.claude/vibecosystem-runtime.json` |
+| Codex worker contract | `.codex/agents/luna-worker.toml` |
+| Codex project defaults | `.codex/config.toml` |
+
+The repository catalog contains 138 agent files, 296 top-level skill directories, 74 hook entry points and 20 rule files. Nested skills, registered commands and unique registered hook names are counted separately.
+
+## Installation and profile selection
+
+`install.sh` and the npm CLI call `tools/install-runtime.mjs`. `tools/profile-runtime.mjs` resolves profile inheritance and aliases. Selected files are installed into `~/.claude/`; hook commands are merged into `settings.json` through `tools/register-hooks.mjs`.
+
+The default `core` profile provides bounded implementation and verification. `dashboard`, `quality`, `context`, `memory` and `orchestration` extend core. `full` selects the catalog and complete registration manifest. The old `minimal`/`smart` and `all` names are aliases for core and full respectively.
+
+The installer records ownership. Profile changes reconcile files and registrations from earlier owned installations, preserve unrelated settings and create backups before replacing files. Unmanaged and locally modified content must not be silently treated as disposable. See [UPGRADING.md](UPGRADING.md) for operational details.
+
+## Event flow
 
 ```mermaid
 flowchart TD
-    U[User Input] --> IC[Intent Classifier Hook]
-    IC -->|task_type, domain, agent_hint| AM[Agent Assignment Matrix Rule]
-    AM --> A[Selected Agent]
-    A -->|reads| SK[Skills - Domain Knowledge]
-    A -->|produces| CODE[Code Changes]
-    CODE --> CR[Code Review Hooks]
-    CR -->|PostToolUse| PL[Passive Learner Hook]
-    PL -->|patterns| IC2[Instinct Consolidator]
-    IC2 -->|confidence >= 5| IL[Instinct Loader]
-    IL -->|SessionStart| U
-
-    CODE --> MEM[(Memory\nPostgreSQL / SQLite)]
-    PL --> MEM
-    IC --> MEM
-
-    subgraph Self-Learning Pipeline
-        PL
-        IC2
-        IL
-    end
+    Profile[Runtime profile] --> Installer[Installer and registrar]
+    Installer --> Settings[Host settings]
+    Installer --> Files[Selected component files]
+    Event[Host lifecycle event] --> Stdin[JSON on hook stdin]
+    Settings --> Hook[Bundled hook process]
+    Stdin --> Hook
+    Hook --> Decision[Permission decision or no output]
+    Hook --> Context[Optional context]
+    Context --> Budget[Session and event budget]
+    Budget --> Host[Host model context]
+    Files --> Host
 ```
 
-The flow works like this:
+Claude sends event JSON through stdin. Tool input is in `tool_input`; PostToolUse output is in `tool_response`. Compatibility readers may accept earlier project-local names, but tests must exercise the canonical envelope.
 
-1. User submits a prompt. The `intent-classifier` hook analyzes it and writes a classified intent (task type, domain, agent hint) to `~/.claude/cache/current-intent.json`.
-2. The `agent-assignment-matrix` rule maps the classified intent to an agent.
-3. The selected agent reads relevant skills (injected by hooks or referenced in its prompt).
-4. After the agent produces code, `PostToolUse` hooks fire: code review, diagnostics, passive learning.
-5. The passive learner captures edit patterns into `instincts.jsonl`. The consolidator groups them. Mature patterns (confidence >= 5) are auto-injected into future sessions.
-6. Memory operations (PostgreSQL for structured learnings, SQLite as fallback) persist across sessions.
+Hook results must use the host-supported envelope. A context suggestion does not dispatch a new agent by itself. `PreToolUse` permission decisions remain intact when optional context has exhausted its budget.
 
-## 3. Hook System
+## Context budget and usage
 
-### Location and Build
+Participating injectors route their final context through `hooks/src/shared/context-budget.ts`. Lean profile limits are 4,000 characters per event and 12,000 per session; full limits are 8,000 and 50,000. Session identity separates independent runs. The budget is for hook-produced context, not the complete prompt or model's generated/reasoning tokens.
 
-- Source: `hooks/src/*.ts` (74 hook files)
-- Shared utilities: `hooks/src/shared/` (27 modules)
-- Built with esbuild: `npm run build` produces `hooks/dist/*.mjs`
-- Tests: `hooks/src/__tests__/` using vitest
+Persisted accounting enables independent hook processes to share the budget. Tests cover isolation, limits, truncation and competing writes. Missing or malformed state must not disable a permission decision. Expose omitted optional context through diagnostics where practical rather than implying retrieval succeeded.
 
-Each hook is a standalone TypeScript file that compiles to a self-contained `.mjs` bundle. No shared runtime -- esbuild inlines all imports from `shared/` into each bundle.
+The token tracker distinguishes provider usage from estimates. A character-based estimate is not a provider tokenization result or an invoice. Benchmarks must state the fixture, measured field, command and limitations; see [docs/verification.md](docs/verification.md).
 
-### Hook Types
+## Components
 
-| Type | Fires When | Can Block? | Example |
-|------|-----------|------------|---------|
-| PreToolUse | Before a tool executes | Yes | `credential-deny`, `path-rules` |
-| PostToolUse | After a tool completes | No | `passive-learner`, `post-edit-diagnostics` |
-| UserPromptSubmit | User sends a prompt | Yes | `intent-classifier`, `skill-activation-prompt` |
-| SessionStart | Session begins | No | `instinct-loader`, `session-start-recall` |
-| SessionEnd | Session ends | No | `session-end-cleanup` |
-| Stop | Agent finishes responding | Yes | `compiler-in-the-loop-stop` |
-| SubagentStart | Subagent spawns | No | `canavar-subagent-tracker` |
-| SubagentStop | Subagent finishes | Yes | `subagent-stop-learner` |
-| PreCompact | Before context compaction | No | `pre-compact-continuity` |
+Agents are Markdown with YAML frontmatter: a role, tools and optional Claude model metadata. Skills are directories containing `SKILL.md`; the top-level directory count differs from recursive SKILL.md count. Rules are host instructions and should be selected deliberately because always-loaded rules consume context.
 
-### How Hooks Inject Context
+The Codex installer does not convert Claude agent metadata into Codex model routing. It optionally installs `luna_worker`, whose canonical contract uses `gpt-5.6-luna` with `max` reasoning. Project settings remain model-neutral.
 
-Hooks communicate by returning JSON with specific fields:
+## Optional subsystems
 
-```typescript
-// Inject text into Claude's context window
-{ "additionalContext": "Relevant information for this prompt..." }
+| Subsystem | Behavior and dependencies |
+| --- | --- |
+| Memory and learning | Captures local patterns and consolidates them into recallable data; thresholds are heuristics requiring review |
+| Memory graph | SQLite-backed graph through optional `better-sqlite3` |
+| TLDR context | Queries a separately available daemon/tool; no result may mean unavailable rather than clean |
+| Compiler diagnostics | Uses relevant project tools; optional assistance can contact a configured LM Studio endpoint |
+| Dashboard | The opt-in `dashboard` profile adds one emitter to core: 7 unique hook entry points and 8 registrations, with agent starts on PreToolUse and structural completions on PostToolUse. Local HTTP/WebSocket service uses `ws`; see `tools/dashboard/README.md` |
+| External actions | Braintrust requires `VIBECO_BRAINTRUST_ANALYSIS=1`; GitHub-mutating hooks require `VIBECO_GITHUB_AUTOMATION=1`; review data destinations and write authority |
+| MCP and search skills | Instructions for separately configured providers; not provisioned by core installation |
 
-// Block a tool call
-{ "permissionDecision": "deny", "reason": "Credential detected in command" }
+Profiles that enable a subsystem do not provision its external binaries, accounts or services. A missing optional dependency must not be described as a successful analysis.
 
-// Write to shared state files that other hooks read
-writeFileSync('~/.claude/cache/current-intent.json', JSON.stringify(intent));
-```
+## Security boundaries
 
-### Key Hooks
+Hooks execute with the user's privileges and can inspect local files and tool data. The credential guard detects supported sensitive paths and command patterns; arbitrary shell parsing and indirect access make it unsuitable as a complete security boundary. Use host permissions, least-privilege credentials and an operating-system sandbox.
 
-| Hook | Type | Purpose |
-|------|------|---------|
-| `intent-classifier` | UserPromptSubmit | Classifies prompt into task type, domain, agent hint |
-| `passive-learner` | PostToolUse | Captures edit/file patterns from tool usage |
-| `instinct-consolidator` | Stop | Groups patterns, promotes mature ones |
-| `instinct-loader` | SessionStart | Injects learned patterns into session context |
-| `canavar-error-broadcast` | PostToolUse | Propagates agent errors to team-wide ledger |
-| `plugin-registry` | PreToolUse | Checks `plugin-config.json` to enable/disable components |
+The dashboard is local by default. Browser origin checks reduce cross-site access to local endpoints; they do not authenticate other processes running as the same user. Logs and learned memory can contain sensitive material. See [SECURITY.md](SECURITY.md).
 
-## 4. Agent System
+## Build and verification
 
-### Format
+TypeScript entry points are bundled by esbuild to ESM `.mjs` files. Runtime imports must work in emitted bundles, not just under the TypeScript test runner. Prebuilt bundles are committed for installation without a compilation step. Optional native dependencies remain explicit.
 
-138 Markdown files in `agents/`, each with YAML frontmatter:
-
-```yaml
----
-name: scout
-description: Codebase exploration and pattern finding
-model: sonnet # Claude adapter only; Codex uses luna_worker
-tools: [Read, Grep, Glob, Bash]
----
-
-# Scout
-
-You are a specialized internal research agent...
-```
-
-**Frontmatter fields:**
-
-| Field | Required | Values |
-|-------|----------|--------|
-| `name` | Yes | Agent identifier |
-| `description` | Yes | One-line purpose |
-| `model` | No | Claude adapter only: `sonnet` (default) or `opus` |
-| `tools` | No | Subset of `[Read, Write, Edit, Bash, Grep, Glob, Task]` |
-
-### Agent Routing
-
-The `agent-assignment-matrix` rule (in `rules/agent-assignment-matrix.md`) maps task categories to agents:
-
-| Task Category | Primary Agent | Backup Agent |
-|---------------|--------------|--------------|
-| React/Next.js UI | frontend-dev | designer |
-| API endpoint | backend-dev | kraken |
-| Bug investigation | sleuth | scout |
-| Large feature (TDD) | kraken | backend-dev |
-| Small fix/tweak | spark | frontend-dev |
-| Documentation | technical-writer | doc-updater |
-
-### Collaboration Chains
-
-Claude agents do not call each other directly. They are chained by the orchestrator (maestro) or by rules. The Codex `luna_worker` does not spawn subagents or swarm workers unless the user explicitly asks:
-
-```
-scout (explore) -> architect (design) -> kraken (implement) -> code-reviewer (review) -> verifier (validate)
-```
-
-### Dev-QA Loop
-
-Every task follows this cycle:
-
-1. Developer agent implements the task
-2. `code-reviewer` + `verifier` run QA checks
-3. **PASS** -- move to next task
-4. **FAIL** -- send feedback to developer, retry (max 3 attempts)
-5. **3x FAIL** -- escalate: reassign to different agent, decompose, or defer
-
-## 5. Skill System
-
-### Format
-
-296 skill directories under `skills/`, each with a SKILL.md (342 SKILL.md files total, some skills nest sub-skills):
-
-```yaml
----
-name: fix
-description: Meta-skill workflow orchestrator for bug investigation and resolution
-allowed-tools: [Bash, Read, Grep, Write, Edit, Task]
----
-```
-
-Some skills also use:
-
-```yaml
-user-invocable: true    # Can be triggered with /fix, /commit, /review, etc.
-user-invocable: false   # Only injected by hooks, not directly callable
-```
-
-### How Skills Are Activated
-
-1. **User-invocable skills**: User types `/commit`, `/fix`, `/review`, `/swarm`, etc. Claude Code matches these to the skill's name.
-2. **Hook-injected skills**: The `skill-activation-prompt` hook detects file patterns and bash patterns in the current context, then injects relevant skill content via `additionalContext`.
-3. **Agent-referenced skills**: Agent prompts reference skills by name. The agent reads the skill file when it needs domain knowledge.
-
-### Skill Categories
-
-| Category | Examples | Count |
-|----------|----------|-------|
-| Workflow orchestrators | fix, build, commit, review, swarm | ~15 |
-| Language patterns | typescript, python, golang, kotlin, swift | ~20 |
-| Framework patterns | django, springboot, react, next.js | ~15 |
-| Infrastructure | kubernetes, terraform, aws, gcp, azure | ~10 |
-| Security | concurrency-security, insecure-defaults, supply-chain | ~10 |
-| Mathematics | 40+ skills across algebra, analysis, topology, etc. | ~45 |
-| Domain-specific | saas-auth, paywall-strategy, revenuecat, elasticsearch | ~30 |
-
-## 6. Self-Learning Pipeline
-
-The self-learning pipeline turns repeated patterns into auto-injected context, without human intervention.
-
-```
-Edit/Write tool calls
-    |
-    v
-passive-learner.ts          PostToolUse: extracts patterns from edits
-    |                       Writes to ~/.claude/instincts.jsonl
-    v
-instinct-consolidator.ts    Stop hook: groups by pattern, counts repeats
-    |                       confidence >= 5 -> mature-instincts.json
-    |                       confidence >= 10 -> auto-generate rule file
-    v
-instinct-loader.ts          SessionStart: injects mature patterns into context
-```
-
-### Cross-Project Learning
-
-Each pattern is tagged with a project hash. The consolidator tracks which projects exhibit which patterns:
-
-- **Project-specific**: Stored in `projects/{hash}/instincts/mature-instincts.json`
-- **Cross-project promotion**: Pattern seen in 2+ projects with 5+ total repeats gets promoted to `global-instincts.json`
-- **Global patterns**: Injected into every session regardless of project
-
-### Canavar Cross-Training
-
-When an agent makes an error, the `canavar-error-broadcast` hook writes it to `~/.claude/canavar/error-ledger.jsonl`. At session start, the `instinct-loader` reads the team-wide error ledger and injects relevant lessons. One agent's mistake trains the entire team.
-
-```
-Agent error -> canavar-error-broadcast -> error-ledger.jsonl
-                                              |
-Session start -> instinct-loader reads -> injects as context
-```
-
-## 7. Profile System
-
-Profiles define which agents, skills, and hooks are active. This controls token budget and session scope.
-
-### Location
-
-The canonical runtime manifest is `profiles/runtime-manifest.json`; the older JSON profiles remain as compatibility fallbacks:
-
-```json
-// profiles/runtime-manifest.json
-{
-  "defaultProfile": "core",
-  "aliases": { "minimal": "core", "smart": "core", "all": "full" },
-  "profiles": { "core": { "contextBudget": { "perEventChars": 4000, "sessionChars": 12000 } } }
-}
-```
-
-### Available Profiles
-
-| Profile | Purpose | Token Impact |
-|---------|---------|-------------|
-| `core` | Bounded agents, skills and safety hooks (default) | Lowest |
-| `quality` | Core plus focused verification hooks | Low |
-| `context` | Core plus targeted context retrieval | Low-Medium |
-| `memory` | Core plus opt-in recall and learning | Medium |
-| `orchestration` | Core plus explicit swarm/orchestration tools | Medium-High |
-| `minimal` | Alias for `core` | Lowest |
-| `frontend` | React/Next.js/CSS focused | Low-Medium |
-| `backend` | API/DB/Auth focused | Low-Medium |
-| `fullstack` | Frontend + Backend combined | Medium |
-| `devops` | CI/CD, Docker, K8s, Terraform | Medium |
-| `smart` | Alias for `core` | Lowest |
-| `full` | Everything enabled, legacy budgets preserved | Highest |
-| `all` | Alias for `full` | Highest |
-
-### How It Works
-
-1. `install.sh` or `vibeco profile <name>` resolves `profiles/runtime-manifest.json`.
-2. The installer copies only the selected owned files and writes `~/.claude/vibecosystem-runtime.json`.
-3. `tools/register-hooks.mjs` registers only the selected hook commands in `settings.json`.
-4. `--prune` removes only unchanged paths recorded in the ownership manifest; unowned files are preserved.
-
-## 8. Directory Structure
-
-```
-vibecosystem/
-|-- agents/                     # 138 agent definitions (.md with YAML frontmatter)
-|   |-- scout.md
-|   |-- kraken.md
-|   |-- sleuth.md
-|   +-- ...
-|
-|-- skills/                     # 296 skill directories
-|   |-- fix/SKILL.md            # Workflow orchestrator skills
-|   |-- commit/SKILL.md
-|   |-- coding-standards/SKILL.md
-|   |-- math/                   # 40+ math sub-skills
-|   |   |-- linear-algebra/
-|   |   |-- topology/
-|   |   +-- ...
-|   +-- ...
-|
-|-- hooks/
-|   |-- src/                    # 74 TypeScript hook source files
-|   |   |-- intent-classifier.ts
-|   |   |-- passive-learner.ts
-|   |   |-- instinct-consolidator.ts
-|   |   |-- shared/             # 15 shared utility modules
-|   |   |   |-- plugin-check.ts
-|   |   |   |-- task-detector.ts
-|   |   |   |-- project-identity.ts
-|   |   |   +-- ...
-|   |   +-- __tests__/          # vitest test files
-|   |-- dist/                   # 74 built .mjs bundles (esbuild output)
-|   |-- package.json            # Build: esbuild, Test: vitest
-|   +-- tsconfig.json
-|
-|-- rules/                      # 20 Markdown rule files
-|   |-- agent-assignment-matrix.md
-|   |-- auto-skill-activation.md
-|   |-- qa-loop.md
-|   |-- canavar.md
-|   +-- ...
-|
-|-- profiles/                   # 7 JSON profile definitions
-|   |-- minimal.json
-|   |-- frontend.json
-|   |-- backend.json
-|   +-- ...
-|
-|-- tools/
-|   |-- vibeco/vibeco.mjs       # CLI tool (zero-dependency Node.js ESM)
-|   +-- dashboard/              # Web monitoring dashboard (port 3848)
-|       |-- server.js
-|       +-- index.html
-|
-|-- LICENSE                     # MIT
-+-- README.md
-```
-
-## 9. vibeco CLI
-
-`tools/vibeco/vibeco.mjs` is a zero-dependency Node.js ESM CLI for managing the ecosystem.
-
-### Commands
-
-```bash
-vibeco help                          # Show help
-vibeco stats                         # Ecosystem statistics (counts, active profile)
-vibeco list <agents|skills|hooks|rules>  # Browse components
-vibeco list agents --search security # Filter by name/description
-vibeco search <term>                 # Search agents and skills by keyword
-vibeco dashboard                     # Start monitoring dashboard (port 3848)
-vibeco doctor                        # Health check (hooks built? DB up? profiles valid?)
-vibeco profile <name>                # Set active profile (core, context, full, etc.)
-vibeco effective-config              # Show model authority, profile and budgets
-vibeco update                        # Pull latest & reinstall
-```
-
-### Example
-
-```bash
-$ vibeco stats
-
-vibecosystem stats
-  Agents     138
-  Skills     296
-  Hooks      74
-  Rules      20
-  Profile    core
-```
-
-## 10. For Contributors
-
-### Adding an Agent
-
-Create `agents/my-agent.md`:
-
-```yaml
----
-name: my-agent
-description: What this agent does in one line
-model: sonnet # Claude adapter only
-tools: [Read, Grep, Glob, Bash]
----
-
-# My Agent
-
-System prompt goes here. Explain the agent's role, constraints, and output format.
-```
-
-### Adding a Skill
-
-Create `skills/my-skill/SKILL.md`:
-
-```yaml
----
-name: my-skill
-description: What knowledge this skill provides
-user-invocable: false
-allowed-tools: [Read, Grep]
----
-
-# My Skill
-
-Skill content -- domain knowledge, patterns, examples, reference material.
-```
-
-Set `user-invocable: true` if users should trigger it with `/my-skill`.
-
-### Adding a Hook
-
-1. Create `hooks/src/my-hook.ts`:
-
-```typescript
-import { readFileSync } from 'fs';
-
-interface HookInput {
-  session_id: string;
-  tool_name: string;
-  tool_input: Record<string, unknown>;
-}
-
-const input: HookInput = JSON.parse(readFileSync('/dev/stdin', 'utf-8'));
-
-// Your logic here
-
-const output = { additionalContext: 'Injected by my-hook' };
-console.log(JSON.stringify(output));
-```
-
-2. Build: `cd hooks && npm run build`
-3. Register in your Claude Code `settings.json` under the appropriate hook type
-4. Test: `cd hooks && npm test`
-
-### Running Tests
-
-```bash
-cd hooks
-npm install
-npm test          # Run all tests once
-npm run test:watch # Watch mode
-npm run check     # TypeScript type checking (no emit)
-```
-
-### Project Conventions
-
-- Hooks read stdin (JSON), write stdout (JSON). No HTTP, no sockets.
-- Agents are pure Markdown. No executable code in agent files.
-- Skills are pure Markdown. Domain knowledge only.
-- Rules are pure Markdown. Loaded into every session's context window.
-- All shared state goes through the filesystem (`~/.claude/cache/`, `~/.claude/canavar/`, etc.).
+Run the hook type check, build, unit tests, emitted-bundle smoke tests and temporary-home installer tests. Parse generated JSON and TOML. Verify `git diff --exit-code hooks/dist/` after a clean rebuild before release. CI and [CONTRIBUTING.md](CONTRIBUTING.md) define the current commands.

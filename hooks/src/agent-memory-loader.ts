@@ -14,10 +14,12 @@
  */
 import { readFileSync, existsSync, readdirSync, statSync } from 'fs';
 import { join } from 'path';
-import { homedir } from 'os';
 import { budgetHookOutput } from './shared/context-budget.js';
+import { readHookInput } from './shared/hook-input.js';
+import { getAgentMemoryScope, getAgentMemoryDir } from './shared/agent-memory.js';
 
 interface PreToolInput {
+  cwd?: string;
   tool_name: string;
   tool_input: {
     subagent_type?: string;
@@ -26,33 +28,8 @@ interface PreToolInput {
   };
 }
 
-type AgentMemoryScope = 'user' | 'project' | 'local';
-
-const CLAUDE_HOME = join(homedir(), '.claude');
-const MAX_MEMORY_SIZE = 8000; // karakterde max inject boyutu
-const MAX_FILES = 10; // max memory dosyasi
-
-/**
- * Agent type'i dizin adi icin sanitize et
- */
-function sanitizeAgentType(agentType: string): string {
-  return agentType.replace(/[:/\\]/g, '-').replace(/\s+/g, '-').toLowerCase();
-}
-
-/**
- * Agent memory dizinini dondur
- */
-function getAgentMemoryDir(agentType: string, scope: AgentMemoryScope): string {
-  const dirName = sanitizeAgentType(agentType);
-  switch (scope) {
-    case 'user':
-      return join(CLAUDE_HOME, 'agent-memory', dirName);
-    case 'project':
-      return join(process.cwd(), '.claude', 'agent-memory', dirName);
-    case 'local':
-      return join(process.cwd(), '.claude', 'agent-memory-local', dirName);
-  }
-}
+const MAX_MEMORY_SIZE = 8000;
+const MAX_FILES = 10;
 
 /**
  * Bir dizindeki memory dosyalarini tara ve iceriklerini topla
@@ -86,37 +63,9 @@ function scanMemoryDir(dir: string): string[] {
   return results;
 }
 
-/**
- * Agent icin frontmatter'dan memory scope'unu oku
- * Yoksa undefined dondur (memory kaydedilmez)
- */
-function getAgentMemoryScope(agentType: string): AgentMemoryScope | undefined {
-  const agentDir = join(CLAUDE_HOME, 'agents');
-  const agentFile = join(agentDir, `${agentType}.md`);
-
-  if (!existsSync(agentFile)) return undefined;
-
-  try {
-    const content = readFileSync(agentFile, 'utf-8');
-    const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
-    if (!frontmatterMatch) return undefined;
-
-    const memoryMatch = frontmatterMatch[1].match(/^memory:\s*(.+)$/m);
-    if (!memoryMatch) return undefined;
-
-    const scope = memoryMatch[1].trim().toLowerCase();
-    if (scope === 'user' || scope === 'project' || scope === 'local') {
-      return scope as AgentMemoryScope;
-    }
-  } catch {
-    // ignore
-  }
-  return undefined;
-}
-
 function main() {
   try {
-    const input: PreToolInput = JSON.parse(process.argv[2] || '{}');
+    const input: PreToolInput = readHookInput<PreToolInput>();
 
     // Sadece Agent tool icin calis
     if (input.tool_name !== 'Agent') return;
@@ -125,12 +74,8 @@ function main() {
     if (!agentType) return;
 
     // Agent'in memory scope'unu kontrol et
-    const scope = getAgentMemoryScope(agentType);
-
-    // Memory scope tanimli degilse, default olarak user scope'ta bak
-    // (bazi built-in agent'larda frontmatter olmayabilir)
-    const effectiveScope = scope || 'user';
-    const memoryDir = getAgentMemoryDir(agentType, effectiveScope);
+    const effectiveScope = getAgentMemoryScope(agentType, input.cwd);
+    const memoryDir = getAgentMemoryDir(agentType, effectiveScope, input.cwd);
 
     // Memory dosyalarini tara
     const memories = scanMemoryDir(memoryDir);
@@ -149,11 +94,11 @@ Bu agent'in onceki session'lardan biriktirdigi kalici bellek:
 ${combined}
 
 ---
-Bu memory'yi guncelle: Yeni ogrenimler varsa ~/.claude/agent-memory/${sanitizeAgentType(agentType)}/ dizinine yaz.
+Bu memory'yi guncelle: Yeni ogrenimler varsa ${memoryDir}/ dizinine yaz.
 Memory guncelleme zorunlu DEGiL - sadece gercekten yeni ve degerli bilgi varsa kaydet.`;
 
     const result = {
-      additionalContext: context,
+      hookSpecificOutput: { hookEventName: 'PreToolUse', additionalContext: context },
     };
 
     process.stdout.write(JSON.stringify(budgetHookOutput(result, 'agent-memory-loader', 'PreToolUse:Agent')));

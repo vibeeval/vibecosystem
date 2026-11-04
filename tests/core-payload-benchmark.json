@@ -1,0 +1,338 @@
+{
+  "baseline": "3b763b1fb288f57bfa3cce76ef18184b96461a78",
+  "metric": "Sum of selected core SKILL.md entrypoint UTF-8 bytes",
+  "caveat": "Skills load on demand; this is available instruction payload, not per-session tokens, tokenizer output or billing.",
+  "before": {
+    "selected_skills": 32,
+    "entrypoint_utf8_bytes": 197345,
+    "entries": [
+      {
+        "name": "build",
+        "utf8_bytes": 22650,
+        "utf16_code_units": 22584
+      },
+      {
+        "name": "cli-reference",
+        "utf8_bytes": 7819,
+        "utf16_code_units": 7819
+      },
+      {
+        "name": "coding-standards",
+        "utf8_bytes": 4755,
+        "utf16_code_units": 4754
+      },
+      {
+        "name": "commit",
+        "utf8_bytes": 1971,
+        "utf16_code_units": 1971
+      },
+      {
+        "name": "completion-check",
+        "utf8_bytes": 3061,
+        "utf16_code_units": 3033
+      },
+      {
+        "name": "dead-code",
+        "utf8_bytes": 1782,
+        "utf16_code_units": 1782
+      },
+      {
+        "name": "debug",
+        "utf8_bytes": 5302,
+        "utf16_code_units": 5302
+      },
+      {
+        "name": "explore",
+        "utf8_bytes": 12100,
+        "utf16_code_units": 12054
+      },
+      {
+        "name": "factcheck-guard",
+        "utf8_bytes": 8767,
+        "utf16_code_units": 8705
+      },
+      {
+        "name": "fix",
+        "utf8_bytes": 15411,
+        "utf16_code_units": 15349
+      },
+      {
+        "name": "git-commits",
+        "utf8_bytes": 1072,
+        "utf16_code_units": 1072
+      },
+      {
+        "name": "help",
+        "utf8_bytes": 10609,
+        "utf16_code_units": 10579
+      },
+      {
+        "name": "modular-code",
+        "utf8_bytes": 3017,
+        "utf16_code_units": 2985
+      },
+      {
+        "name": "notepad-system",
+        "utf8_bytes": 7018,
+        "utf16_code_units": 6966
+      },
+      {
+        "name": "observe-before-editing",
+        "utf8_bytes": 1101,
+        "utf16_code_units": 1101
+      },
+      {
+        "name": "plan-agent",
+        "utf8_bytes": 9917,
+        "utf16_code_units": 9917
+      },
+      {
+        "name": "project-detect",
+        "utf8_bytes": 1676,
+        "utf16_code_units": 1676
+      },
+      {
+        "name": "refactor",
+        "utf8_bytes": 4862,
+        "utf16_code_units": 4501
+      },
+      {
+        "name": "review",
+        "utf8_bytes": 6197,
+        "utf16_code_units": 5377
+      },
+      {
+        "name": "search-router",
+        "utf8_bytes": 2713,
+        "utf16_code_units": 2625
+      },
+      {
+        "name": "search-tools",
+        "utf8_bytes": 2048,
+        "utf16_code_units": 2036
+      },
+      {
+        "name": "security",
+        "utf8_bytes": 3225,
+        "utf16_code_units": 3225
+      },
+      {
+        "name": "security-review",
+        "utf8_bytes": 12696,
+        "utf16_code_units": 12676
+      },
+      {
+        "name": "strategic-compact",
+        "utf8_bytes": 2118,
+        "utf16_code_units": 2118
+      },
+      {
+        "name": "system-overview",
+        "utf8_bytes": 2845,
+        "utf16_code_units": 2817
+      },
+      {
+        "name": "tdd",
+        "utf8_bytes": 9810,
+        "utf16_code_units": 9536
+      },
+      {
+        "name": "tdd-workflow",
+        "utf8_bytes": 9953,
+        "utf16_code_units": 9811
+      },
+      {
+        "name": "test",
+        "utf8_bytes": 6146,
+        "utf16_code_units": 5366
+      },
+      {
+        "name": "test-strategy",
+        "utf8_bytes": 4922,
+        "utf16_code_units": 4900
+      },
+      {
+        "name": "tour",
+        "utf8_bytes": 1877,
+        "utf16_code_units": 1877
+      },
+      {
+        "name": "verification-loop",
+        "utf8_bytes": 2649,
+        "utf16_code_units": 2649
+      },
+      {
+        "name": "wiring",
+        "utf8_bytes": 7256,
+        "utf16_code_units": 7232
+      }
+    ]
+  },
+  "after": {
+    "selected_skills": 32,
+    "entrypoint_utf8_bytes": 58056,
+    "entries": [
+      {
+        "name": "build",
+        "utf8_bytes": 2038,
+        "utf16_code_units": 2038
+      },
+      {
+        "name": "cli-reference",
+        "utf8_bytes": 1655,
+        "utf16_code_units": 1655
+      },
+      {
+        "name": "coding-standards",
+        "utf8_bytes": 4755,
+        "utf16_code_units": 4754
+      },
+      {
+        "name": "commit",
+        "utf8_bytes": 1971,
+        "utf16_code_units": 1971
+      },
+      {
+        "name": "completion-check",
+        "utf8_bytes": 3061,
+        "utf16_code_units": 3033
+      },
+      {
+        "name": "dead-code",
+        "utf8_bytes": 1782,
+        "utf16_code_units": 1782
+      },
+      {
+        "name": "debug",
+        "utf8_bytes": 1163,
+        "utf16_code_units": 1163
+      },
+      {
+        "name": "explore",
+        "utf8_bytes": 1362,
+        "utf16_code_units": 1362
+      },
+      {
+        "name": "factcheck-guard",
+        "utf8_bytes": 1070,
+        "utf16_code_units": 1070
+      },
+      {
+        "name": "fix",
+        "utf8_bytes": 1677,
+        "utf16_code_units": 1677
+      },
+      {
+        "name": "git-commits",
+        "utf8_bytes": 1072,
+        "utf16_code_units": 1072
+      },
+      {
+        "name": "help",
+        "utf8_bytes": 1442,
+        "utf16_code_units": 1442
+      },
+      {
+        "name": "modular-code",
+        "utf8_bytes": 3017,
+        "utf16_code_units": 2985
+      },
+      {
+        "name": "notepad-system",
+        "utf8_bytes": 1356,
+        "utf16_code_units": 1356
+      },
+      {
+        "name": "observe-before-editing",
+        "utf8_bytes": 1101,
+        "utf16_code_units": 1101
+      },
+      {
+        "name": "plan-agent",
+        "utf8_bytes": 1443,
+        "utf16_code_units": 1443
+      },
+      {
+        "name": "project-detect",
+        "utf8_bytes": 1676,
+        "utf16_code_units": 1676
+      },
+      {
+        "name": "refactor",
+        "utf8_bytes": 1124,
+        "utf16_code_units": 1124
+      },
+      {
+        "name": "review",
+        "utf8_bytes": 1173,
+        "utf16_code_units": 1173
+      },
+      {
+        "name": "search-router",
+        "utf8_bytes": 948,
+        "utf16_code_units": 948
+      },
+      {
+        "name": "search-tools",
+        "utf8_bytes": 931,
+        "utf16_code_units": 931
+      },
+      {
+        "name": "security",
+        "utf8_bytes": 3225,
+        "utf16_code_units": 3225
+      },
+      {
+        "name": "security-review",
+        "utf8_bytes": 1936,
+        "utf16_code_units": 1936
+      },
+      {
+        "name": "strategic-compact",
+        "utf8_bytes": 2118,
+        "utf16_code_units": 2118
+      },
+      {
+        "name": "system-overview",
+        "utf8_bytes": 1493,
+        "utf16_code_units": 1485
+      },
+      {
+        "name": "tdd",
+        "utf8_bytes": 1410,
+        "utf16_code_units": 1410
+      },
+      {
+        "name": "tdd-workflow",
+        "utf8_bytes": 1197,
+        "utf16_code_units": 1197
+      },
+      {
+        "name": "test",
+        "utf8_bytes": 1358,
+        "utf16_code_units": 1358
+      },
+      {
+        "name": "test-strategy",
+        "utf8_bytes": 4922,
+        "utf16_code_units": 4900
+      },
+      {
+        "name": "tour",
+        "utf8_bytes": 832,
+        "utf16_code_units": 832
+      },
+      {
+        "name": "verification-loop",
+        "utf8_bytes": 2649,
+        "utf16_code_units": 2649
+      },
+      {
+        "name": "wiring",
+        "utf8_bytes": 1099,
+        "utf16_code_units": 1091
+      }
+    ]
+  },
+  "reduction_percent": 70.58
+}

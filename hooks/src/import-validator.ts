@@ -1,3 +1,4 @@
+import { readHookInput } from './shared/hook-input.js';
 /**
  * Import Validator Hook (PostToolUse)
  *
@@ -91,7 +92,7 @@ function checkSymbolExists(symbol: string): { exists: boolean, location?: string
 }
 
 async function main() {
-  const input: HookInput = JSON.parse(readFileSync(0, 'utf-8'));
+  const input = readHookInput<HookInput>();
 
   if (input.tool_name !== 'Write' && input.tool_name !== 'Edit') {
     console.log('{}');

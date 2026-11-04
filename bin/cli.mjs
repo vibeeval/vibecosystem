@@ -3,7 +3,7 @@
 // vibecosystem npm CLI
 // npx vibecosystem [command] [options]
 
-import { existsSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readdirSync, statSync, readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -12,10 +12,10 @@ import { installClaude } from '../tools/install-runtime.mjs';
 const __filename = fileURLToPath(import.meta.url);
 const REPO_DIR = join(dirname(__filename), '..');
 const CLAUDE_DIR = join(homedir(), '.claude');
-const VERSION = '3.4.0';
+const VERSION = '3.5.0';
 
 const VALID_PROFILES = new Set([
-  'core', 'quality', 'context', 'memory', 'orchestration', 'full',
+  'core', 'quality', 'context', 'memory', 'orchestration', 'dashboard', 'full',
   'minimal', 'frontend', 'backend', 'fullstack', 'devops', 'all', 'smart',
 ]);
 
@@ -52,9 +52,9 @@ ${c('bold', 'COMMANDS')}
   help              Show this help
 
 ${c('bold', 'INIT OPTIONS')}
-  --profile X       core, quality, context, memory, orchestration or full
+  --profile X       core, quality, context, memory, orchestration, dashboard or full
   --force           Overwrite conflicting files after creating backups
-  --prune           Remove only files owned by a previous vibecosystem install
+  --prune           Reconcile unchanged owned files (automatic on profile changes)
   --dry-run         Show the plan without changing files
 
 ${c('bold', 'EXAMPLES')}
@@ -68,6 +68,7 @@ ${c('bold', 'PROFILES')}
   context       Core + targeted context retrieval
   memory        Core + opt-in memory and learning hooks
   orchestration Core + explicit multi-agent workflows
+  dashboard     Core + opt-in local dashboard event capture
   full          138 agents, 296 skills  All legacy capabilities
   minimal/smart Alias for core; all Alias for full
 
@@ -77,14 +78,20 @@ ${c('dim', 'https://github.com/vibeeval/vibecosystem')}
 
 function doctor() {
   console.log(`\n${c('bold', 'vibecosystem doctor')} - Health Check\n`);
+  const statePath = join(CLAUDE_DIR, 'vibecosystem-runtime.json');
+  const runtime = existsSync(statePath) ? JSON.parse(readFileSync(statePath, 'utf8')) : {};
   const checks = [
+    { name: 'Runtime state', path: statePath },
+    { name: 'Hook settings', path: join(CLAUDE_DIR, 'settings.json') },
     { name: 'Agents directory', path: join(CLAUDE_DIR, 'agents') },
     { name: 'Skills directory', path: join(CLAUDE_DIR, 'skills') },
     { name: 'Hooks dist', path: join(CLAUDE_DIR, 'hooks', 'dist') },
-    { name: 'Rules directory', path: join(CLAUDE_DIR, 'rules') },
     { name: 'Profiles', path: join(CLAUDE_DIR, 'profiles') },
     { name: 'Dashboard', path: join(CLAUDE_DIR, 'tools', 'dashboard', 'server.js') },
   ];
+  if (runtime.ownedFiles?.some(file => file.startsWith('rules/'))) {
+    checks.push({ name: 'Rules directory', path: join(CLAUDE_DIR, 'rules') });
+  }
 
   let pass = 0;
   let fail = 0;
@@ -95,11 +102,14 @@ function doctor() {
     else fail += 1;
   }
   console.log(`\n  ${pass} passed, ${fail} failed\n`);
-  if (fail > 0) console.log(`  Run ${c('cyan', 'npx vibecosystem init')} to fix.\n`);
+  if (fail > 0) {
+    console.log(`  Run ${c('cyan', 'npx vibecosystem init')} to fix.\n`);
+    process.exitCode = 1;
+  }
 }
 
 function parseInitArgs(args) {
-  const options = { force: false, prune: false, dryRun: false, profile: 'core' };
+  const options = { force: false, prune: true, dryRun: false, profile: 'core' };
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
     if (arg === '--force') options.force = true;
@@ -112,7 +122,7 @@ function parseInitArgs(args) {
       index += 1;
     } else if (arg.startsWith('--profile=')) {
       options.profile = arg.slice('--profile='.length);
-    } else if (!arg.startsWith('--')) {
+    } else {
       throw new Error(`Unknown init argument: ${arg}`);
     }
   }

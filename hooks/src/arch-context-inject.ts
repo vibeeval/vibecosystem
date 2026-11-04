@@ -1,3 +1,4 @@
+import { readHookInput } from './shared/hook-input.js';
 /**
  * PreToolUse Hook: Architecture Context Injection
  *
@@ -150,7 +151,7 @@ function formatArchContext(arch: ArchResult): string {
 }
 
 async function main() {
-  const input: HookInput = JSON.parse(readStdin());
+  const input = readHookInput<HookInput>();
 
   if (!isRelevantForIntent('arch-context-inject')) {
     console.log('{}');

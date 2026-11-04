@@ -1,12 +1,5 @@
-var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require : typeof Proxy !== "undefined" ? new Proxy(x, {
-  get: (a, b) => (typeof require !== "undefined" ? require : a)[b]
-}) : x)(function(x) {
-  if (typeof require !== "undefined") return require.apply(this, arguments);
-  throw Error('Dynamic require of "' + x + '" is not supported');
-});
-
 // src/plugin-registry.ts
-import { readFileSync, writeFileSync, existsSync, readdirSync } from "fs";
+import { readFileSync, writeFileSync, existsSync, readdirSync, statSync, mkdirSync } from "fs";
 import { join } from "path";
 import { homedir } from "os";
 var CLAUDE_HOME = join(homedir(), ".claude");
@@ -22,6 +15,7 @@ function loadConfig() {
   return { hooks: {}, skills: {} };
 }
 function saveConfig(config) {
+  mkdirSync(CLAUDE_HOME, { recursive: true });
   writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2), "utf-8");
 }
 function isHookEnabled(hookName) {
@@ -64,7 +58,7 @@ function listSkills() {
   if (!existsSync(skillsDir)) return [];
   return readdirSync(skillsDir).filter((f) => {
     try {
-      return __require("fs").statSync(join(skillsDir, f)).isDirectory();
+      return statSync(join(skillsDir, f)).isDirectory();
     } catch {
       return false;
     }

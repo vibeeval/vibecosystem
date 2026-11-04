@@ -8,9 +8,13 @@ permissions:
   pull-requests: write
   issues: write
 
+concurrency:
+  group: claude-fix-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
 jobs:
   claude-fix:
-    if: github.event.label.name == 'claude-fix'
+    if: github.event.label.name == 'claude-fix' && !github.event.issue.pull_request
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

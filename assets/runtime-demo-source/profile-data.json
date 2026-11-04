@@ -1,0 +1,73 @@
+{
+  "kind": "manifest-derived product diagram; not a benchmark or screen recording",
+  "version": "3.5.0",
+  "defaultProfile": "core",
+  "profiles": [
+    {
+      "name": "core",
+      "agents": 12,
+      "skills": 32,
+      "hooks": 6,
+      "registeredCommands": 6,
+      "contextBudget": {
+        "perEventChars": 4000,
+        "sessionChars": 12000
+      }
+    },
+    {
+      "name": "quality",
+      "agents": 12,
+      "skills": 32,
+      "hooks": 12,
+      "registeredCommands": 12,
+      "contextBudget": {
+        "perEventChars": 4000,
+        "sessionChars": 12000
+      }
+    },
+    {
+      "name": "context",
+      "agents": 12,
+      "skills": 32,
+      "hooks": 12,
+      "registeredCommands": 12,
+      "contextBudget": {
+        "perEventChars": 4000,
+        "sessionChars": 12000
+      }
+    },
+    {
+      "name": "memory",
+      "agents": 13,
+      "skills": 36,
+      "hooks": 12,
+      "registeredCommands": 12,
+      "contextBudget": {
+        "perEventChars": 4000,
+        "sessionChars": 12000
+      }
+    },
+    {
+      "name": "orchestration",
+      "agents": 14,
+      "skills": 35,
+      "hooks": 14,
+      "registeredCommands": 15,
+      "contextBudget": {
+        "perEventChars": 4000,
+        "sessionChars": 12000
+      }
+    },
+    {
+      "name": "dashboard",
+      "agents": 12,
+      "skills": 32,
+      "hooks": 7,
+      "registeredCommands": 8,
+      "contextBudget": {
+        "perEventChars": 4000,
+        "sessionChars": 12000
+      }
+    }
+  ]
+}

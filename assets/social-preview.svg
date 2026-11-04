@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+<title id="title">vibecosystem — core by default</title><desc id="desc">Core is the default runtime. Dashboard, quality, context, memory and orchestration are optional profiles. Catalog size is different from active context.</desc>
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#121322"/><stop offset="1" stop-color="#221a38"/></linearGradient><linearGradient id="accent"><stop stop-color="#b5a0ff"/><stop offset="1" stop-color="#ddd2ff"/></linearGradient></defs>
+<rect width="1200" height="630" fill="url(#bg)"/>
+<g fill="#f4f0ff" font-family="Arial, Helvetica, sans-serif">
+<rect x="62" y="58" width="72" height="72" rx="20" fill="#baa1ff"/>
+<path d="M79 79 L98 111 L117 79" fill="none" stroke="#20172e" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="158" y="107" font-size="43" font-weight="700" fill="#eee5ff">vibecosystem</text>
+<text x="62" y="226" font-size="62" font-weight="700" fill="#ffffff">A focused coding runtime.</text>
+<text x="62" y="291" font-size="62" font-weight="700" fill="#cbb3ff">Core by default.</text>
+<text x="62" y="360" font-size="28" font-weight="400" fill="#d5cfe5">Claude Code components · bounded Codex worker</text>
+<rect x="62" y="414" width="332" height="98" rx="18" fill="#30244c" stroke="#bba4ff" stroke-width="2"/><text x="86" y="455" font-size="24" font-weight="700" fill="#ddd0ff">Select the profile</text><text x="86" y="486" font-size="16" font-weight="400" fill="#d5cfe5">Keep routine work small</text>
+<rect x="418" y="414" width="332" height="98" rx="18" fill="#1c1d30" stroke="#484159" stroke-width="1"/><text x="442" y="455" font-size="24" font-weight="700" fill="#f4f0ff">Bound the context</text><text x="442" y="486" font-size="16" font-weight="400" fill="#d5cfe5">Measure the actual fixture</text>
+<rect x="774" y="414" width="364" height="98" rx="18" fill="#1c1d30" stroke="#484159" stroke-width="1"/><text x="798" y="455" font-size="24" font-weight="700" fill="#f4f0ff">Verify the result</text><text x="798" y="486" font-size="16" font-weight="400" fill="#d5cfe5">Keep source and bundles aligned</text>
+<text x="62" y="584" font-size="22" font-weight="400" fill="#b0a5c5">github.com/vibeeval/vibecosystem</text>
+</g>
+</svg>

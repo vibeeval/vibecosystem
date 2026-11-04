@@ -13,9 +13,12 @@
  */
 import { readFileSync, writeFileSync, existsSync, mkdirSync, appendFileSync } from 'fs';
 import { join } from 'path';
-import { homedir } from 'os';
+import { readHookInput, hookResponseText } from './shared/hook-input.js';
+import { getAgentMemoryScope, getAgentMemoryDir } from './shared/agent-memory.js';
 
 interface PostToolInput {
+  cwd?: string;
+  tool_response?: unknown;
   tool_name: string;
   tool_input: {
     subagent_type?: string;
@@ -25,8 +28,6 @@ interface PostToolInput {
   tool_output?: string;
   session_id?: string;
 }
-
-const CLAUDE_HOME = join(homedir(), '.claude');
 
 // Ogrenim kaydetmeyi tetikleyen sinyaller
 const LEARNING_SIGNALS = [
@@ -55,10 +56,6 @@ const SUCCESS_SIGNALS = [
   /\bimplemented\b/i,
   /\brefactored\b/i,
 ];
-
-function sanitizeAgentType(agentType: string): string {
-  return agentType.replace(/[:/\\]/g, '-').replace(/\s+/g, '-').toLowerCase();
-}
 
 function ensureDir(dir: string): void {
   if (!existsSync(dir)) {
@@ -109,12 +106,12 @@ function extractKeyInfo(output: string, maxLen = 500): string {
 
 function main() {
   try {
-    const input: PostToolInput = JSON.parse(process.argv[2] || '{}');
+    const input: PostToolInput = readHookInput<PostToolInput>();
 
     if (input.tool_name !== 'Agent') return;
 
     const agentType = input.tool_input?.subagent_type;
-    const output = input.tool_output || '';
+    const output = hookResponseText(input);
     const description = input.tool_input?.description || '';
 
     if (!agentType || !output || output.length < 50) return;
@@ -126,14 +123,14 @@ function main() {
     if (!hasLearning && !hasSuccess) return;
 
     // Memory dizini olustur
-    const dirName = sanitizeAgentType(agentType);
-    const memoryDir = join(CLAUDE_HOME, 'agent-memory', dirName);
+    const scope = getAgentMemoryScope(agentType, input.cwd);
+    const memoryDir = getAgentMemoryDir(agentType, scope, input.cwd);
     ensureDir(memoryDir);
 
     const timestamp = getTimestamp();
     const keyInfo = extractKeyInfo(output);
 
-    if (hasLearning) {
+    if (hasLearning || hasSuccess) {
       // Ogrenimler journal'a ekle (append mode)
       const journalPath = join(memoryDir, 'learnings.md');
 

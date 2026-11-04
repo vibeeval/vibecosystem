@@ -1,3 +1,23 @@
+// src/shared/hook-response.ts
+function responseText(value) {
+  if (value === void 0 || value === null) return "";
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) return value.map(responseText).filter(Boolean).join("\n");
+  if (typeof value !== "object") return String(value);
+  const object = value;
+  if ("stdout" in object || "stderr" in object) {
+    return [object.stdout, object.stderr].map(responseText).filter(Boolean).join("\n");
+  }
+  if ("text" in object) return responseText(object.text);
+  if ("content" in object) return responseText(object.content);
+  if ("file" in object) return responseText(object.file);
+  if (object.type === "image" || object.type === "image_url") return "";
+  return JSON.stringify(value);
+}
+function hookResponseText(input) {
+  return responseText(input.tool_response !== void 0 ? input.tool_response : input.tool_output);
+}
+
 // src/tamagotchi-engine.ts
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
@@ -67,7 +87,7 @@ function calculateLevel(state) {
   return Math.max(1, Math.floor(state.sessionEvents / 50));
 }
 function determineMood(state, event) {
-  const output = String(event.tool_output || "").toLowerCase();
+  const output = hookResponseText(event).toLowerCase();
   if (output.includes("error") || output.includes("fail") || output.includes("exception")) {
     return state.mood === "sad" ? "angry" : "sad";
   }
@@ -83,7 +103,7 @@ function determineMood(state, event) {
   return state.mood;
 }
 function updateStats(state, event) {
-  const output = String(event.tool_output || "").toLowerCase();
+  const output = hookResponseText(event).toLowerCase();
   switch (event.tool_name) {
     case "Agent": {
       state.stats.chaos = clamp(state.stats.chaos + 2);

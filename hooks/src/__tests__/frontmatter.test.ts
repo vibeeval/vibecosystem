@@ -8,6 +8,15 @@ import { describe, it, expect } from 'vitest';
 import { parseFrontmatter } from '../../../tools/vibeco/lib/frontmatter.mjs';
 
 describe('parseFrontmatter', () => {
+  it('reads CRLF metadata used by shipped agents and accepts a UTF-8 BOM', () => {
+    const source = '\uFEFF---\r\nname: architect\r\ndescription: Windows line endings\r\n---\r\nBody';
+    expect(parseFrontmatter(source)).toEqual({ name: 'architect', description: 'Windows line endings' });
+  });
+
+  it('requires a complete closing delimiter line', () => {
+    expect(parseFrontmatter('---\nname: invalid\n---suffix\nBody')).toEqual({});
+  });
+
   it('parses valid frontmatter with name and description', () => {
     const content = [
       '---',

@@ -1,0 +1,31 @@
+{
+  "baseline_commit": "3b763b1fb288f57bfa3cce76ef18184b96461a78",
+  "measurement": "Synthetic 20-event repetition of an unchanged Grep advisory; UTF-16 code units and UTF-8 bytes, not model tokens.",
+  "repetitions": 20,
+  "advisory_utf16_code_units": 114,
+  "runtime": {
+    "node": "v22.23.2",
+    "platform": "darwin",
+    "architecture": "arm64"
+  },
+  "before": {
+    "repeated_advisory_emissions": 20,
+    "emitted_utf16_code_units": 2280,
+    "emitted_utf8_bytes": 2280,
+    "elapsed_ms": 1.941,
+    "fresh_session_emitted_utf16_code_units": 0
+  },
+  "after": {
+    "repeated_advisory_emissions": 1,
+    "emitted_utf16_code_units": 114,
+    "emitted_utf8_bytes": 114,
+    "elapsed_ms": 2.683,
+    "fresh_session_emitted_utf16_code_units": 21
+  },
+  "advisory_payload_reduction_percent": 95,
+  "limitations": [
+    "This controlled fixture measures deduplication of identical optional advice, not task quality, total session tokens, or billed token savings.",
+    "Timing includes filesystem coordination and is a single local sample; it is not an end-to-end latency benchmark.",
+    "Session-wide deduplication is opt-in for epistemic reminders; subagent and changing context remain per invocation."
+  ]
+}

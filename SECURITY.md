@@ -1,54 +1,40 @@
-# Security Policy
+# Security policy
 
-## Supported Versions
+## Supported versions
 
-| Version | Supported |
-|---------|-----------|
-| 3.x     | Yes       |
-| < 3.0   | No        |
+Security fixes target the current 3.x source line. Version 3.5.0 is in preparation; a version string in this tree does not mean a published package or release exists. Earlier releases may lack fixes documented in [CHANGELOG.md](CHANGELOG.md).
 
-## Reporting a Vulnerability
+## Report a vulnerability
 
-If you discover a security vulnerability in vibecosystem, please report it responsibly.
+Please avoid posting exploitable details or secrets in a public issue. Contact **security@vibeeval.com**, or contact [@vibeeval](https://x.com/vibeeval) privately to arrange a report.
 
-**Do NOT open a public issue for security vulnerabilities.**
+Include the affected commit or version, operating system, selected profile, minimal reproduction, expected behavior and potential impact. Use synthetic credentials and temporary home directories. Do not include real keys, private source code or personal memory files. Disclosure and fixes depend on severity and maintainer availability.
 
-### How to Report
+## Trust boundaries
 
-1. Email: **security@vibeeval.com** (or DM [@vibeeval](https://twitter.com/vibeeval) on Twitter)
-2. Include:
-   - Description of the vulnerability
-   - Steps to reproduce
-   - Potential impact
-   - Suggested fix (if any)
+Hooks run as local processes with the user's privileges. Agent prompts and skill instructions are not a sandbox. Only install extensions and configure services that you trust.
 
-### What to Expect
+The credential hook is a best-effort filter for supported tool paths and recognizable shell access patterns. It cannot prove that an arbitrary shell program, obfuscated command, indirect interpreter access, race or third-party tool cannot read a secret. Enforce host permissions, use an operating-system sandbox and provide narrowly scoped credentials. Passing the guard is not proof that an action is safe.
 
-- **Acknowledgment:** Within 48 hours
-- **Assessment:** Within 7 days
-- **Fix:** Depending on severity, within 7-30 days
-- **Disclosure:** After the fix is released
+The installer writes to the selected host directories, records owned files and creates backups before replacing content. Existing malformed settings must be repaired explicitly; they must not be silently replaced. Update failures must preserve the checkout and local changes. Ownership manifests are not authorization to remove unrelated files or user memories.
 
-### Scope
+The optional dashboard binds to loopback and checks host/origin headers, including WebSocket upgrades. This reduces browser-origin access to local data. It does not isolate the dashboard from other local processes running as the same user. Do not expose or reverse-proxy it to a network without an explicit authentication and deployment design.
 
-The following are in scope:
-- Hook code execution (TypeScript hooks in `hooks/src/`)
-- `install.sh` script security
-- Agent prompt injection vulnerabilities
-- Credential/secret exposure in any files
+## Data and integrations
 
-The following are out of scope:
-- Issues in Claude Code itself (report to [Anthropic](https://github.com/anthropics/claude-code/issues))
-- Social engineering attacks
-- Denial of service
+Local stores and logs may contain prompts, code excerpts, tool responses, file paths, agent errors and learned lessons. Review `~/.claude/` data before sharing it. Backups can retain replaced sensitive content.
 
-### Security Best Practices for Contributors
+Optional provider, MCP, compiler-assistance and extraction integrations may contact configured services. Braintrust extraction requires `VIBECO_BRAINTRUST_ANALYSIS=1` as well as its API key and script. The presence of a provider key alone should not enable external learning. Hooks that mutate GitHub state require `VIBECO_GITHUB_AUTOMATION=1`; normal lifecycle events must not implicitly grant external write authority. Review destinations and data handling before enabling an integration.
 
-- Never commit secrets, API keys, or credentials
-- All hooks run in the user's shell context - be careful with `Bash` tool calls
-- Agent prompts should not instruct bypassing security controls
-- Review `install.sh` changes carefully - it runs with user privileges
+Memory consolidation and learned rules use heuristics. They may preserve incorrect or untrusted material. Review new lessons and promoted instructions before using them in sensitive projects.
 
-## Hall of Fame
+## Contributor checks
 
-We appreciate security researchers who help keep vibecosystem safe. Responsible reporters will be credited here (with permission).
+- Use subprocess argument arrays for tool-controlled values; avoid interpolating them into shell command strings.
+- Validate event input and paths. Keep permission decisions intact when optional context is omitted.
+- Exercise canonical stdin events and emitted ESM bundles in isolated fixtures.
+- Preserve user configuration, modified files and unowned content during install/profile changes.
+- Test browser origins for both HTTP and WebSocket endpoints; local CORS policy alone does not protect upgrades.
+- Do not commit keys, tokens, private logs or personal installation data.
+
+Hook implementation, installers, credential handling, dashboard boundaries and extension-controlled prompt injection are in scope. Report defects in the coding host itself to that host's maintainers.

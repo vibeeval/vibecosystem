@@ -55,6 +55,7 @@ export function getCurrentRepo(): string | null {
  * @returns Issue URL veya null (rate limit veya hata durumunda)
  */
 export function createIssue(title: string, body: string, labels?: string[]): string | null {
+  if (process.env.VIBECO_GITHUB_AUTOMATION !== '1') return null;
   const state = loadRateLimit();
   if (state.issues_created >= MAX_ISSUES_PER_SESSION) {
     return null; // Rate limit
@@ -86,6 +87,7 @@ export function createIssue(title: string, body: string, labels?: string[]): str
  * PR'a yorum ekler.
  */
 export function addPRComment(prNumber: number, body: string): boolean {
+  if (process.env.VIBECO_GITHUB_AUTOMATION !== '1') return false;
   if (!Number.isInteger(prNumber) || prNumber < 1) return false;
   try {
     execFileSync('gh', ['pr', 'comment', String(prNumber), '--body', body.slice(0, 4000)], {

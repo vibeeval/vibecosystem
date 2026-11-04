@@ -1,3 +1,23 @@
+// src/shared/hook-response.ts
+function responseText(value) {
+  if (value === void 0 || value === null) return "";
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) return value.map(responseText).filter(Boolean).join("\n");
+  if (typeof value !== "object") return String(value);
+  const object = value;
+  if ("stdout" in object || "stderr" in object) {
+    return [object.stdout, object.stderr].map(responseText).filter(Boolean).join("\n");
+  }
+  if ("text" in object) return responseText(object.text);
+  if ("content" in object) return responseText(object.content);
+  if ("file" in object) return responseText(object.file);
+  if (object.type === "image" || object.type === "image_url") return "";
+  return JSON.stringify(value);
+}
+function hookResponseText(input) {
+  return responseText(input.tool_response !== void 0 ? input.tool_response : input.tool_output);
+}
+
 // src/sast-on-edit.ts
 import { readFileSync } from "fs";
 var SUPPORTED_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".py", ".go", ".java", ".rb", ".php"];
@@ -204,8 +224,9 @@ function main() {
   if (input.tool_input?.content && typeof input.tool_input.content === "string") {
     contentToScan.push(input.tool_input.content);
   }
-  if (input.tool_output) {
-    contentToScan.push(input.tool_output);
+  const responseText2 = hookResponseText(input);
+  if (responseText2) {
+    contentToScan.push(responseText2);
   }
   if (contentToScan.length === 0) {
     const fileName = filePath.split("/").pop() || filePath;

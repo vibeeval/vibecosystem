@@ -1,7 +1,7 @@
 {
   "name": "vibecosystem",
-  "description": "Lean Claude runtime with 138 agents, 296 skills, 74 hooks and opt-in self-learning",
-  "version": "3.4.0",
+  "description": "Profile-based Claude runtime with 138 agents, 296 skills, 74 hooks in the catalog; memory and orchestration are opt-in",
+  "version": "3.5.0",
   "author": {
     "name": "vibeeval",
     "url": "https://github.com/vibeeval"

@@ -47,6 +47,7 @@ export interface StopInput {
 }
 
 export interface SessionStartInput {
+  source?: 'startup' | 'resume' | 'clear' | 'compact';
   session_id: string;
   cwd?: string;
   project?: string;

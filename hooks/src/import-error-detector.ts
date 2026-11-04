@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Import Error Detector - PostToolUse hook that detects Python import errors
- * and suggests the /dependency-preflight skill.
+ * and suggests the /environment-triage skill.
  *
  * Runs on Bash tool output, matches patterns like:
  * - ModuleNotFoundError: No module named 'X'
@@ -10,18 +10,20 @@
  *
  * Returns a system reminder suggesting the skill when errors are detected.
  */
-import { readFileSync } from 'fs';
+import { readHookInput } from './shared/hook-input.js';
+import { budgetHookOutput } from './shared/context-budget.js';
+import { hookResponseText } from './shared/hook-response.js';
 
 interface PostToolUseInput {
   tool_name: string;
   tool_input: Record<string, unknown>;
   tool_output?: string;
+  tool_response?: unknown;
   error?: string;
 }
 
 interface HookOutput {
-  result: 'continue' | 'block';
-  message?: string;
+  hookSpecificOutput: { hookEventName: 'PostToolUse'; additionalContext: string };
 }
 
 // Error patterns to detect
@@ -51,8 +53,7 @@ async function main() {
   let input: PostToolUseInput;
 
   try {
-    const rawInput = readFileSync(0, 'utf-8');
-    input = JSON.parse(rawInput) as PostToolUseInput;
+    input = readHookInput<PostToolUseInput>();
   } catch {
     // Malformed input - continue silently
     console.log(JSON.stringify({ result: 'continue' }));
@@ -66,7 +67,7 @@ async function main() {
   }
 
   // Check both output and error fields
-  const textToCheck = [input.tool_output, input.error].filter(Boolean).join('\n');
+  const textToCheck = [hookResponseText(input), input.error].filter(Boolean).join('\n');
 
   if (!textToCheck) {
     console.log(JSON.stringify({ result: 'continue' }));
@@ -78,22 +79,24 @@ async function main() {
   if (result.detected) {
     const moduleName = result.module ? ` (module: ${result.module})` : '';
     const output: HookOutput = {
-      result: 'continue',
-      message: `
+      hookSpecificOutput: {
+        hookEventName: 'PostToolUse',
+        additionalContext: `
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🔧 IMPORT ERROR DETECTED${moduleName}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Consider using /dependency-preflight skill to diagnose:
+Consider using /environment-triage skill to diagnose:
 
 1. Check Python version: uv run python --version
 2. Check if installed: uv pip show ${result.module || '<module>'}
 3. Verify import: uv run python -c "import ${result.module || '<module>'}"
 
-Or invoke the skill: /dependency-preflight
+Or invoke the skill: /environment-triage
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+      },
     };
-    console.log(JSON.stringify(output));
+    console.log(JSON.stringify(budgetHookOutput(output, 'import-error-detector', 'PostToolUse:Bash')));
   } else {
     console.log(JSON.stringify({ result: 'continue' }));
   }

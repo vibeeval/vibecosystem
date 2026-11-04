@@ -1,89 +1,18 @@
 ---
 name: system-overview
-description: Show how vibecosystem works - agents, skills, hooks, and self-learning pipeline.
+description: Explain actual profile selection, installation, hook execution, and optional integrations.
 ---
 
 # System Overview
 
-Show users how Continuous Claude works - the opinionated setup with hooks, memory, and coordination.
+Use `profiles/runtime-manifest.json`, installed `vibecosystem-runtime.json`, `plugin-config.json` and `settings.json` as available. Do not invent learned-fact counts, savings or service availability.
 
-## When to Use
+Flow: select profile → install selected files → merge owned registrations → Claude sends stdin event JSON → bundled hook emits supported event output. Repository files form a catalog; only registered hooks run. Agents support scoped delegation and skills load when applicable.
 
-- User asks "how does this work?"
-- User asks "what can you remember?"
-- User asks "what's different about this setup?"
-- User runs `/system_overview`
+Core supplies bounded implementation and verification. Quality adds checks; context retrieval; memory and orchestration are opt-in; full selects legacy capabilities. Verify optional dependencies before claiming these integrations work.
 
-## Response
+Context budgets bound advisory text, not model billing or permission semantics. Explain configured limits. Empty output can mean no relevant context, exhausted allowance, unavailable optional dependency or failure; inspect stderr and health checks to distinguish.
 
-```
-CONTINUOUS CLAUDE SYSTEM OVERVIEW
-=================================
+Codex has a separate `luna_worker` adapter. Project configuration does not override its model; Claude model fields do not route Codex.
 
-MEMORY LAYER (PostgreSQL + pgvector)
-------------------------------------
-- 78,000+ temporal facts from past sessions
-- Learnings extracted automatically at session end
-- Semantic search with embeddings
-
-RECALL: uv run python opc/scripts/recall_temporal_facts.py --query "your topic"
-
-HOOKS (9 event types registered)
---------------------------------
-SessionStart    → Load continuity ledger, rebuild symbol index
-UserPromptSubmit → Skill activation check, context injection
-PreToolUse      → Smart search routing (Grep → TLDR for code)
-PostToolUse     → File claims, compiler feedback
-PreCompact      → Save state before context compaction
-Stop            → Extract learnings, create handoffs
-SubagentStart   → Register spawned agents
-SubagentStop    → Coordination, handoff creation
-SessionEnd      → Cleanup
-
-CONTINUITY SYSTEM
------------------
-Ledger:   thoughts/ledgers/CONTINUITY_CLAUDE-{session}.md
-Handoffs: thoughts/shared/handoffs/{session}/*.yaml
-
-Commands:
-  /resume_handoff <path>  - Continue from handoff
-  /create_handoff         - Create snapshot for transfer
-
-TLDR CODE INTELLIGENCE
-----------------------
-5-layer analysis: AST → Call Graph → CFG → DFG → PDG
-95% token savings vs reading raw files
-Auto-intercepts Grep for .py/.ts/.go/.rs files
-
-Pre-built index: /tmp/claude-symbol-index/symbols.json
-
-SETUP
------
-Run: uv run python opc/scripts/setup/wizard.py
-
-Options:
-  [1] SQLite only (simple, offline)
-  [2] PostgreSQL + pgvector (semantic search)
-```
-
-## Key Files
-
-| Component | Location |
-|-----------|----------|
-| Hook registration | `.claude/settings.json` |
-| Hook implementations | `.claude/hooks/src/*.ts` |
-| Rules (auto-injected) | `.claude/rules/*.md` |
-| Skills | `.claude/skills/*/SKILL.md` |
-| Setup wizard | `opc/scripts/setup/wizard.py` |
-| Recall script | `opc/scripts/recall_temporal_facts.py` |
-| Store learning | `opc/scripts/core/store_learning.py` |
-| Symbol index builder | `opc/scripts/build_symbol_index.py` |
-
-## Environment Variables
-
-| Variable | Purpose |
-|----------|---------|
-| `CONTINUOUS_CLAUDE_DB_URL` | PostgreSQL connection |
-| `VOYAGE_API_KEY` | Embeddings (optional) |
-| `BRAINTRUST_API_KEY` | Tracing (optional) |
-| `CLAUDE_PROJECT_DIR` | Auto-set by Claude Code |
+Use available `vibeco effective-config`, `profile` and `doctor` commands. Explain a requested subsystem instead of dumping the full catalog. No database, setup wizard, past memories or external service is assumed.

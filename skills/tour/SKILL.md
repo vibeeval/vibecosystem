@@ -1,66 +1,14 @@
 ---
 name: tour
-description: Friendly onboarding tour of Claude Code capabilities for users asking what it can do.
+description: Give a short onboarding tour based on the installed vibecosystem profile.
 ---
 
-# Tour: What Can I Do?
+# Tour
 
-Friendly onboarding when users ask about capabilities.
+Inspect runtime state and installed capabilities, or use the profile manifest for a future installation. Distinguish installed, configured and successfully exercised functionality.
 
-## Triggers
+Show practical examples relevant to the user's project: `explore` maps code, `build` implements, `fix` repairs, `review` inspects changes, `test` verifies.
 
-Activate when user says things like:
-- "what can you do?"
-- "what can I do?"
-- "help me get started"
-- "show me around"
-- "what features are available?"
-- "how does this work?"
+Explain core as the bounded default; quality, context, memory and orchestration are opt-in. The full catalog does not imply every component runs each session. Optional providers, databases and CLIs may require dependencies or credentials.
 
-## Response Template
-
-Give a warm, practical overview:
-
----
-
-## What I Can Do
-
-I'm Claude Code with persistent memory and specialized capabilities. Here's what makes me useful:
-
-### Code & Development
-- **Write & edit code** - any language, any framework
-- **Debug issues** - trace errors, find root causes
-- **Refactor** - improve structure without breaking things
-- **Test** - write and run tests, validate changes
-
-### Memory & Context
-- **Remember across sessions** - learnings persist to SQLite/PostgreSQL
-- **Recall past work** - search what worked/failed before
-- **Handoffs** - create snapshots to resume complex work
-
-### Research & Planning
-- **Explore codebases** - understand unfamiliar projects fast
-- **Plan implementations** - architect before coding
-- **Search the web** - find docs, solutions, best practices
-
-### Specialized Agents
-I can spawn sub-agents for complex tasks:
-- `explorer` - map codebase structure
-- `kraken` - implement with TDD workflow
-- `debug` - investigate issues systematically
-
-### Quick Tips
-- Ask naturally - I'll figure out which tools to use
-- Say "create a handoff" before ending sessions
-- Say "what worked for X before?" to recall past learnings
-
-**What would you like to work on?**
-
----
-
-## Style Notes
-
-- Be welcoming, not overwhelming
-- Focus on practical value, not feature lists
-- End with an invitation to start working
-- Don't list every skill - highlight categories
+Offer a concrete first task. Do not install packages, activate profiles, start automation or promise persistent memory as part of a tour.

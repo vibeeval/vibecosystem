@@ -1,7 +1,11 @@
 name: Claude Code Review
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, labeled]
+
+concurrency:
+  group: claude-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -10,6 +14,7 @@ permissions:
 
 jobs:
   claude-review:
+    if: github.event.pull_request.head.repo.full_name == github.repository && contains(github.event.pull_request.labels.*.name, 'claude-review')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

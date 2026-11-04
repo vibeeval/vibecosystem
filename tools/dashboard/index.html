@@ -4,39 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>vibecosystem - Agent Monitoring Dashboard</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            vibe: {
-              bg: '#0a0a0f',
-              card: '#12121a',
-              border: '#1e1e2e',
-              accent: '#8b5cf6',
-              green: '#22c55e',
-              red: '#ef4444',
-              yellow: '#eab308',
-              blue: '#3b82f6',
-              muted: '#6b7280',
-              text: '#e5e7eb',
-            }
-          }
-        }
-      }
-    }
-  </script>
+  <link rel="stylesheet" href="/dashboard.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
-
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: system-ui, -apple-system, sans-serif;
       background: #0a0a0f;
       color: #e5e7eb;
     }
-    .mono { font-family: 'JetBrains Mono', monospace; }
+    .mono { font-family: ui-monospace, SFMono-Regular, monospace; }
 
     .glow-green { box-shadow: 0 0 12px rgba(34, 197, 94, 0.3); }
     .glow-red { box-shadow: 0 0 12px rgba(239, 68, 68, 0.3); }
@@ -103,7 +78,7 @@
         <h1 class="text-xl font-bold">
           <span class="text-vibe-accent">vibe</span><span class="text-vibe-muted">cosystem</span>
         </h1>
-        <span class="text-xs mono text-vibe-muted bg-vibe-card px-2 py-1 rounded">Agent Monitor v2.0</span>
+        <span class="text-xs mono text-vibe-muted bg-vibe-card px-2 py-1 rounded">Agent Monitor</span>
         <span id="connection-badge" class="text-xs mono px-2 py-1 rounded bg-red-900/30 text-red-400">
           DISCONNECTED
         </span>
@@ -226,7 +201,7 @@ let ws = null;
 let isPaused = false;
 let currentTab = 'all';
 let allEvents = [];
-let agentTimelines = {};
+let agentTimelines = Object.create(null);
 let agentTypes = new Set();
 let reconnectTimer = null;
 let uptimeStart = Date.now();
@@ -235,7 +210,8 @@ let uptimeStart = Date.now();
 function connect() {
   if (ws && ws.readyState <= 1) return;
 
-  ws = new WebSocket('ws://127.0.0.1:3847');
+  const wsPort = Number('__VIBECO_WS_PORT__') || 3847;
+  ws = new WebSocket(`ws://${location.hostname}:${wsPort}`);
 
   ws.onopen = () => {
     document.getElementById('connection-badge').className =
@@ -281,7 +257,7 @@ function handleEvent(event, silent) {
 
   // Agent type tracking
   if (event.agentType) {
-    agentTypes.add(event.agentType);
+    if (agentTypes.size < 256) agentTypes.add(event.agentType);
     updateAgentFilter();
   }
 
@@ -313,7 +289,10 @@ function updateLocalStats(event) {
     case 'agent_error': localStats.errors++; break;
     case 'tool_call': localStats.tools++; break;
   }
-  if (event.duration) localStats.durations.push(event.duration);
+  if (event.duration) {
+    localStats.durations.push(event.duration);
+    if (localStats.durations.length > 1000) localStats.durations.shift();
+  }
 
   document.getElementById('stat-spawns').textContent = localStats.spawns;
   document.getElementById('stat-completes').textContent = localStats.completes;
@@ -349,8 +328,9 @@ function updateStatsDisplay(stats) {
 
 // === Timeline ===
 function updateTimeline(event) {
-  const key = event.agentType || 'unknown';
-  if (!agentTimelines[key]) {
+  const key = displayText(event.agentType) || 'unknown';
+  if (!Object.hasOwn(agentTimelines, key)) {
+    if (Object.keys(agentTimelines).length >= 256) return;
     agentTimelines[key] = [];
   }
 
@@ -364,14 +344,22 @@ function updateTimeline(event) {
   } else {
     // Son running entry'yi bul ve kapat
     const entries = agentTimelines[key];
+    let matched = false;
     for (let i = entries.length - 1; i >= 0; i--) {
       if (entries[i].status === 'running') {
         entries[i].end = event.timestamp;
         entries[i].status = event.type === 'agent_error' ? 'error' : 'done';
+        matched = true;
         break;
       }
     }
+    if (!matched) {
+      entries.push({ start: event.timestamp, end: event.timestamp,
+        status: event.type === 'agent_error' ? 'error' : 'done',
+        metadata: event.metadata, inferredStart: true });
+    }
   }
+  if (agentTimelines[key].length > 200) agentTimelines[key].shift();
 
   renderTimeline();
 }
@@ -413,7 +401,8 @@ function renderTimeline() {
       const left = ((start - minTime) / totalSpan * 100).toFixed(2);
       const width = Math.max(((end - start) / totalSpan * 100), 1).toFixed(2);
       const duration = Math.round((end - start) / 1000);
-      const durationStr = duration < 60 ? duration + 's' : Math.round(duration / 60) + 'm';
+      const durationStr = entry.inferredStart ? 'completed'
+        : duration < 60 ? duration + 's' : Math.round(duration / 60) + 'm';
 
       html += `<div class="timeline-bar ${entry.status}" style="position:absolute; left:${left}%; width:${width}%; top:2px;"`;
       html += ` title="${escapeHtml(type)}: ${durationStr} (${escapeHtml(entry.status)})">`;
@@ -477,7 +466,7 @@ function formatEventType(type) {
     tool_call: 'TOOL',
     hook_fire: 'HOOK',
   };
-  return map[type] || type.toUpperCase();
+  return Object.hasOwn(map, type) ? map[type] : displayText(type).toUpperCase();
 }
 
 function getTypeColor(type) {
@@ -488,15 +477,15 @@ function getTypeColor(type) {
     tool_call: 'text-vibe-blue',
     hook_fire: 'text-vibe-yellow',
   };
-  return map[type] || 'text-vibe-muted';
+  return Object.hasOwn(map, type) ? map[type] : 'text-vibe-muted';
 }
 
 function formatEventDetail(event) {
   const meta = event.metadata || {};
-  if (meta.promptSummary) return meta.promptSummary;
-  if (meta.command) return meta.command.slice(0, 100);
-  if (meta.tool) return `${meta.tool}: ${(meta.detail || '').slice(0, 80)}`;
-  return JSON.stringify(meta).slice(0, 100);
+  if (meta.promptSummary) return displayText(meta.promptSummary).slice(0, 120);
+  if (meta.command) return displayText(meta.command).slice(0, 100);
+  if (meta.tool) return `${displayText(meta.tool)}: ${displayText(meta.detail).slice(0, 80)}`;
+  return displayText(meta).slice(0, 100);
 }
 
 // === Feed Tabs ===
@@ -578,8 +567,10 @@ function updateAgentBreakdown() {
 async function fetchErrors() {
   const container = document.getElementById('error-container');
   try {
-    const res = await fetch('http://127.0.0.1:3848/api/errors');
-    const errors = await res.json();
+    const res = await fetch('/api/errors');
+    const payload = await res.json();
+    if (!Array.isArray(payload)) throw new Error('Invalid error ledger response');
+    const errors = payload.filter(error => error && typeof error === 'object' && !Array.isArray(error));
 
     if (errors.length === 0) {
       container.innerHTML = '<div class="text-center text-vibe-muted text-sm py-4">No errors in ledger</div>';
@@ -588,15 +579,16 @@ async function fetchErrors() {
 
     let html = '';
     errors.slice(0, 30).forEach(err => {
-      const time = err.ts ? new Date(err.ts).toLocaleString('en-US', {
+      const validTimestamp = ['string', 'number'].includes(typeof err.ts) && Number.isFinite(new Date(err.ts).getTime());
+      const time = validTimestamp ? new Date(err.ts).toLocaleString('en-US', {
         month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false
       }) : '-';
 
       html += `
         <div class="bg-vibe-bg rounded p-2.5 border border-red-900/20">
           <div class="flex items-center justify-between mb-1">
-            <span class="text-xs mono text-vibe-red font-medium">${err.agent_type || 'unknown'}</span>
-            <span class="text-[10px] mono text-vibe-muted">${time}</span>
+            <span class="text-xs mono text-vibe-red font-medium">${escapeHtml(err.agent_type || 'unknown')}</span>
+            <span class="text-[10px] mono text-vibe-muted">${escapeHtml(time)}</span>
           </div>
           <div class="text-xs text-vibe-text mb-1">${escapeHtml(err.error_pattern || err.detail || '-')}</div>
           ${err.lesson ? `<div class="text-[11px] text-vibe-muted italic">${escapeHtml(err.lesson)}</div>` : ''}
@@ -611,9 +603,14 @@ async function fetchErrors() {
 }
 
 // === Utilities ===
-function escapeHtml(str) {
-  if (!str) return '';
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+function displayText(value) {
+  if (value == null) return '';
+  if (['string', 'number', 'boolean', 'bigint'].includes(typeof value)) return String(value);
+  try { return JSON.stringify(value) || ''; } catch { return ''; }
+}
+function escapeHtml(value) {
+  return displayText(value).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 function togglePause() {

@@ -4,6 +4,7 @@
  * Dashboard opsiyonel - baglanti yoksa sessizce devam eder.
  */
 import { readFileSync } from 'fs';
+import { request } from 'node:http';
 
 interface PostToolInput {
   session_id: string;
@@ -24,72 +25,36 @@ interface DashboardEvent {
   metadata: Record<string, unknown>;
 }
 
-function extractAgentInfo(input: PostToolInput): Partial<DashboardEvent> {
-  const ti = input.tool_input as Record<string, string>;
-
+// Only structural metadata is sent. Prompts, shell commands and tool inputs can
+// contain credentials and are unnecessary for local activity monitoring.
+export function extractAgentInfo(input: PostToolInput): Partial<DashboardEvent> {
+  const ti = input.tool_input || {};
+  const response = input.tool_response;
+  const object = response && typeof response === 'object' ? response as Record<string, unknown> : {};
+  const hasError = object.is_error === true || object.isError === true ||
+    typeof object.exitCode === 'number' && object.exitCode !== 0 ||
+    typeof object.exit_code === 'number' && object.exit_code !== 0;
   if (input.tool_name === 'Agent' || input.tool_name === 'Task') {
-    const agentType = ti.subagent_type || ti.type || 'unknown';
-    const prompt = ti.description || ti.prompt || '';
-    const promptSummary = typeof prompt === 'string' ? prompt.slice(0, 120) : '';
-
-    // tool_response varsa agent tamamlanmis demek (PostToolUse)
-    const hasResponse = input.tool_response !== undefined && input.tool_response !== null;
-    const responseStr = typeof input.tool_response === 'string'
-      ? input.tool_response
-      : JSON.stringify(input.tool_response || '');
-    const hasError = responseStr.toLowerCase().includes('error') ||
-                     responseStr.toLowerCase().includes('fail');
-
-    let status: DashboardEvent['status'] = 'running';
-    let type: DashboardEvent['type'] = 'agent_spawn';
-
-    if (hasResponse && hasError) {
-      status = 'error';
-      type = 'agent_error';
-    } else if (hasResponse) {
-      status = 'done';
-      type = 'agent_complete';
-    }
-
+    const agentType = typeof ti.subagent_type === 'string' ? ti.subagent_type
+      : typeof ti.type === 'string' ? ti.type : 'unknown';
+    const hasResponse = response !== undefined && response !== null;
     return {
-      type,
-      agentType,
-      status,
-      metadata: {
-        promptSummary,
-        responseLength: responseStr.length,
-      },
+      type: hasError ? 'agent_error' : hasResponse ? 'agent_complete' : 'agent_spawn',
+      agentType: agentType.slice(0, 128),
+      status: hasError ? 'error' : hasResponse ? 'done' : 'running',
+      metadata: { tool: input.tool_name },
     };
   }
-
-  if (input.tool_name === 'Bash') {
-    const cmd = (ti.command || '').slice(0, 200);
-    const responseStr = typeof input.tool_response === 'string'
-      ? input.tool_response
-      : JSON.stringify(input.tool_response || '');
-    const hasError = responseStr.includes('Error') ||
-                     responseStr.includes('error:') ||
-                     responseStr.includes('FAIL');
-
-    return {
-      type: 'tool_call',
-      status: hasError ? 'error' : 'done',
-      metadata: { tool: 'Bash', command: cmd },
-    };
-  }
-
-  // Diger tool'lar
   return {
     type: 'tool_call',
-    status: 'done',
-    metadata: {
-      tool: input.tool_name,
-      detail: JSON.stringify(input.tool_input).slice(0, 150),
-    },
+    status: hasError ? 'error' : 'done',
+    metadata: { tool: input.tool_name },
   };
 }
 
 function sendToWebSocket(event: DashboardEvent): Promise<void> {
+  const port = Number(process.env.VIBECO_DASHBOARD_WS_PORT || 3847);
+  if (!Number.isInteger(port) || port < 1 || port > 65535) return Promise.resolve();
   return new Promise((resolve) => {
     // Raw TCP ile WebSocket frame gonderme yerine,
     // basit UDP-like fire-and-forget HTTP POST kullaniyoruz
@@ -97,10 +62,10 @@ function sendToWebSocket(event: DashboardEvent): Promise<void> {
     const payload = JSON.stringify(event);
     const postData = Buffer.from(payload);
 
-    const req = require('http').request(
+    const req = request(
       {
         hostname: '127.0.0.1',
-        port: 3847,
+        port,
         path: '/event',
         method: 'POST',
         headers: {
@@ -109,7 +74,7 @@ function sendToWebSocket(event: DashboardEvent): Promise<void> {
         },
         timeout: 500,
       },
-      () => resolve()
+      response => { response.resume(); resolve(); }
     );
 
     req.on('error', () => resolve()); // Sessizce devam et
@@ -125,7 +90,13 @@ async function main() {
   if (!raw) { console.log('{}'); return; }
 
   let input: PostToolInput;
-  try { input = JSON.parse(raw); } catch { console.log('{}'); return; }
+  try {
+    input = JSON.parse(raw);
+    if (!input || typeof input.tool_name !== 'string' || !input.tool_input ||
+        typeof input.tool_input !== 'object' || Array.isArray(input.tool_input)) {
+      console.log('{}'); return;
+    }
+  } catch { console.log('{}'); return; }
 
   // Sadece ilginc event'leri gonder (Agent, Task, Bash, Edit, Write)
   const interestingTools = ['Agent', 'Task', 'Bash', 'Edit', 'Write', 'Read', 'Grep', 'Glob'];
@@ -139,7 +110,7 @@ async function main() {
   const event: DashboardEvent = {
     type: partial.type || 'tool_call',
     timestamp: new Date().toISOString(),
-    sessionId: (input.session_id || 'unknown').slice(0, 8),
+    sessionId: (typeof input.session_id === 'string' ? input.session_id : 'unknown').slice(0, 128),
     agentType: partial.agentType || undefined,
     agentId: process.env.CLAUDE_AGENT_ID || undefined,
     status: partial.status || 'done',

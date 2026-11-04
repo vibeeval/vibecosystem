@@ -1,3 +1,4 @@
+import { readHookInput } from './shared/hook-input.js';
 import * as fs from 'fs';
 import * as path from 'path';
 import { execSync } from 'child_process';
@@ -249,7 +250,7 @@ function getUnmarkedHandoffs(): UnmarkedHandoff[] {
 }
 
 async function main() {
-  const input: SessionStartInput = JSON.parse(await readStdin());
+  const input = readHookInput<SessionStartInput>();
   const projectDir = process.env.CLAUDE_PROJECT_DIR || process.cwd();
 
   // Support both 'source' (per docs) and 'type' (legacy) fields

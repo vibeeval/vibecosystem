@@ -6,10 +6,17 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { WebSocketServer } = require('ws');
+let WebSocketServer;
+try { ({ WebSocketServer } = require('ws')); } catch {
+  console.error(`[vibecosystem] Dashboard dependency missing. Run: npm ci --ignore-scripts --prefix ${JSON.stringify(__dirname)}`);
+  process.exit(1);
+}
 
-const WS_PORT = 3847;
-const HTTP_PORT = 3848;
+const WS_PORT = Number(process.env.VIBECO_DASHBOARD_WS_PORT || 3847);
+const HTTP_PORT = Number(process.env.VIBECO_DASHBOARD_HTTP_PORT || 3848);
+if (![WS_PORT, HTTP_PORT].every(port => Number.isInteger(port) && port > 0 && port <= 65535)) {
+  throw new Error('Dashboard ports must be integers between 1 and 65535');
+}
 const CANAVAR_DIR = path.join(require('os').homedir(), '.claude', 'canavar');
 const EVENTS_LOG = path.join(require('os').homedir(), '.claude', 'agent-events.jsonl');
 const LEDGER_PATH = path.join(CANAVAR_DIR, 'error-ledger.jsonl');
@@ -30,7 +37,7 @@ const sessionStats = {
   toolCalls: 0,
   hookFires: 0,
   agentDurations: [],
-  byAgentType: {},
+  byAgentType: Object.create(null),
 };
 
 function addEvent(event) {
@@ -59,7 +66,8 @@ function addEvent(event) {
       break;
   }
 
-  if (event.agentType) {
+  if (event.agentType && (Object.hasOwn(sessionStats.byAgentType, event.agentType) ||
+      Object.keys(sessionStats.byAgentType).length < 256)) {
     if (!sessionStats.byAgentType[event.agentType]) {
       sessionStats.byAgentType[event.agentType] = {
         spawns: 0,
@@ -200,58 +208,75 @@ function getStats() {
   };
 }
 
-// === WebSocket Server (port 3847) ===
-// Hem WS client'lari dinler, hem HTTP POST ile event alir
+// Both listeners bind loopback. Host validation also prevents DNS rebinding;
+// WebSocket upgrades need their own Origin check (HTTP CORS does not cover them).
+const allowedOrigins = new Set([
+  `http://127.0.0.1:${HTTP_PORT}`, `http://localhost:${HTTP_PORT}`,
+]);
+function hasLocalHost(req, port) {
+  return new Set([`127.0.0.1:${port}`, `localhost:${port}`]).has(req.headers.host);
+}
+function reject(res, status, message) {
+  res.writeHead(status, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify({ error: message }));
+}
+const eventTypes = new Set(['agent_spawn', 'agent_complete', 'agent_error', 'hook_fire', 'tool_call']);
+function validEvent(event) {
+  return event && typeof event === 'object' && !Array.isArray(event) &&
+    eventTypes.has(event.type) && typeof event.timestamp === 'string' &&
+    event.timestamp.length <= 64 && Number.isFinite(Date.parse(event.timestamp)) &&
+    typeof event.sessionId === 'string' && event.sessionId.length <= 128 &&
+    ['running', 'done', 'error'].includes(event.status) &&
+    (event.agentType == null || typeof event.agentType === 'string' && event.agentType.length <= 128) &&
+    (event.duration == null || typeof event.duration === 'number' && Number.isFinite(event.duration) && event.duration >= 0) &&
+    (event.metadata == null || typeof event.metadata === 'object' && !Array.isArray(event.metadata));
+}
+
 const wsHttpServer = http.createServer((req, res) => {
-  // Hook'lardan gelen event'leri al
-  if (req.method === 'POST' && req.url === '/event') {
-    // DNS rebinding korumasi: sadece localhost Host header'i kabul et,
-    // tarayici kaynakli (Origin'li) istekleri reddet - hook'lar Origin gondermez
-    const host = (req.headers.host || '').replace(/:\d+$/, '');
-    const allowedHosts = new Set(['localhost', '127.0.0.1', '[::1]']);
-    if (!allowedHosts.has(host) || req.headers.origin) {
-      res.writeHead(403, { 'Content-Type': 'application/json' });
-      res.end('{"error":"forbidden"}');
+  if (!hasLocalHost(req, WS_PORT) || req.headers.origin) {
+    reject(res, 403, 'forbidden'); return;
+  }
+  if (req.method !== 'POST' || req.url !== '/event') {
+    reject(res, 404, 'not found'); return;
+  }
+  let body = '';
+  let bodySize = 0;
+  let tooLarge = false;
+  const MAX_BODY = 64 * 1024;
+  req.on('data', chunk => {
+    if (tooLarge) return;
+    bodySize += chunk.length;
+    if (bodySize > MAX_BODY) {
+      tooLarge = true;
+      reject(res, 413, 'payload too large');
       return;
     }
-    let body = '';
-    let bodySize = 0;
-    const MAX_BODY = 64 * 1024; // 64KB limit
-    req.on('data', chunk => {
-      bodySize += chunk.length;
-      if (bodySize > MAX_BODY) {
-        res.writeHead(413, { 'Content-Type': 'application/json' });
-        res.end('{"error":"payload too large"}');
-        req.destroy();
-        return;
-      }
-      body += chunk;
+    body += chunk;
+  });
+  req.on('end', () => {
+    if (tooLarge) return;
+    let event;
+    try { event = JSON.parse(body); } catch { reject(res, 400, 'invalid json'); return; }
+    if (!validEvent(event)) { reject(res, 400, 'invalid event'); return; }
+    addEvent(event);
+    const payload = JSON.stringify(event);
+    wss.clients.forEach(client => {
+      if (client.readyState === 1) client.send(payload);
     });
-    req.on('end', () => {
-      try {
-        const event = JSON.parse(body);
-        addEvent(event);
-        // Tum WS client'lara broadcast et
-        wss.clients.forEach(client => {
-          if (client.readyState === 1) { // WebSocket.OPEN
-            client.send(JSON.stringify(event));
-          }
-        });
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end('{"ok":true}');
-      } catch {
-        res.writeHead(400);
-        res.end('{"error":"invalid json"}');
-      }
-    });
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end('{"ok":true}');
+  });
+  req.on('error', () => { if (!res.headersSent) reject(res, 400, 'invalid request'); });
+});
+wsHttpServer.requestTimeout = 5000;
+const wss = new WebSocketServer({ noServer: true, maxPayload: 64 * 1024 });
+wsHttpServer.on('upgrade', (req, socket, head) => {
+  if (req.url !== '/' || !hasLocalHost(req, WS_PORT) || !allowedOrigins.has(req.headers.origin)) {
+    socket.end('HTTP/1.1 403 Forbidden\r\nConnection: close\r\nContent-Length: 0\r\n\r\n');
     return;
   }
-
-  res.writeHead(404);
-  res.end('not found');
+  wss.handleUpgrade(req, socket, head, ws => wss.emit('connection', ws, req));
 });
-
-const wss = new WebSocketServer({ server: wsHttpServer });
 
 wss.on('connection', (ws) => {
   console.log(`[WS] Client connected (total: ${wss.clients.size})`);
@@ -275,8 +300,15 @@ wsHttpServer.listen(WS_PORT, '127.0.0.1', () => {
 
 // === HTTP Server (port 3848) ===
 const httpServer = http.createServer((req, res) => {
-  // CORS headers
-  res.setHeader('Access-Control-Allow-Origin', 'http://127.0.0.1:3848');
+  if (!hasLocalHost(req, HTTP_PORT) || (req.headers.origin && !allowedOrigins.has(req.headers.origin))) {
+    reject(res, 403, 'forbidden'); return;
+  }
+  if (!['GET', 'OPTIONS'].includes(req.method)) { reject(res, 405, 'method not allowed'); return; }
+  // No cross-origin access is needed by the dashboard.
+  if (req.headers.origin) res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+  res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  res.setHeader('Content-Security-Policy', `default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' ws://127.0.0.1:${WS_PORT} ws://localhost:${WS_PORT}; frame-ancestors 'none'; base-uri 'none'; form-action 'none'`);
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
@@ -331,11 +363,20 @@ const httpServer = http.createServer((req, res) => {
     return;
   }
 
+  if (req.url === '/dashboard.css') {
+    try {
+      const css = fs.readFileSync(path.join(__dirname, 'dashboard.css'));
+      res.writeHead(200, { 'Content-Type': 'text/css; charset=utf-8' });
+      res.end(css);
+    } catch { reject(res, 500, 'dashboard.css not found'); }
+    return;
+  }
+
   // Static files
   if (req.url === '/' || req.url === '/index.html') {
     const htmlPath = path.join(__dirname, 'index.html');
     try {
-      const html = fs.readFileSync(htmlPath, 'utf-8');
+      const html = fs.readFileSync(htmlPath, 'utf-8').replace('__VIBECO_WS_PORT__', String(WS_PORT));
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
       res.end(html);
     } catch {
@@ -351,8 +392,15 @@ const httpServer = http.createServer((req, res) => {
 
 httpServer.listen(HTTP_PORT, '127.0.0.1', () => {
   console.log(`[HTTP] Dashboard UI on http://127.0.0.1:${HTTP_PORT}`);
-  console.log(`[vibecosystem] Agent Monitoring Dashboard v2.0 ready`);
+  console.log(`[vibecosystem] Agent Monitoring Dashboard ready`);
 });
+
+for (const server of [wsHttpServer, httpServer]) {
+  server.on('error', error => {
+    console.error(`[vibecosystem] Dashboard failed: ${error.message}`);
+    process.exit(1);
+  });
+}
 
 // Graceful shutdown
 process.on('SIGINT', () => {

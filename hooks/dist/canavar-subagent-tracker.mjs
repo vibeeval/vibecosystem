@@ -1,3 +1,23 @@
+// src/shared/hook-response.ts
+function responseText(value) {
+  if (value === void 0 || value === null) return "";
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) return value.map(responseText).filter(Boolean).join("\n");
+  if (typeof value !== "object") return String(value);
+  const object = value;
+  if ("stdout" in object || "stderr" in object) {
+    return [object.stdout, object.stderr].map(responseText).filter(Boolean).join("\n");
+  }
+  if ("text" in object) return responseText(object.text);
+  if ("content" in object) return responseText(object.content);
+  if ("file" in object) return responseText(object.file);
+  if (object.type === "image" || object.type === "image_url") return "";
+  return JSON.stringify(value);
+}
+function hookResponseText(input) {
+  return responseText(input.tool_response !== void 0 ? input.tool_response : input.tool_output);
+}
+
 // src/canavar-subagent-tracker.ts
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import { join } from "path";
@@ -96,7 +116,7 @@ function main() {
   }
   const agentType = input.tool_input?.subagent_type || "unknown-agent";
   const description = input.tool_input?.description || "";
-  const output = input.tool_output || "";
+  const output = hookResponseText(input);
   if (agentType === "unknown-agent" && !description) {
     console.log("{}");
     return;

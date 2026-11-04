@@ -7,6 +7,7 @@
  * Also broadcasts to dashboard WebSocket if running.
  */
 
+import { hookResponseText } from './shared/hook-response.js';
 import { appendFileSync, mkdirSync, existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
@@ -15,6 +16,7 @@ interface ToolEvent {
   tool_name: string;
   tool_input?: Record<string, unknown>;
   tool_output?: string;
+  tool_response?: unknown;
   session_id?: string;
   usage?: TokenUsage;
   token_usage?: TokenUsage;
@@ -77,14 +79,14 @@ function runHook(): void {
   }
 
   const inputChars = charCount(JSON.stringify(event.tool_input || {}));
-  const outputChars = charCount(event.tool_output);
+  const outputChars = charCount(hookResponseText(event));
   const usage = getUsage(event);
   const providerInput = Number(usage?.input_tokens);
   const providerOutput = Number(usage?.output_tokens);
   const providerTotal = Number(usage?.total_tokens);
-  const hasProviderInput = Number.isFinite(providerInput);
-  const hasProviderOutput = Number.isFinite(providerOutput);
-  const hasProviderTotal = Number.isFinite(providerTotal);
+  const hasProviderInput = typeof usage?.input_tokens === 'number' && Number.isFinite(providerInput) && providerInput >= 0;
+  const hasProviderOutput = typeof usage?.output_tokens === 'number' && Number.isFinite(providerOutput) && providerOutput >= 0;
+  const hasProviderTotal = typeof usage?.total_tokens === 'number' && Number.isFinite(providerTotal) && providerTotal >= 0;
   const inputTokens = hasProviderInput ? providerInput : estimateTokens(inputChars);
   const outputTokens = hasProviderOutput ? providerOutput : estimateTokens(outputChars);
   const totalTokens = hasProviderTotal ? providerTotal : inputTokens + outputTokens;

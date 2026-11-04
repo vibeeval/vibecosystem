@@ -17,13 +17,14 @@ Profiles:
   context       Core plus targeted context retrieval
   memory        Core plus opt-in memory hooks
   orchestration Core plus explicit multi-agent workflows
+  dashboard     Core plus optional local dashboard event capture
   full          All legacy Claude capabilities
 
 Aliases: minimal and smart -> core, all -> full
 
 Options:
   --force            Overwrite existing files, with a backup
-  --prune            Remove only previously vibecosystem-owned stale files
+  --prune            Reconcile unchanged owned files (enabled by default)
   --dry-run          Show the selected runtime without changing files
   --non-interactive  Do not prompt for confirmation
 EOF

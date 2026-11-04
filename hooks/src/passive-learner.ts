@@ -3,6 +3,7 @@
  * Dosya editleme patternlerini otomatik cikarir
  * Tekrarlayan pattern'lari ~/.claude/instincts.jsonl'e yazar
  */
+import { hookResponseText } from './shared/hook-response.js';
 import { readFileSync, appendFileSync, existsSync, mkdirSync } from 'fs';
 import { join, extname, basename } from 'path';
 import { homedir } from 'os';
@@ -19,6 +20,7 @@ interface PostToolInput {
     content?: string;
   };
   tool_output?: string;
+  tool_response?: unknown;
 }
 
 interface Instinct {
@@ -162,8 +164,8 @@ function main() {
   }
 
   // Bash tool: error fix tespiti
-  if (input.tool_name === 'Bash' && input.tool_output) {
-    const errInst = detectErrorFix(input.tool_output);
+  if (input.tool_name === 'Bash') {
+    const errInst = detectErrorFix(hookResponseText(input));
     if (errInst) instincts.push({ ...errInst, session: sessionId });
   }
 

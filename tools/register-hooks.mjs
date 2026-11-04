@@ -1,153 +1,66 @@
 #!/usr/bin/env node
-/**
- * Register the selected vibecosystem hooks without touching user-owned hooks.
- *
- * Usage: node register-hooks.mjs <hooks.json> <settings.json> <claude-dir> [profile] [prune]
- */
+/** Merge selected hooks while preserving hooks not owned by this installer. */
 import fs from 'node:fs';
-import {
-  countRegisteredHookCommands,
-  filterHookManifest,
-  repoDirFromHookManifest,
-  resolveProfile,
-} from './profile-runtime.mjs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { countRegisteredHookCommands, filterHookManifest, repoDirFromHookManifest, resolveProfile } from './profile-runtime.mjs';
 
 const keyFor = (event, matcher, command) => `${event}\u0000${matcher ?? ''}\u0000${command}`;
+const shellQuote = (value) => `'${value.replaceAll("'", "'\\''")}'`;
 
-function main() {
-  const [manifestPath, settingsPath, claudeDir, requestedProfile = 'core', pruneFlag = 'false'] = process.argv.slice(2);
-  if (!manifestPath || !settingsPath || !claudeDir) {
-    console.log('  Usage: register-hooks.mjs <hooks.json> <settings.json> <claude-dir> [profile] [prune]');
-    return;
-  }
-
-  let manifest;
-  try {
-    manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-  } catch (error) {
-    console.log(`  WARNING: could not read ${manifestPath} - hooks NOT registered (${error.message})`);
-    return;
-  }
-
-  let runtime;
-  try {
-    const repoDir = repoDirFromHookManifest(manifestPath);
-    runtime = resolveProfile(repoDir, requestedProfile);
-    manifest = filterHookManifest(manifest, runtime.hooks);
-  } catch (error) {
-    console.log(`  WARNING: profile ${requestedProfile} could not be resolved - hooks NOT registered (${error.message})`);
-    return;
-  }
-
-  let settings = {};
-  if (fs.existsSync(settingsPath)) {
-    try {
-      const raw = fs.readFileSync(settingsPath, 'utf8');
-      settings = JSON.parse(raw);
-      const backupPath = `${settingsPath}.bak-${new Date().toISOString().replace(/[:.]/g, '-')}`;
-      fs.writeFileSync(backupPath, raw);
-      console.log(`  Backed up settings.json -> ${backupPath}`);
-    } catch (error) {
-      console.log(`  WARNING: ${settingsPath} could not be parsed - hooks NOT registered (${error.message})`);
-      console.log('  Fix your settings.json and re-run, or merge hooks/hooks.json manually.');
-      return;
-    }
-  }
-
-  const statePath = `${claudeDir}/vibecosystem-runtime.json`;
-  let previousState = {};
-  try { previousState = JSON.parse(fs.readFileSync(statePath, 'utf8')); } catch { /* first install */ }
-
-  const mergedHooks = { ...(settings.hooks || {}) };
-  const prune = pruneFlag === 'true' || pruneFlag === '1';
-  const previousOwnedKeys = new Set(previousState.ownedHookKeys || []);
-  const activeHookKeys = new Set();
+export function mergeOwnedHooks({ manifest, settings = {}, claudeDir, ownedHookKeys = [] }) {
+  if (!settings || typeof settings !== 'object' || Array.isArray(settings)) throw new Error('settings.json must contain an object');
+  const previouslyOwned = new Set(ownedHookKeys);
+  const hooks = {};
+  const nextOwned = new Set();
   let added = 0;
   let skipped = 0;
-
-  if (prune && previousOwnedKeys.size > 0) {
-    for (const [event, groups] of Object.entries(mergedHooks)) {
-      const remainingGroups = (groups || [])
-        .map((group) => ({
-          ...group,
-          hooks: (group.hooks || []).filter((hook) => !previousOwnedKeys.has(
-            keyFor(event, group.matcher, hook.command)
-          )),
-        }))
-        .filter((group) => (group.hooks || []).length > 0);
-      if (remainingGroups.length > 0) mergedHooks[event] = remainingGroups;
-      else delete mergedHooks[event];
-    }
+  for (const [event, groups] of Object.entries(settings.hooks || {})) {
+    if (!Array.isArray(groups)) throw new Error(`settings.hooks.${event} must be an array`);
+    const remaining = groups.map((group) => ({
+      ...group,
+      hooks: (group.hooks || []).filter((hook) => !previouslyOwned.has(keyFor(event, group.matcher, hook.command))),
+    })).filter((group) => group.hooks.length);
+    if (remaining.length) hooks[event] = remaining;
   }
-
   for (const [event, groups] of Object.entries(manifest.hooks || {})) {
-    const existingGroups = [...(mergedHooks[event] || [])];
-    const existingCommands = new Set(
-      existingGroups.flatMap((group) => (group.hooks || []).map((hook) =>
-        `${group.matcher ?? ''}\u0000${hook.command}`
-      ))
-    );
-
+    const existing = hooks[event] || [];
+    const commands = new Set(existing.flatMap((group) => (group.hooks || []).map((hook) => keyFor(event, group.matcher, hook.command))));
     for (const group of groups || []) {
-      const resolved = (group.hooks || [])
-        .map((hook) => ({
-          ...hook,
-          command: hook.command.replaceAll('${CLAUDE_PLUGIN_ROOT}', claudeDir),
-        }))
-        .filter((hook) => {
-          const ownershipKey = keyFor(event, group.matcher, hook.command);
-          activeHookKeys.add(ownershipKey);
-          const dedupeKey = `${group.matcher ?? ''}\u0000${hook.command}`;
-          if (existingCommands.has(dedupeKey)) {
-            skipped += 1;
-            return false;
-          }
-          existingCommands.add(dedupeKey);
-          added += 1;
-          return true;
-        });
-      if (resolved.length === 0) continue;
-
-      const matcher = group.matcher ?? '';
-      const targetIndex = existingGroups.findIndex((entry) => (entry.matcher ?? '') === matcher);
-      if (targetIndex >= 0) {
-        const target = existingGroups[targetIndex];
-        existingGroups[targetIndex] = { ...target, hooks: [...(target.hooks || []), ...resolved] };
-      } else {
-        existingGroups.push({ ...group, hooks: resolved });
+      const selected = [];
+      for (const hook of group.hooks || []) {
+        const resolved = { ...hook, command: hook.command.replaceAll('${CLAUDE_PLUGIN_ROOT}', shellQuote(claudeDir)) };
+        const key = keyFor(event, group.matcher, resolved.command);
+        // An identical pre-existing user hook remains user-owned.
+        if (commands.has(key)) { skipped += 1; continue; }
+        commands.add(key);
+        nextOwned.add(key);
+        selected.push(resolved);
+        added += 1;
       }
+      if (selected.length) existing.push({ ...group, hooks: selected });
     }
-    if (existingGroups.length > 0) mergedHooks[event] = existingGroups;
+    if (existing.length) hooks[event] = existing;
   }
-
-  const ownedHookKeys = prune
-    ? activeHookKeys
-    : new Set([...previousOwnedKeys, ...activeHookKeys]);
-
-  try {
-    fs.mkdirSync(claudeDir, { recursive: true });
-    fs.writeFileSync(settingsPath, `${JSON.stringify({ ...settings, hooks: mergedHooks }, null, 2)}\n`);
-    fs.writeFileSync(statePath, `${JSON.stringify({
-      ...previousState,
-      activeProfile: runtime.profile,
-      requestedProfile: runtime.requestedProfile,
-      contextBudget: runtime.contextBudget,
-      registeredHookCommands: countRegisteredHookCommands(manifest),
-      ownedHookKeys: [...ownedHookKeys],
-      updatedAt: new Date().toISOString(),
-    }, null, 2)}\n`);
-  } catch (error) {
-    console.log(`  WARNING: could not write runtime state - hooks NOT registered (${error.message})`);
-    return;
-  }
-
-  console.log(`  Profile: ${runtime.profile}`);
-  console.log(`  Hooks registered: ${added} added, ${skipped} already present`);
-  console.log(`  Hook commands in profile: ${countRegisteredHookCommands(manifest)}`);
+  return { settings: { ...settings, hooks }, ownedHookKeys: [...nextOwned], registeredHookCommands: countRegisteredHookCommands(manifest), added, skipped };
 }
 
-try {
-  main();
-} catch (error) {
-  console.log(`  WARNING: hook registration failed (${error?.message ?? error})`);
+function main() {
+  const [manifestPath, settingsPath, claudeDir, requestedProfile = 'core'] = process.argv.slice(2);
+  if (!manifestPath || !settingsPath || !claudeDir) throw new Error('Usage: register-hooks.mjs <hooks.json> <settings.json> <claude-dir> [profile]');
+  const runtime = resolveProfile(repoDirFromHookManifest(manifestPath), requestedProfile);
+  const manifest = filterHookManifest(JSON.parse(fs.readFileSync(manifestPath, 'utf8')), runtime.hooks);
+  const settings = fs.existsSync(settingsPath) ? JSON.parse(fs.readFileSync(settingsPath, 'utf8')) : {};
+  const statePath = join(claudeDir, 'vibecosystem-runtime.json');
+  const state = fs.existsSync(statePath) ? JSON.parse(fs.readFileSync(statePath, 'utf8')) : {};
+  const merged = mergeOwnedHooks({ manifest, settings, claudeDir, ownedHookKeys: state.ownedHookKeys });
+  fs.mkdirSync(dirname(settingsPath), { recursive: true });
+  if (fs.existsSync(settingsPath)) fs.copyFileSync(settingsPath, `${settingsPath}.bak-${Date.now()}`);
+  fs.writeFileSync(settingsPath, `${JSON.stringify(merged.settings, null, 2)}\n`);
+  fs.writeFileSync(statePath, `${JSON.stringify({ ...state, activeProfile: runtime.profile, requestedProfile, contextBudget: runtime.contextBudget, ownedHookKeys: merged.ownedHookKeys, registeredHookCommands: merged.registeredHookCommands }, null, 2)}\n`);
+  console.log(`Hooks registered: ${merged.added} added, ${merged.skipped} already present`);
+}
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  try { main(); } catch (error) { console.error(`Hook registration failed: ${error.message}`); process.exitCode = 1; }
 }

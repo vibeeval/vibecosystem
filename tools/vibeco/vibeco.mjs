@@ -3,7 +3,9 @@
 // Zero dependencies, pure Node.js ESM
 
 import { readFileSync, readdirSync, existsSync, statSync, writeFileSync } from 'node:fs';
-import { join, basename } from 'node:path';
+import { join, basename, dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
 import { homedir } from 'node:os';
 import { execFileSync, execSync, spawn } from 'node:child_process';
 import { createConnection } from 'node:net';
@@ -11,7 +13,7 @@ import { get } from 'node:http';
 import { parseFrontmatter } from './lib/frontmatter.mjs';
 import { installClaude } from '../install-runtime.mjs';
 
-const VERSION = '3.4.0';
+const VERSION = '3.5.0';
 const CLAUDE_DIR = join(homedir(), '.claude');
 const PROFILES_DIR = join(CLAUDE_DIR, 'profiles');
 const PLUGIN_CONFIG = join(CLAUDE_DIR, 'plugin-config.json');
@@ -94,18 +96,11 @@ function httpGet(url) {
 }
 
 function getRepoDir() {
-  // vibeco.mjs is at repo/tools/vibeco/vibeco.mjs
-  const scriptPath = new URL(import.meta.url).pathname;
-  const toolsDir = join(scriptPath, '..', '..', '..');
-  try {
-    // cwd option instead of `cd "${path}"`: the install path must never be
-    // interpolated into a shell string
-    const resolved = execSync('git rev-parse --show-toplevel 2>/dev/null', { cwd: toolsDir, encoding: 'utf-8' }).trim();
-    if (resolved && existsSync(join(resolved, 'install.sh'))) return resolved;
-  } catch {}
-  // fallback: ~/.vibecosystem
-  const fallback = join(homedir(), '.vibecosystem');
-  if (existsSync(join(fallback, 'install.sh'))) return fallback;
+  const scriptRepo = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
+  const runtime = readJsonFile(join(CLAUDE_DIR, 'vibecosystem-runtime.json'), {});
+  for (const candidate of [scriptRepo, runtime.repoDir, join(homedir(), '.vibecosystem')]) {
+    if (candidate && existsSync(join(candidate, 'install.sh')) && existsSync(join(candidate, 'profiles', 'runtime-manifest.json')) && existsSync(join(candidate, 'skills', 'build', 'SKILL.md'))) return candidate;
+  }
   return null;
 }
 
@@ -291,6 +286,14 @@ async function dashboard() {
     return;
   }
 
+  try {
+    createRequire(DASHBOARD_SCRIPT).resolve('ws');
+  } catch {
+    console.log(`${red('[ERROR]')} Dashboard dependency missing. Install the optional dashboard dependencies first:`);
+    console.log(`  npm ci --ignore-scripts --prefix ${JSON.stringify(dirname(DASHBOARD_SCRIPT))}`);
+    process.exitCode = 1;
+    return;
+  }
   console.log(`Starting dashboard...`);
   const child = spawn('node', [DASHBOARD_SCRIPT], {
     detached: true,
@@ -311,9 +314,13 @@ async function dashboard() {
 
 function profile() {
   const name = process.argv[3];
-  const validProfiles = ['core', 'quality', 'context', 'memory', 'orchestration', 'full', 'minimal', 'frontend', 'backend', 'fullstack', 'devops', 'all', 'smart'];
+  const validProfiles = ['core', 'quality', 'context', 'memory', 'orchestration', 'dashboard', 'full', 'minimal', 'frontend', 'backend', 'fullstack', 'devops', 'all', 'smart'];
 
   if (!name || !validProfiles.includes(name)) {
+    if (name) {
+      console.error(`${red('[ERROR]')} Unknown profile: ${name}`);
+      process.exitCode = 1;
+    }
     const config = readPluginConfig();
     const runtime = readJsonFile(join(CLAUDE_DIR, 'vibecosystem-runtime.json'), {});
     const current = runtime.activeProfile || config.activeProfile || 'core';
@@ -332,83 +339,19 @@ function profile() {
       installClaude({
         repoDir,
         profile: name,
-        prune: process.argv.includes('--prune'),
+        prune: true,
         nonInteractive: true,
       });
       return;
     } catch (error) {
       console.log(`${red('[ERROR]')} Profile install failed: ${error.message}`);
+      process.exitCode = 1;
       return;
     }
   }
 
-  const profileFile = join(PROFILES_DIR, `${name}.json`);
-  if (!existsSync(profileFile)) {
-    console.log(`${red('[ERROR]')} Profile "${name}" not found at ${profileFile}`);
-    console.log(`${dim('Run install.sh or vibeco update to install profiles')}`);
-    return;
-  }
-
-  const profileData = JSON.parse(readFileSync(profileFile, 'utf-8'));
-  const config = readPluginConfig();
-
-  if (name === 'all' || name === 'smart') {
-    // all ve smart: tum agent/skill'ler etkin
-    // smart = all + settings.json env ile vercel-plugin budget kisintili
-    delete config.agents;
-    delete config.skills;
-    config.activeProfile = name;
-    writePluginConfig(config);
-    const label = name === 'smart' ? 'smart (full capability, token optimized)' : 'all - everything enabled';
-    console.log(`${green('[OK]')} Profile set to ${bold(label)}`);
-    if (name === 'smart') {
-      console.log(`  ${dim('Ensure ~/.claude/settings.json has env section with VERCEL_PLUGIN_* budgets set.')}`);
-    }
-    return;
-  }
-
-  // Get full lists
-  const allAgents = [];
-  const allSkills = [];
-  try {
-    for (const f of readdirSync(join(CLAUDE_DIR, 'agents'))) {
-      if (f.endsWith('.md')) allAgents.push(basename(f, '.md'));
-    }
-  } catch {}
-  try {
-    for (const d of readdirSync(join(CLAUDE_DIR, 'skills'))) {
-      if (statSync(join(CLAUDE_DIR, 'skills', d)).isDirectory()) allSkills.push(d);
-    }
-  } catch {}
-
-  // Compute disabled sets
-  const enabledAgents = new Set(profileData.agents || []);
-  const enabledSkills = new Set(profileData.skills || []);
-
-  const disabledAgents = {};
-  for (const a of allAgents) {
-    if (!enabledAgents.has(a)) disabledAgents[a] = { enabled: false };
-  }
-
-  const disabledSkills = {};
-  for (const s of allSkills) {
-    if (!enabledSkills.has(s)) disabledSkills[s] = { enabled: false };
-  }
-
-  config.activeProfile = name;
-  config.agents = disabledAgents;
-  config.skills = disabledSkills;
-  writePluginConfig(config);
-
-  const enabledA = enabledAgents.size;
-  const enabledS = enabledSkills.size;
-  const disabledA = Object.keys(disabledAgents).length;
-  const disabledS = Object.keys(disabledSkills).length;
-
-  console.log(`${green('[OK]')} Profile set to ${bold(name)}`);
-  console.log(`  ${cyan('Agents')}  ${green(String(enabledA))} enabled, ${dim(String(disabledA))} disabled`);
-  console.log(`  ${cyan('Skills')}  ${green(String(enabledS))} enabled, ${dim(String(disabledS))} disabled`);
-  console.log(`  ${dim(`Description: ${profileData.description || name}`)}`);
+  console.log(`${red('[ERROR]')} Runtime source not found. Re-run install.sh from a checkout or npx vibecosystem init.`);
+  process.exitCode = 1;
 }
 
 function effectiveConfig() {
@@ -724,7 +667,7 @@ async function update() {
   console.log(`\nReinstalling...`);
   try {
     const runtime = readJsonFile(join(CLAUDE_DIR, 'vibecosystem-runtime.json'), {});
-    const allowedProfiles = new Set(['core', 'quality', 'context', 'memory', 'orchestration', 'full']);
+    const allowedProfiles = new Set(['core', 'quality', 'context', 'memory', 'orchestration', 'dashboard', 'full']);
     const activeProfile = allowedProfiles.has(runtime.activeProfile) ? runtime.activeProfile : 'core';
     execFileSync('bash', ['install.sh', '--profile', activeProfile, '--non-interactive'], { cwd: repoDir, stdio: 'inherit' });
   } catch {

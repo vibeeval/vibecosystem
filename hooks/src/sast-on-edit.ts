@@ -4,6 +4,7 @@
  * Desteklenen uzantilar: .ts, .js, .py, .go, .java, .rb, .php
  * Basit pattern-based kontrol yapar ve systemMessage ile uyari verir.
  */
+import { hookResponseText } from './shared/hook-response.js';
 import { readFileSync } from 'fs';
 
 interface PostToolInput {
@@ -15,6 +16,7 @@ interface PostToolInput {
     [key: string]: unknown;
   };
   tool_output?: string;
+  tool_response?: unknown;
 }
 
 // Desteklenen dosya uzantilari
@@ -267,8 +269,9 @@ function main() {
   }
 
   // tool_output varsa onu da tara
-  if (input.tool_output) {
-    contentToScan.push(input.tool_output);
+  const responseText = hookResponseText(input);
+  if (responseText) {
+    contentToScan.push(responseText);
   }
 
   if (contentToScan.length === 0) {

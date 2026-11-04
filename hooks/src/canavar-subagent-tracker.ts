@@ -10,6 +10,7 @@
  * - Son aktif zaman
  * - Çalıştığı dosya türleri (skill kategorisi)
  */
+import { hookResponseText } from './shared/hook-response.js';
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
@@ -23,6 +24,7 @@ interface PostAgentInput {
     prompt?: string;
   };
   tool_output?: string;
+  tool_response?: unknown;
 }
 
 interface SkillStats {
@@ -157,7 +159,7 @@ function main() {
 
   const agentType = input.tool_input?.subagent_type || 'unknown-agent';
   const description = input.tool_input?.description || '';
-  const output = input.tool_output || '';
+  const output = hookResponseText(input);
 
   // Çok kısa veya anlamsız agent çağrılarını atla
   if (agentType === 'unknown-agent' && !description) {

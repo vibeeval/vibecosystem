@@ -26,7 +26,7 @@ LUNA_TARGET="$CODEX_AGENT_DIR/luna-worker.toml"
 
 FORCE=false
 DRY_RUN=false
-PRUNE=false
+PRUNE=true
 INSTALL_LUNA_WORKER=false
 VALIDATE_LUNA_WORKER=false
 VALIDATION_ONLY=false
@@ -45,42 +45,8 @@ MANIFEST_DIRTY=false
 MANIFEST_BACKED_UP=false
 BACKUP_DIR=""
 
-# This is the Codex core profile. It intentionally stays explicit so a repo
-# expansion cannot silently change the small, predictable install profile.
-CORE_SKILLS=(
-  build
-  cli-reference
-  coding-standards
-  commit
-  completion-check
-  dead-code
-  debug
-  explore
-  factcheck-guard
-  fix
-  git-commits
-  help
-  modular-code
-  notepad-system
-  observe-before-editing
-  plan-agent
-  project-detect
-  refactor
-  review
-  search-router
-  search-tools
-  security
-  security-review
-  strategic-compact
-  system-overview
-  tdd
-  tdd-workflow
-  test
-  test-strategy
-  tour
-  verification-loop
-  wiring
-)
+# The shared runtime manifest is the only core allowlist.
+command -v node >/dev/null 2>&1 || { echo "ERROR: Node.js is required." >&2; exit 2; }
 
 usage() {
   cat <<'EOF'
@@ -93,7 +59,7 @@ Options:
   --install-luna-worker     Install .codex/agents/luna-worker.toml globally
   --validate-luna-worker    Validate the canonical luna worker contract
   --dry-run                 Show actions without writing user files
-  --prune                   Remove only unchanged skills owned by this installer
+  --prune                   Reconcile unchanged owned skills (enabled by default)
   --force                   Replace existing destinations after making a backup
   --non-interactive         Skip the confirmation prompt
   --help, -h                Show this help
@@ -111,7 +77,7 @@ die() {
 
 is_valid_skill_name() {
   case "$1" in
-    ""|*[!A-Za-z0-9._-]*) return 1 ;;
+    ""|.|..|*[!A-Za-z0-9._-]*) return 1 ;;
     *) return 0 ;;
   esac
 }
@@ -145,11 +111,14 @@ ensure_directory() {
 }
 
 selected_skill_names() {
-  if [ "$PROFILE" = "core" ]; then
-    printf '%s\n' "${CORE_SKILLS[@]}"
-  else
-    find "$REPO_DIR/skills" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | LC_ALL=C sort
-  fi
+  node --input-type=module - "$REPO_DIR" "$PROFILE" <<'JS'
+import { readdirSync } from 'node:fs';
+import { pathToFileURL } from 'node:url';
+const repo = process.argv[2];
+const { resolveProfile } = await import(pathToFileURL(`${repo}/tools/profile-runtime.mjs`).href);
+const selected = resolveProfile(repo, process.argv[3]).skills;
+console.log((selected === 'all' ? readdirSync(`${repo}/skills`, { withFileTypes: true }).filter((x) => x.isDirectory()).map((x) => x.name).sort() : selected).join('\n'));
+JS
 }
 
 selected_contains() {
@@ -197,8 +166,13 @@ remove_manifest_entry() {
     i=$((i + 1))
   done
   if [ "$found" = true ]; then
-    MANAGED_NAMES=("${new_names[@]}")
-    MANAGED_HASHES=("${new_hashes[@]}")
+    if [ "${#new_names[@]}" -gt 0 ]; then
+      MANAGED_NAMES=("${new_names[@]}")
+      MANAGED_HASHES=("${new_hashes[@]}")
+    else
+      MANAGED_NAMES=()
+      MANAGED_HASHES=()
+    fi
     MANIFEST_DIRTY=true
   fi
 }
@@ -221,42 +195,34 @@ load_manifest() {
   MANIFEST_DIRTY=false
 }
 
-HASH_MODE="none"
-if command -v shasum >/dev/null 2>&1; then
-  HASH_MODE="shasum"
-elif command -v sha256sum >/dev/null 2>&1; then
-  HASH_MODE="sha256sum"
-fi
-
-hash_file() {
-  case "$HASH_MODE" in
-    shasum) shasum -a 256 "$1" ;;
-    sha256sum) sha256sum "$1" ;;
-    *) printf 'unverified  %s\n' "$1" ;;
-  esac
-}
+HASH_MODE="node"
 
 hash_skill() {
-  local directory="$1"
-  if [ "$HASH_MODE" = "none" ]; then
-    printf 'unverified\n'
-    return 0
-  fi
-  if [ "$HASH_MODE" = "shasum" ]; then
-    (
-      cd "$directory"
-      find . -type f -print | LC_ALL=C sort | while IFS= read -r file; do
-        hash_file "$file"
-      done
-    ) | shasum -a 256 | awk '{print $1}'
-  else
-    (
-      cd "$directory"
-      find . -type f -print | LC_ALL=C sort | while IFS= read -r file; do
-        hash_file "$file"
-      done
-    ) | sha256sum | awk '{print $1}'
-  fi
+  # Match the historical shasum manifest format without starting one process per file.
+  node --input-type=module - "$1" <<'JS'
+import { createHash } from 'node:crypto';
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+const root = process.argv[2];
+const files = [];
+function walk(dir, prefix = '.') {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const path = join(dir, entry.name);
+    const label = `${prefix}/${entry.name}`;
+    if (entry.isDirectory()) walk(path, label);
+    else if (entry.isFile()) files.push([label, path]);
+    else throw new Error(`Unsupported file in skill: ${path}`);
+  }
+}
+walk(root);
+files.sort((a, b) => Buffer.compare(Buffer.from(a[0]), Buffer.from(b[0])));
+const combined = createHash('sha256');
+for (const [label, path] of files) {
+  const digest = createHash('sha256').update(readFileSync(path)).digest('hex');
+  combined.update(`${digest}  ${label}\n`);
+}
+console.log(combined.digest('hex'));
+JS
 }
 
 ensure_backup_directory() {
@@ -479,7 +445,21 @@ install_skill() {
 
   if [ -e "$destination" ] || [ -L "$destination" ]; then
     [ -L "$destination" ] && die "refusing to overwrite symlink: $destination"
-    if [ "$FORCE" = true ]; then
+    local owned_hash=""
+    local managed_index=0
+    while [ "$managed_index" -lt "${#MANAGED_NAMES[@]}" ]; do
+      if [ "${MANAGED_NAMES[$managed_index]}" = "$name" ]; then owned_hash="${MANAGED_HASHES[$managed_index]}"; break; fi
+      managed_index=$((managed_index + 1))
+    done
+    local current_hash=""
+    if [ -d "$destination" ] && [ -z "$(find "$destination" -type l -print -quit)" ]; then current_hash="$(hash_skill "$destination")"; fi
+    local source_hash
+    source_hash="$(hash_skill "$source")"
+    if [ -n "$owned_hash" ] && [ "$owned_hash" != unverified ] && [ "$current_hash" = "$owned_hash" ] && [ "$current_hash" = "$source_hash" ]; then
+      SKIPPED=$((SKIPPED + 1))
+      return 0
+    fi
+    if [ "$FORCE" = true ] || { [ -n "$owned_hash" ] && [ "$owned_hash" != unverified ] && [ "$current_hash" = "$owned_hash" ]; }; then
       if [ "$DRY_RUN" = true ]; then
         echo "  [dry-run] would back up and replace skill: $destination"
         UPDATED=$((UPDATED + 1))
@@ -590,18 +570,19 @@ case "$PROFILE" in
 esac
 
 SELECTED_SKILLS=()
+SELECTED_SKILL_OUTPUT="$(selected_skill_names)" || die "could not resolve selected skills"
 while IFS= read -r skill_name; do
   [ -n "$skill_name" ] || continue
   is_valid_skill_name "$skill_name" || die "invalid skill name in $PROFILE profile: $skill_name"
   [ -d "$REPO_DIR/skills/$skill_name" ] || die "profile $PROFILE references missing skill: $skill_name"
   SELECTED_SKILLS[${#SELECTED_SKILLS[@]}]="$skill_name"
-done < <(selected_skill_names)
+done <<< "$SELECTED_SKILL_OUTPUT"
 
 if [ "$VALIDATE_LUNA_WORKER" = true ] && \
    [ "$INSTALL_LUNA_WORKER" = false ] && \
    [ "$PROFILE_EXPLICIT" = false ] && \
    [ "$FORCE" = false ] && \
-   [ "$PRUNE" = false ]; then
+   [ "$PROFILE" = core ]; then
   VALIDATION_ONLY=true
 fi
 

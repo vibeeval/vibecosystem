@@ -9,6 +9,7 @@
  * Stats evolve based on coding patterns.
  */
 
+import { hookResponseText } from './shared/hook-response.js';
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { homedir, userInfo } from 'node:os';
@@ -18,6 +19,7 @@ interface ToolEvent {
   tool_name: string;
   tool_input?: Record<string, unknown>;
   tool_output?: string;
+  tool_response?: unknown;
   session_id?: string;
 }
 
@@ -108,7 +110,7 @@ function calculateLevel(state: TamagotchiState): number {
 }
 
 function determineMood(state: TamagotchiState, event: ToolEvent): string {
-  const output = String(event.tool_output || '').toLowerCase();
+  const output = hookResponseText(event).toLowerCase();
 
   // Check for failures
   if (output.includes('error') || output.includes('fail') || output.includes('exception')) {
@@ -134,7 +136,7 @@ function determineMood(state: TamagotchiState, event: ToolEvent): string {
 }
 
 function updateStats(state: TamagotchiState, event: ToolEvent): void {
-  const output = String(event.tool_output || '').toLowerCase();
+  const output = hookResponseText(event).toLowerCase();
 
   switch (event.tool_name) {
     case 'Agent': {

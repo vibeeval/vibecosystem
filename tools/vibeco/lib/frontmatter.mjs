@@ -11,7 +11,8 @@
  * @returns {Record<string, string>}
  */
 export function parseFrontmatter(content) {
-  const match = content.match(/^---\n([\s\S]*?)\n---/);
+  const normalized = content.replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n');
+  const match = normalized.match(/^---\n([\s\S]*?)\n---(?:\n|$)/);
   if (!match) return {};
   const fm = {};
   for (const line of match[1].split('\n')) {

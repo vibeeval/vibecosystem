@@ -11,6 +11,7 @@
  * - Mimari kararlar
  * - Uyarilar ve kacinilmasi gerekenler
  */
+import { hookResponseText } from './shared/hook-response.js';
 import { readFileSync, appendFileSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
@@ -24,6 +25,7 @@ interface PostAgentInput {
     prompt?: string;
   };
   tool_output?: string;
+  tool_response?: unknown;
 }
 
 interface AgentLearning {
@@ -173,7 +175,7 @@ function main() {
 
   const agentType = input.tool_input?.subagent_type || 'unknown';
   const description = input.tool_input?.description || '';
-  const output = input.tool_output || '';
+  const output = hookResponseText(input);
   const sessionId = input.session_id || 'unknown';
 
   // Extract learnings

@@ -1,7 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { spawn, execSync } from 'child_process';
-import Database from 'better-sqlite3';
+import type Database from 'better-sqlite3';
+import { loadOptionalSqlite, reportSqliteUnavailable } from './shared/optional-sqlite.js';
 
 interface PostToolUseInput {
   session_id: string;
@@ -88,13 +89,16 @@ function storeSessionAffinity(projectDir: string, terminalPid: number, sessionNa
   const dbPath = path.join(projectDir, '.claude', 'cache', 'artifact-index', 'context.db');
   const dbDir = path.dirname(dbPath);
 
+  const Sqlite = loadOptionalSqlite('handoff-index');
+  if (!Sqlite) return;
+  let db: Database.Database | undefined;
   try {
     // Ensure directory exists
     if (!fs.existsSync(dbDir)) {
       fs.mkdirSync(dbDir, { recursive: true });
     }
 
-    const db = new Database(dbPath);
+    db = new Sqlite(dbPath);
 
     // Create table if not exists
     db.exec(`
@@ -112,9 +116,10 @@ function storeSessionAffinity(projectDir: string, terminalPid: number, sessionNa
     `);
     stmt.run(terminalPid.toString(), sessionName);
 
-    db.close();
   } catch {
-    // Silently fail - don't block handoff creation
+    reportSqliteUnavailable('handoff-index');
+  } finally {
+    try { db?.close(); } catch { /* Preserve handoff creation. */ }
   }
 }
 
@@ -222,6 +227,7 @@ async function main() {
         detached: true,
         stdio: 'ignore'
       });
+      child.on('error', () => { console.error('[handoff-index] Artifact indexing skipped: uv could not start.'); });
       child.unref();
     }
 

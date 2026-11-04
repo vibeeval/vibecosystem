@@ -1,10 +1,11 @@
 {
   "name": "vibecosystem",
-  "version": "3.4.0",
-  "description": "Lean Claude runtime with 138 agents, 296 skills, 74 hooks and a Codex luna_worker",
+  "version": "3.5.0",
+  "description": "Profile-based Claude runtime: 138 agents, 296 skills, 74 hooks in the catalog; bounded Codex worker",
   "type": "module",
   "bin": {
-    "vibecosystem": "./bin/cli.mjs"
+    "vibecosystem": "./bin/cli.mjs",
+    "vibeco": "./tools/vibeco/vibeco.mjs"
   },
   "files": [
     "agents/",
@@ -16,7 +17,12 @@
     "tools/vibeco/",
     "tools/install-runtime.mjs",
     "tools/profile-runtime.mjs",
-    "tools/dashboard/",
+    "tools/dashboard/server.js",
+    "tools/dashboard/index.html",
+    "tools/dashboard/dashboard.css",
+    "tools/dashboard/package.json",
+    "tools/dashboard/package-lock.json",
+    "tools/dashboard/README.md",
     "plugin.json",
     "bin/",
     "install.sh",
@@ -27,6 +33,12 @@
     "hooks/hooks.json",
     "tools/register-hooks.mjs"
   ],
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "test:installers": "bash tests/validate-claude-installer.sh && bash tests/validate-codex-installer.sh",
+    "benchmark:payload": "node tests/benchmark-core-payload.mjs",
+    "benchmark:context": "node tests/benchmark-context-budget.mjs"
+  },
   "keywords": [
     "claude-code",
     "ai",

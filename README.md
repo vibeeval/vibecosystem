@@ -2,469 +2,179 @@
 
 # vibecosystem
 
-**Your AI software team. Built on Claude Code.**
+**A focused runtime for Claude Code. A bounded worker for Codex.**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Agents](https://img.shields.io/badge/agents-138-blue.svg)](#agents)
-[![Skills](https://img.shields.io/badge/skills-296-green.svg)](#skills)
-[![Hooks](https://img.shields.io/badge/hooks-74-orange.svg)](#hooks)
-[![Rules](https://img.shields.io/badge/rules-20-red.svg)](#rules)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Agents](https://img.shields.io/badge/agents-138-blue.svg)](#catalog)
+[![Skills](https://img.shields.io/badge/skills-296-green.svg)](#catalog)
+[![Hooks](https://img.shields.io/badge/hooks-74-orange.svg)](#catalog)
+[![Rules](https://img.shields.io/badge/rules-20-red.svg)](#catalog)
 [![Validate](https://github.com/vibeeval/vibecosystem/actions/workflows/validate.yml/badge.svg)](https://github.com/vibeeval/vibecosystem/actions/workflows/validate.yml)
-[![Works with Cursor](https://img.shields.io/badge/works%20with-Cursor-00b4d8.svg)](#multi-cli)
-[![Works with Codex CLI](https://img.shields.io/badge/works%20with-Codex%20CLI-10a37f.svg)](#multi-cli)
-[![Works with OpenCode](https://img.shields.io/badge/works%20with-OpenCode-purple.svg)](#multi-cli)
-[![npm](https://img.shields.io/npm/v/vibecosystem.svg)](https://www.npmjs.com/package/vibecosystem)
-[![Marketplace](https://img.shields.io/badge/Claude%20Code-Marketplace-8A2BE2.svg)](https://github.com/vibeeval/vibecosystem)
 
-[Türkçe](#turkce) | [English](#english) | [Espanol](docs/README_ES.md) | [Francais](docs/README_FR.md) | [Deutsch](docs/README_DE.md) | [Portugues](docs/README_PT.md) | [Italiano](docs/README_IT.md) | [Nederlands](docs/README_NL.md) | [中文](docs/README_ZH.md) | [日本語](docs/README_JA.md) | [한국어](docs/README_KO.md) | [العربية](docs/README_AR.md) | [हिन्दी](docs/README_HI.md) | [Русский](docs/README_RU.md)
+[Türkçe](#turkce) · [Español](docs/README_ES.md) · [Français](docs/README_FR.md) · [Deutsch](docs/README_DE.md) · [Português](docs/README_PT.md) · [Italiano](docs/README_IT.md) · [Nederlands](docs/README_NL.md) · [中文](docs/README_ZH.md) · [日本語](docs/README_JA.md) · [한국어](docs/README_KO.md) · [العربية](docs/README_AR.md) · [हिन्दी](docs/README_HI.md) · [Русский](docs/README_RU.md)
 
-![vibecosystem](assets/gif1-numbers.gif)
+![Core runtime by default; quality, context, memory and orchestration are explicit opt-ins](assets/runtime-demo.gif)
 
 </div>
 
-vibecosystem turns Claude Code into a full AI software team — 138 specialized agents that plan, build, review, test, and learn from every mistake. No configuration needed — just install and code.
+vibecosystem packages agents, skills and hooks for software work. The default `core` profile installs a selected set for investigation, implementation, review and verification. Memory, learning and orchestration have explicit profiles; the complete catalog is available through `full`.
 
-> **v2.0**: 13 new agents (sast-scanner, mutation-tester, graph-analyst, mcp-manager, community-manager, benchmark, dependency-auditor, api-designer, incident-responder, data-modeler, test-architect, release-engineer, documentation-architect) + 23 new skills (SAST, compliance, product, marketing, MCP) + 4 new hooks + Agent Monitoring Dashboard + GitHub Actions CI/CD + MCP Auto-Discovery. See [UPGRADING.md](UPGRADING.md) for details.
+**3.5.0 is a release candidate in this source tree.** It is not a claim that an npm package or GitHub release has been published. See [CHANGELOG.md](CHANGELOG.md) and the [upgrade guide](UPGRADING.md).
 
-> **v2.1**: 7 new skills (minimax-pdf, minimax-docx, minimax-xlsx, pptx-generator, frontend-dev, fullstack-dev, clone-website) + 2 new agents (document-generator, website-cloner). Document generation, pixel-perfect website cloning, and enhanced frontend/fullstack patterns.
+## Quick start
 
-> **v2.1.1**: 7 new skills from oh-my-claudecode (smart-model-routing, deep-interview, agent-benchmark, visual-verdict, ai-slop-cleaner, factcheck-guard, notepad-system) + 1 new rule (commit-trailers).
-
-> **v2.2**: 5 features from Claude Code source — Agent Memory (persistent per-agent memory), Magic Docs (auto-updating docs), Dream Consolidation (cross-session memory cleanup), Smart Recall (frontmatter-based memory scoring), Plugin Toggle (hook enable/disable CLI). +7 hooks, skill references for 21 agents.
-
-> **v2.2.1**: Monetization stack — 1 new agent (monetization-expert), 2 new skills (paywall-optimizer, codex-orchestration), 3 updated skills (revenuecat-patterns, paywall-strategy, subscription-pricing). AI-powered paywall optimization with 14-category benchmarks, RevenueCat SDK patterns, Codex + Claude Code orchestration.
-
-> **v2.3**: `vibeco` CLI tool (stats, doctor, profiles, dashboard), 6 preset profiles for token savings, one-liner install (`curl | bash`).
-
-> **v2.4**: Terminal HUD (real-time statusline), prompt auto-improver (enriches vague prompts with context), persistent planning system (PLAN.md/PROGRESS.md/CONTEXT.md for 96.7% task completion). Competitive gap closure from analysis of 20+ ecosystem repos.
-
-> **v3.0**: `npx vibecosystem init` npm installer, `plugin.json` for official plugin ecosystem, worktree isolation on 60 producer agents, Claude-adapter model routing (Haiku/Sonnet/Opus tiers), knowledge graph integration (6-71x token savings), dashboard v2 with token/cost tracking.
-
-> **v3.4**: Lean `core` runtime is now the default. Codex uses one model authority, `luna_worker` with `gpt-5.6-luna` and `max` reasoning; Claude-only Opus/Sonnet frontmatter remains isolated to the Claude adapter. Context injectors have bounded event/session budgets, and installer ownership manifests make backups and pruning explicit.
-
-## The Problem
-
-Claude Code is powerful, but it's one assistant. You prompt, it responds, you review. For complex projects you need a planner, a reviewer, a security auditor, a tester — and you end up being all of them yourself.
-
-## The Solution
-
-vibecosystem is a complete [Claude Code](https://docs.anthropic.com/en/docs/claude-code) ecosystem that creates a self-organizing AI team:
-
-1. <a name="agents"></a>**138 agents** — specialized roles from frontend-dev to security-analyst
-2. <a name="skills"></a>**296 skills** — reusable knowledge from TDD workflows to Kubernetes patterns
-3. <a name="hooks"></a>**74 hooks** — TypeScript sensors that observe, filter, and inject context
-4. <a name="rules"></a>**20 rules** — behavioral guidelines that shape every agent's output
-5. **Self-learning** — every error becomes a rule, automatically
-
-After setup, you say "build a feature" and 20+ agents coordinate across 5 phases.
-
-<a name="english"></a>
-
-## Quick Start
-
-### npm (recommended)
-
-```bash
-npx vibecosystem init
-```
-
-### One-liner
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/vibeeval/vibecosystem/main/install-remote.sh | bash
-```
-
-### Manual
+Use a source checkout to try these changes. When reviewing a PR, check out its head branch before installing; cloning uses `main` by default:
 
 ```bash
 git clone https://github.com/vibeeval/vibecosystem.git
 cd vibecosystem
+./install.sh --profile core --dry-run
 ./install.sh --profile core
 ```
 
-That's it. Use Claude Code normally. The team activates.
+The installer uses the prebuilt hooks in `hooks/dist/`; a normal installation does not compile TypeScript or install the hook development dependencies. Node.js 18+ and Bash are required. Development checks use Node.js 22.
 
-### vibeco CLI
-
-After install, the `vibeco` command is available:
+For the published npm version:
 
 ```bash
-vibeco stats                          # ecosystem statistics
-vibeco list agents --search security  # browse components
-vibeco profile frontend               # switch profile (saves tokens)
-vibeco doctor                         # health check
-vibeco dashboard                      # start monitoring UI
-vibeco update                         # pull latest & reinstall
-vibeco effective-config               # show model, worker, profile and budgets
+npx vibecosystem init --profile core
 ```
 
-### Profiles
-
-Save tokens by loading only what you need:
-
-| Profile | Agents | Skills | Use case |
-|---------|--------|--------|----------|
-| `core` | 12 | 32 | Bounded implementation and verification (default) |
-| `quality` | 12 | 32 | Core + focused edit and verification checks |
-| `context` | 12 | 32 | Core + targeted context retrieval |
-| `memory` | 13 | 36 | Core + opt-in memory and learning hooks |
-| `orchestration` | 14 | 35 | Core + explicit multi-agent workflows |
-| `minimal` | 12 | 32 | Alias for `core` |
-| `frontend` | ~30 | ~60 | React/Next.js/CSS/a11y |
-| `backend` | ~44 | ~74 | API/DB/security |
-| `fullstack` | ~59 | ~96 | Frontend + Backend |
-| `devops` | ~33 | ~61 | CI/CD/K8s/cloud |
-| `full` | 138 | 296 | All legacy capabilities; 8k/event and 50k/session context budget |
-| `smart` | 12 | 32 | Alias for `core` |
-| `all` | 138 | 296 | Alias for `full` |
-
-The lean profiles change the active component set and context budget, not the model. `core` uses 4,000 characters per event and 12,000 per session; `full` preserves the legacy 8,000/50,000 limits. Memory and orchestration are opt-in so a normal task does not trigger recall, swarm, or cross-agent chains.
+The remote installer is also available. Review the script before running it:
 
 ```bash
-vibeco profile core       # bounded default
-vibeco profile full       # back to every legacy capability
+curl -fsSL https://raw.githubusercontent.com/vibeeval/vibecosystem/main/install-remote.sh -o install-remote.sh
+bash install-remote.sh --profile core
 ```
 
-## How It Works
-
-```
-YOU SAY SOMETHING                VIBECOSYSTEM ACTIVATES              RESULT
-┌──────────────┐                 ┌──────────────────────┐            ┌──────────┐
-│ "add a new   │──→ Intent ──→  │ Phase 1: scout +     │──→ Code   │ Feature  │
-│  feature"    │   Classifier   │   architect plan     │   Written │ built,   │
-│              │                 │ Phase 2: backend-dev │   Tested  │ reviewed,│
-│              │                 │   + frontend-dev     │   Reviewed│ tested,  │
-│              │                 │ Phase 3: code-review │           │ merged   │
-│              │                 │   + security-review  │           │          │
-│              │                 │ Phase 4: verifier    │           │          │
-│              │                 │ Phase 5: self-learner│           │          │
-└──────────────┘                 └──────────────────────┘            └──────────┘
-```
-
-**Hooks** are sensors — they observe every tool call and inject relevant context:
-```
-"fix the bug"       → compiler-in-loop + error-broadcast      ~2,400 tok
-"add api endpoint"  → edit-context + signature-helper + arch   ~3,100 tok
-"explain this code" → (nothing extra)                          ~800 tok
-```
-
-**Agents** are muscles — each one specialized for a specific job:
-```
-GraphQL API      → graphql-expert   (backup: backend-dev)
-Kubernetes       → kubernetes-expert (backup: devops)
-DDD modeling     → ddd-expert       (backup: architect)
-Bug reproduction → replay           (backup: sleuth)
-... 70 more routing rules
-```
-
-**Self-Learning Pipeline** turns mistakes into permanent knowledge:
-```
-Error happens → passive-learner captures pattern (+ project tag)
-→ consolidator groups & counts (per-project + global)
-→ confidence >= 5 → auto-inject into context
-→ 2+ projects, 5+ total → cross-project promotion
-→ 10x repeat → permanent .md rule file
-```
-
-No manual intervention. The system writes its own rules — and shares them across projects.
-
-## What's New in v2.0
-
-- **SAST Security Scanner** — static analysis agent + hook for automated vulnerability detection
-- **Agent Monitoring Dashboard** — real-time web UI for agent activity and performance
-- **MCP Auto-Discovery** — automatic MCP server recommendations based on project type
-- **Changelog Automation** — automatic changelog generation at session end
-- **Compliance Skills** — SOC2, GDPR, HIPAA compliance checking
-- **Product & Marketing Skills** — PRD writer, analytics setup, growth playbooks
-- **GitHub Actions CI/CD** — automated PR review + issue fix workflows
-- **Mutation Testing** — test quality measurement via mutation analysis
-- **Code Knowledge Graph** — codebase structure analysis with graph-analyst
-
----
-
-## Core Features
-
-### Agent Swarm
-
-Say "add a new feature" and 20+ agents activate across 5 phases.
-
-![Agent Swarm](assets/gif3-swarm.gif)
-
-```
-Phase 1 (Discovery):    scout + architect + project-manager
-Phase 2 (Development):  backend-dev + frontend-dev + devops + specialists
-Phase 3 (Review):       code-reviewer + security-reviewer + qa-engineer
-Phase 4 (QA Loop):      verifier + tdd-guide (max 3 retry → escalate)
-Phase 5 (Final):        self-learner + technical-writer
-```
-
-### Self-Learning Pipeline
-
-Every error becomes a rule. Automatically.
-
-![Self-Learning](assets/gif2-pipeline.gif)
-
-### Dev-QA Loop
-
-Every task goes through a quality gate:
-
-```
-Developer implements → code-reviewer + verifier check
-→ PASS → next task
-→ FAIL → feedback to developer, retry (max 3)
-→ 3x FAIL → escalate (reassign / decompose / defer)
-```
-
-### Cross-Project Learning
-
-Patterns learned in one project automatically benefit all your projects.
-
-```
-Project A: add-error-handling (3x) ─┐
-                                     ├→ 2+ projects, 5+ total → GLOBAL
-Project B: add-error-handling (4x) ─┘
-                                     ↓
-Next session in ANY project → "add-error-handling" injected as global pattern
-```
-
-Each project gets its own pattern store. When the same pattern appears in 2+ projects with 5+ total occurrences, it's promoted to a global pattern that benefits every project — even brand new ones.
+Restart Claude Code after changing its hook registrations. Inspect the installed state with:
 
 ```bash
-node ~/.claude/hooks/dist/instinct-cli.mjs portfolio      # All projects
-node ~/.claude/hooks/dist/instinct-cli.mjs global          # Global patterns
-node ~/.claude/hooks/dist/instinct-cli.mjs project <name>  # Project detail
-node ~/.claude/hooks/dist/instinct-cli.mjs stats           # Statistics
+vibeco effective-config
+vibeco doctor
+vibeco stats
 ```
 
-### Canavar Cross-Training
+The source installer creates `~/.local/bin/vibeco` unless an unmanaged launcher already exists there. Add `~/.local/bin` to `PATH` if your shell cannot find it. You can also run the source CLI with `node tools/vibeco/vibeco.mjs`.
 
-When one agent makes a mistake, the entire team learns from it.
+## Profiles
 
-```
-Agent error → error-ledger.jsonl → skill-matrix.json
-→ All agents get the lesson at session start
-→ Team-wide error prevention
-```
+Profiles select installed components and registered hook commands. Catalog size does not describe how much prompt content is loaded into each request.
 
-### Adaptive Hook Loading
+| Profile | Purpose |
+| --- | --- |
+| `core` | Selected implementation, investigation and verification tools; default |
+| `dashboard` | Core plus opt-in local activity monitoring |
+| `quality` | Core plus focused edit, compiler and security checks |
+| `context` | Core plus targeted code context retrieval |
+| `memory` | Core plus persistent recall and learning |
+| `orchestration` | Core plus explicit multi-agent workflows |
+| `full` | All catalog components and the complete hook registration manifest |
 
-74 hook sources exist, but profiles register only a bounded subset. `core` registers 6 commands; `full` registers the complete manifest. Intent and profile determine which hooks fire.
-
-![Hooks](assets/gif4-hooks.gif)
-
----
-
-## Architecture
-
-![Big Picture](assets/gif5-bigpicture.gif)
-
-```
-┌─────────────────────────────────────────────────────────┐
-│                    Claude Code                          │
-│                                                         │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐              │
-│  │  Hooks   │  │  Agents  │  │  Skills  │              │
-│  │  (74)    │→ │  (138)   │← │  (296)   │              │
-│  └────┬─────┘  └────┬─────┘  └──────────┘              │
-│       │              │                                   │
-│       ▼              ▼                                   │
-│  ┌──────────┐  ┌──────────┐                              │
-│  │  Rules   │  │  Memory  │                              │
-│  │  (20)    │  │ (PgSQL)  │                              │
-│  └──────────┘  └──────────┘                              │
-│                                                         │
-│  ┌──────────────────────────────────────┐                │
-│  │  Self-Learning Pipeline             │                │
-│  │  instincts → consolidate → rules    │                │
-│  │  + cross-project promotion          │                │
-│  └──────────────────────────────────────┘                │
-│                                                         │
-│  ┌──────────────────────────────────────┐                │
-│  │  Canavar Cross-Training             │                │
-│  │  error-ledger → skill-matrix → team │                │
-│  └──────────────────────────────────────┘                │
-└─────────────────────────────────────────────────────────┘
-```
-
----
-
-## Agent Categories
-
-| Category | Count | Examples |
-|----------|-------|---------|
-| Core Dev | 14 | frontend-dev, backend-dev, kraken, spark, devops, browser-agent, website-cloner |
-| Review & QA | 8 | code-reviewer, security-reviewer, verifier, qa-engineer |
-| Domain Experts | 36 | graphql-expert, kubernetes-expert, ddd-expert, redis-expert, paywall-planner |
-| Architecture | 8 | architect, planner, clean-arch-expert, cqrs-expert |
-| Testing | 6 | tdd-guide, e2e-runner, arbiter, mocksmith |
-| DevOps & Cloud | 12 | aws-expert, gcp-expert, azure-expert, terraform-expert |
-| Analysis | 11 | scout, sleuth, data-analyst, profiler, strategist, harvest |
-| Orchestration | 16 | nexus, sentinel, commander, neuron, vault, nitro |
-| Documentation | 6 | technical-writer, doc-updater, copywriter, api-doc-generator, document-generator |
-| Learning | 7 | self-learner, canavar, reputation-engine, session-replay-analyzer |
-
----
-
-## Comparison
-
-| Feature | vibecosystem | Single Claude Code | Cursor | aider |
-|---------|:----------:|:------------------:|:------:|:-----:|
-| Specialized agents | **138** | 0 | 0 | 0 |
-| Self-learning | **Yes** | No | No | No |
-| Agent swarm coordination | **Yes** | No | No | No |
-| Cross-project learning | **Yes** | No | No | No |
-| Cross-agent error training | **Yes** | No | No | No |
-| Dev-QA retry loop | **Yes** | No | No | No |
-| Adaptive hook loading | **Yes** | No | No | No |
-| Assignment matrix routing | **Yes** | No | No | No |
-| Claude Code native | **Yes** | Yes | No | No |
-| Zero config after install | **Yes** | Yes | No | No |
-
----
-
-## What's Included
-
-| Component | Count | Description |
-|-----------|-------|-------------|
-| `agents/` | 138 | Markdown agent definitions with specialized prompts |
-| `skills/` | 296 | Reusable knowledge — TDD, security, patterns, frameworks |
-| `hooks/src/` | 74 | TypeScript hooks — sensors, learners, validators |
-| `rules/` | 20 | Behavioral guidelines — coding style, safety, QA |
-
----
-
-## Tech Stack
-
-| Component | Technology |
-|-----------|-----------|
-| Runtime | Claude Code adapter + Codex `luna_worker` adapter |
-| Models | Claude: Opus/Sonnet frontmatter; Codex: `gpt-5.6-luna` / `max` |
-| Hook engine | TypeScript → esbuild → .mjs |
-| Memory DB | PostgreSQL + pgvector (Docker) |
-| Agent format | Markdown + YAML frontmatter |
-| Skill format | prompt.md / SKILL.md |
-| Cross-training | JSONL ledger + JSON skill matrix |
-| Cross-project learning | Per-project instinct stores + global promotion |
-
----
-
-## Philosophy
-
-```
-hooks are sensors. observe, filter, signal.
-agents are muscles. build, produce, fix.
-the bridge between them: context injection.
-no direct RPC. no message passing. by design.
-implicit coordination through context.
-```
-
----
-
-## Data & Privacy
-
-- All data stays on your machine (`~/.claude/`)
-- No network requests, no telemetry, no cloud sync
-- Self-learned rules go to `~/.claude/rules/`
-- Hooks run locally via Claude Code's native hook system
-
----
-
-<a name="multi-cli"></a>
-
-## Multi-CLI Support
-
-vibecosystem works with multiple AI coding tools:
-
-| CLI | Installer | Instructions File | What You Get |
-|-----|-----------|-------------------|--------------|
-| **Claude Code** | `./install.sh` | `rules/*.md` | Full support (agents + skills + hooks + rules) |
-| **Cursor IDE** | `./install-cursor.sh` | `AGENTS.md` + `.cursor/rules/` | 6 MDC rules + AGENTS.md + skills |
-| **Codex CLI** (OpenAI) | `./install-codex.sh` | `AGENTS.md` + `.codex/agents/luna-worker.toml` | Core allowlist (32 skills) or full skills; one bounded `luna_worker` model authority |
-| **OpenCode** | Manual | `AGENTS.md` | Skills only |
+`minimal` and `smart` alias `core`; `all` aliases `full`. Legacy `frontend`, `backend`, `fullstack` and `devops` profiles retain domain allowlists with core hooks. Read the exact selection in [profiles/runtime-manifest.json](profiles/runtime-manifest.json), or use `vibeco effective-config` after installation.
 
 ```bash
-# For Cursor IDE users:
-./install-cursor.sh /path/to/your/project
-
-# For Codex CLI users:
-./install-codex.sh --profile core --install-luna-worker
+vibeco profile quality
+vibeco profile core
 ```
 
-See [docs/codex-setup.md](docs/codex-setup.md) for Codex CLI setup, or copy `.cursor/rules/` into any Cursor project.
+Profile changes reconcile installer-owned files and hook registrations. Modified or unmanaged files require review; the installer preserves ownership boundaries and creates backups before replacements. See [UPGRADING.md](UPGRADING.md).
 
----
+## Token and runtime efficiency
 
-## Inspired By
+The default profile avoids installing the complete agent and skill catalog. Context-producing hooks use character limits: **4,000 per event and 12,000 per session** for lean profiles; **8,000/50,000** for `full`. These are limits on participating hook context, not limits on total model input, output, reasoning, tool results or billing.
 
-vibecosystem stands on the shoulders of great open-source projects:
+Token cost depends on the selected model, task, retrieved content and retries. Character counts and `estimated_tokens` are estimates; provider-reported usage is recorded separately when present. This project does not promise a fixed percentage or multiplier of token savings. Reproducible measurements belong with their fixtures and commands in [the verification record](docs/verification.md).
 
-- **[Shannon](https://github.com/KeygraphHQ/Shannon)** by KeygraphHQ — Result<T,E> pattern, pentest pipeline, comment philosophy
-- **[UI UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max)** by nextlevelbuilder — Named UX rules, UI style catalog, design token architecture
-- **[Game Studios](https://github.com/Donchitos/game-studios)** by Donchitos — Context resilience, incremental writing, gate-check system
-- **[Skill Gateway](https://github.com/buraksu42/skill-gateway)** by buraksu42 — Invisible skill routing, external catalog, one-question rule
-- **[Pyxel](https://github.com/kitao/pyxel)** by kitao — Retro game engine patterns, pixel art constraints, MML audio
-- **[copilot-orchestra](https://github.com/ShepAlderson/copilot-orchestra)** by ShepAlderson -- Phase-gated commits, plan documentation trail, 90% confidence threshold
-- **[RevenueCat](https://www.revenuecat.com/)** -- Subscription infrastructure, category benchmarks, paywall patterns
-- **[Trail of Bits Skills](https://github.com/trailofbits/skills)** by trailofbits -- Security audit patterns, variant analysis, false positive verification, sharp edges detection
+The core skill entrypoint payload is smaller after focused rewrites: see the [reproducible byte comparison](docs/verification.md#core-skill-entrypoint-payload). Skills load on demand, so this is an available instruction size measurement, not a whole-session token claim.
 
----
+For routine work, stay on `core`, inspect relevant files, use one bounded implementation path and run the checks required for the change. Select `context`, `memory` or `orchestration` when the task benefits from them. Installing `full` does not automatically launch an agent swarm.
 
-## Contributing
+## How the runtime fits together
 
-Contributions welcome! Areas where help is needed:
+```mermaid
+flowchart LR
+    P[Selected profile] --> I[Installer]
+    I --> C[Selected agents and skills]
+    I --> H[Registered Claude hooks]
+    E[Claude lifecycle event] --> H
+    H --> B[Bounded optional context]
+    B --> W[Claude session]
+    C --> W
+    W --> V[Implementation and verification]
+```
 
-- **More agent definitions** — specialized roles for your domain
-- **More skill patterns** — framework-specific knowledge (Rails, Flutter, etc.)
-- **Better hooks** — new sensors, smarter context injection
-- **Documentation** — tutorials, guides, examples
-- **Translations** — improve existing or add new languages
+Hooks run in response to host lifecycle events. They can inspect tool input, return a permission decision or provide context. They do not guarantee that a suggested agent or workflow will execute. Agent and skill files are instructions consumed by the host model.
 
----
+The optional memory pipeline captures and consolidates patterns under the user's Claude directory. Its thresholds are heuristics, not proof that a learned rule is correct. Review learned material before relying on it in sensitive work.
+
+## Catalog
+
+| Path | Catalog contents |
+| --- | --- |
+| `agents/` | 138 Markdown agent definitions |
+| `skills/` | 296 top-level skill directories; some contain nested skills |
+| `hooks/src/` | 74 TypeScript entry points, including utilities and CLIs |
+| `rules/` | 20 rule documents; the lean profiles do not install the full rule set |
+
+Source entry points, unique hook names and registered commands are different counts. [hooks/hooks.json](hooks/hooks.json) is the registration source. Some files are command-line utilities or are not registered by default. Use `vibeco list agents --search security` to browse the installed catalog.
+
+## Codex and other adapters
+
+| Host | Setup | Scope |
+| --- | --- | --- |
+| Claude Code | `./install.sh --profile core` | Selected agents, skills, hooks and rules |
+| Codex | `./install-codex.sh --profile core --install-luna-worker` | Selected skills and an optional bounded `luna_worker` |
+| Cursor | `./install-cursor.sh /path/to/project` | Project instructions, MDC rules and skills |
+| Other compatible hosts | Manual | Skill content; check the host's format and discovery rules |
+
+The Codex worker contract is [`.codex/agents/luna-worker.toml`](.codex/agents/luna-worker.toml): `gpt-5.6-luna` with `max` reasoning. The project config stays model-neutral. Claude-only `opus`/`sonnet` metadata is not applied by the Codex installer. Model availability and custom-agent support depend on the host and account. See [docs/codex-setup.md](docs/codex-setup.md).
+
+## Optional integrations and data
+
+Core installation does not provision external services. Some optional hooks and skills need tools that are not bundled:
+
+- Code context and Python diagnostics use a compatible TLDR daemon; unavailable diagnostics can return no findings.
+- Memory graph features need a Node-compatible `better-sqlite3` installed in `~/.claude/hooks/`; a missing or incompatible module is reported and that graph operation skips. Other recall workflows reference Python/`uv` scripts and may need a configured database.
+- The `dashboard` profile adds one emitter to core (7 unique hook entry points across 8 registrations). It records agent starts on PreToolUse and structural tool completion events on PostToolUse; `full` includes it too. The dashboard uses the local `ws` package. Install it with `npm ci --ignore-scripts --prefix ~/.claude/tools/dashboard`, as described in [its setup guide](tools/dashboard/README.md).
+- Compiler assistance may contact a configured LM Studio endpoint. Braintrust extraction requires `VIBECO_BRAINTRUST_ANALYSIS=1`, a key and its script. GitHub-mutating hooks require `VIBECO_GITHUB_AUTOMATION=1`. MCP, search and provider skills may contact their configured services.
+
+Local state can contain code excerpts, prompts, tool output, errors and learned rules under `~/.claude/`. The core product is local; integrations may send data to the services you configure. Review the enabled profile, credentials and endpoint settings. The credential hook is a best-effort guard and does not replace host permissions or an operating-system sandbox. See [SECURITY.md](SECURITY.md).
+
+## Development
+
+```bash
+cd hooks
+npm ci
+npm run check
+npm run build
+npm test
+```
+
+Keep `hooks/dist/` synchronized with source. Installer tests use temporary home directories; do not use a personal installation as a fixture. See [CONTRIBUTING.md](CONTRIBUTING.md), [ARCHITECTURE.md](ARCHITECTURE.md) and [docs/verification.md](docs/verification.md).
+
+## Visuals
+
+The current [seven-second GIF](assets/runtime-demo.gif) is a locally rendered product diagram, not a screen recording or benchmark. Its [editable source](assets/runtime-demo-source/README.md) freezes data from the runtime manifest. The [static diagram](assets/runtime-overview.svg) describes profile selection and runtime boundaries. Earlier terminal GIFs remain in `assets/` as historical material; they depict legacy workflows and are not evidence that every feature runs in the default profile. See [assets/README.md](assets/README.md) for sources and reproduction requirements.
 
 <a name="turkce"></a>
 
 ## Türkçe
 
-### Nedir?
-
-vibecosystem, Claude Code'u tam donanımlı bir yapay zeka yazılım ekibine dönüştürür. Sadece tek bir asistan değil — planlayan, geliştiren, kod incelemesi (review) yapan, test eden ve yaptığı her hatadan öğrenen **138 uzman ajandan (agent) oluşan bir ekip**.
-
-Claude adapter'ı için ayrı bir model zorlaması yok; Codex tarafında tek otorite `luna_worker` ve `gpt-5.6-luna/max`. Sistem, Claude Code'un hook + agent + rules katmanlarını ve Codex'in sınırlı worker sözleşmesini birlikte kullanır.
-
-### Hızlı Başlangıç
+vibecosystem, Claude Code için agent, skill ve hook'ları bir araya getirir. Varsayılan `core` profili, araştırma, geliştirme, inceleme ve doğrulama için seçilmiş bileşenleri kurar. Bellek, öğrenme ve çoklu agent akışları ayrıca seçilir; katalogdaki her şey her oturumda yüklenmez.
 
 ```bash
-git clone https://github.com/vibeeval/vibecosystem.git
-cd vibecosystem
+./install.sh --profile core --dry-run
 ./install.sh --profile core
+vibeco effective-config
 ```
 
-### Nasıl Çalışır?
+Token verimliliği için önce göreve uygun küçük profili seç. Bağlam sınırları modelin toplam token tüketimini sınırlamaz; ücret ve kullanım görevine, modele ve tekrar sayısına bağlıdır. Ölçülmemiş tasarruf oranları vaat etmiyoruz. `full` profili tüm kataloğu açar; otomatik olarak bir agent ordusu başlatmaz.
 
-1. **Hook'lar sensördür** — gözlemler, filtreler ve işaret eder.
-2. **Agent'lar kas gibidir** — çalışır, üretir ve düzeltir.
-3. **Aralarındaki köprü:** Context (bağlam) enjeksiyonudur.
-4. **Doğrudan RPC yoktur** — bu kasıtlı bir mimari tercihtir.
-5. **Context üzerinden örtük (implicit) koordinasyon** sağlanır.
+3.5.0 bu kaynak ağacında hazırlanıyor. Yayınlanmış sürüm ve kurulum için İngilizce bölümü, değişiklikler için [CHANGELOG.md](CHANGELOG.md) dosyasını takip edebilirsin.
 
-### Felsefe
+## Credits and license
 
-```text
-Kullanıcının hiçbir şey hatırlamasına gerek yoktur.
-Her şey otomatiktir.
-```
----
+Built by [@vibeeval](https://x.com/vibeeval). MIT licensed. See [LICENSE](LICENSE).
 
-## License
-
-MIT
-
----
-
-<div align="center">
-
-**Built by [@vibeeval](https://x.com/vibeeval)**
-
-No custom model. No custom API. Just good engineering.
-
-</div>
+The catalog incorporates ideas credited in the individual skills and agent definitions, including work from Shannon, UI UX Pro Max, Game Studios, Skill Gateway, Pyxel, copilot-orchestra and Trail of Bits Skills. External tools and providers retain their own licenses and terms.

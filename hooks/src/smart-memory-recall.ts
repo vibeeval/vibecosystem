@@ -14,10 +14,12 @@
  * 1. ~/.claude/projects/<project>/memory/*.md (proje memory)
  * 2. ~/.claude/agent-memory/**\/*.md (agent memory)
  */
-import { readFileSync, existsSync, readdirSync, statSync } from 'fs';
+import { readFileSync, existsSync, readdirSync, statSync, openSync, readSync, closeSync } from 'node:fs';
 import { join } from 'path';
 import { homedir } from 'os';
 import { budgetHookOutput } from './shared/context-budget.js';
+import { readHookInput } from './shared/hook-input.js';
+import { agentProjectDir } from './shared/agent-memory.js';
 
 interface UserPromptSubmitInput {
   session_id: string;
@@ -76,10 +78,13 @@ function scanDir(dir: string): MemoryHeader[] {
         if (!stat.isFile() || stat.size === 0) continue;
 
         // Sadece ilk 2KB oku (frontmatter icin yeterli)
-        const fd = require('fs').openSync(filePath, 'r');
+        const fd = openSync(filePath, 'r');
         const buf = Buffer.alloc(Math.min(FRONTMATTER_MAX_BYTES, stat.size));
-        require('fs').readSync(fd, buf, 0, buf.length, 0);
-        require('fs').closeSync(fd);
+        try {
+          readSync(fd, buf, 0, buf.length, 0);
+        } finally {
+          closeSync(fd);
+        }
 
         const content = buf.toString('utf-8');
         const fm = parseFrontmatter(content);
@@ -106,33 +111,24 @@ function scanDir(dir: string): MemoryHeader[] {
 /**
  * Tum memory dizinlerini tara
  */
-function scanAllMemories(): MemoryHeader[] {
-  const headers: MemoryHeader[] = [];
-
-  // 1. Proje memory'leri
-  const projectsDir = join(CLAUDE_HOME, 'projects');
-  if (existsSync(projectsDir)) {
+function scanAllMemories(cwd: string): MemoryHeader[] {
+  const projectDir = agentProjectDir(cwd);
+  // Claude's project-memory directory is encoded from the absolute project path.
+  // Do not enumerate other projects: their memories are not context for this one.
+  const projectKey = projectDir.replace(/[^a-zA-Z0-9]/g, '-');
+  const headers = scanDir(join(CLAUDE_HOME, 'projects', projectKey, 'memory'));
+  const agentRoots = [
+    join(CLAUDE_HOME, 'agent-memory'),
+    join(projectDir, '.claude', 'agent-memory'),
+    join(projectDir, '.claude', 'agent-memory-local'),
+  ];
+  for (const root of agentRoots) {
     try {
-      for (const proj of readdirSync(projectsDir)) {
-        const memDir = join(projectsDir, proj, 'memory');
-        headers.push(...scanDir(memDir));
+      for (const agent of readdirSync(root, { withFileTypes: true })) {
+        if (agent.isDirectory()) headers.push(...scanDir(join(root, agent.name)));
       }
-    } catch { /* skip */ }
+    } catch { /* No memory in this scope. */ }
   }
-
-  // 2. Agent memory'leri
-  const agentMemDir = join(CLAUDE_HOME, 'agent-memory');
-  if (existsSync(agentMemDir)) {
-    try {
-      for (const agent of readdirSync(agentMemDir)) {
-        const dir = join(agentMemDir, agent);
-        if (existsSync(dir) && statSync(dir).isDirectory()) {
-          headers.push(...scanDir(dir));
-        }
-      }
-    } catch { /* skip */ }
-  }
-
   return headers;
 }
 
@@ -172,6 +168,9 @@ function scoreMemories(headers: MemoryHeader[], query: string): MemoryHeader[] {
         score += 15;
       }
     }
+
+    // Recency/type alone must never make an unrelated memory relevant.
+    if (score === 0) { header.score = 0; continue; }
 
     // Type match bonus (feedback/project daha degerli)
     if (header.type === 'feedback') score += 5;
@@ -219,24 +218,20 @@ function loadMemoryContents(selected: MemoryHeader[]): string {
   return parts.join('\n\n---\n\n');
 }
 
-function readStdin(): string {
-  return readFileSync(0, 'utf-8');
-}
-
 async function main() {
-  const input: UserPromptSubmitInput = JSON.parse(readStdin());
+  const input: UserPromptSubmitInput = readHookInput<UserPromptSubmitInput>();
 
   // Subagent'larda calisma
   if (process.env.CLAUDE_AGENT_ID) return;
 
   // Kisa prompt'larda calisma
-  if (input.prompt.length < 15) return;
+  if (typeof input.prompt !== 'string' || input.prompt.length < 15) return;
 
   // Slash command'larda calisma
   if (input.prompt.trim().startsWith('/')) return;
 
   // Tum memory'leri tara
-  const allHeaders = scanAllMemories();
+  const allHeaders = scanAllMemories(input.cwd);
   if (allHeaders.length === 0) return;
 
   // Skorla ve sec

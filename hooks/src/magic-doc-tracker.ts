@@ -12,8 +12,10 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
 import { budgetHookOutput } from './shared/context-budget.js';
+import { readHookInput, hookResponseText } from './shared/hook-input.js';
 
 interface PostToolInput {
+  tool_response?: unknown;
   tool_name: string;
   tool_input: {
     file_path?: string;
@@ -59,13 +61,13 @@ function saveTracked(tracked: Record<string, TrackedDoc>): void {
 
 function main() {
   try {
-    const input: PostToolInput = JSON.parse(process.argv[2] || '{}');
+    const input: PostToolInput = readHookInput<PostToolInput>();
 
     // Sadece Read tool icin calis
     if (input.tool_name !== 'Read') return;
 
     const filePath = input.tool_input?.file_path;
-    const output = input.tool_output || '';
+    const output = hookResponseText(input);
 
     if (!filePath || !output) return;
 
@@ -99,7 +101,10 @@ function main() {
 
     // Kullaniciya bildir
     const result = {
-      additionalContext: `[Magic Doc detected: "${title}" at ${filePath}. Will be auto-updated at session end.]`,
+      hookSpecificOutput: {
+        hookEventName: 'PostToolUse',
+        additionalContext: `[Magic Doc detected: "${title}" at ${filePath}.]`,
+      },
     };
     process.stdout.write(JSON.stringify(budgetHookOutput(result, 'magic-doc-tracker', 'PostToolUse:Read')));
   } catch {

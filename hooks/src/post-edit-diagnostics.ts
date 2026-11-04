@@ -1,3 +1,4 @@
+import { readHookInput } from './shared/hook-input.js';
 /**
  * Post-Edit Diagnostics Hook
  *
@@ -28,7 +29,7 @@ interface HookOutput {
 }
 
 async function main() {
-  const input: HookInput = JSON.parse(readFileSync(0, 'utf-8'));
+  const input = readHookInput<HookInput>();
 
   // Only run on Edit and Write operations
   if (input.tool_name !== 'Edit' && input.tool_name !== 'Write') {

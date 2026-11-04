@@ -14,6 +14,8 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, statSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
+import { readHookInput } from './shared/hook-input.js';
+import { budgetHookOutput } from './shared/context-budget.js';
 
 const CLAUDE_HOME = join(homedir(), '.claude');
 const DREAM_DIR = join(CLAUDE_HOME, 'dream');
@@ -33,7 +35,7 @@ interface LockData {
 
 interface SessionStartInput {
   session_id?: string;
-  event?: string;
+  source?: string;
 }
 
 function ensureDir(dir: string): void {
@@ -180,10 +182,10 @@ ${dirList}
 
 function main() {
   try {
-    const input: SessionStartInput = JSON.parse(process.argv[2] || '{}');
+    const input: SessionStartInput = readHookInput<SessionStartInput>();
 
     // Sadece startup event'inde calis (resume/compact'ta calisma)
-    if (input.event && input.event !== 'startup') return;
+    if (input.source !== 'startup') return;
 
     const lock = readLock();
 
@@ -212,9 +214,9 @@ function main() {
     const prompt = buildConsolidationPrompt(memoryDirs);
 
     const result = {
-      systemMessage: prompt,
+      hookSpecificOutput: { hookEventName: 'SessionStart', additionalContext: prompt },
     };
-    process.stdout.write(JSON.stringify(result));
+    process.stdout.write(JSON.stringify(budgetHookOutput(result, 'dream-consolidator', 'SessionStart')));
   } catch {
     // sessiz
   }

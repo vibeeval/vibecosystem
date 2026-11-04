@@ -4,7 +4,33 @@ All notable changes to vibecosystem will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [3.5.0] - Unreleased
+
+This version is being prepared in source. No npm publication, release tag or deployment is implied.
+
+### Changed
+
+- Claude CI review is opt-in through the `claude-review` label and cancels stale runs. Ordinary validation does not call an LLM.
+- Added an explicit `dashboard` profile for local agent/tool activity monitoring; it is also included in `full`.
+- Twenty core skill entrypoints now use bounded workflows with available agents. Entrypoint-byte comparisons and their limits are recorded in the verification guide.
+- Default-profile documentation now distinguishes catalog contents, installed components and hook registrations. Removed unsupported token-saving multipliers, completion rates and automatic swarm guarantees from current product copy.
+- Refreshed localized introductions and replaced legacy workflow GIF embeds with a locally rendered, editable HyperFrames product GIF and source-controlled runtime diagrams. Historical media are explicitly labeled.
+- Synchronized package and plugin metadata at 3.5.0. Optional dependencies, data destinations and security boundaries are documented.
+
+### Fixed
+
+- Remote installer update failures stop without removing the checkout. Normal Claude and Codex installs reconcile unchanged owned files, preserve modified/unmanaged files and back up replacements.
+- The installed CLI and npm `vibeco` alias are available through explicit launchers; profile changes use the recorded source repository.
+- Hook input readers accept canonical stdin events and `tool_response`. Agent memory honors user/project/local scopes, and recall requires relevant content.
+- Hook context accounting separates sessions and coordinates writes. Explicit deduplication avoids repeating unchanged optional reminders; truncation preserves valid text.
+- Optional native SQLite loading works from emitted ESM bundles and reports missing/incompatible dependencies. Braintrust extraction and GitHub-mutating hooks require explicit opt-in flags.
+- The optional dashboard binds to loopback and validates browser origins for HTTP and WebSocket requests. Credential-path matching covers additional supported shell forms while remaining a best-effort guard.
+
+### Verification
+
+- See [the verification record](docs/verification.md) for reproducible checks, measurements and their limitations. Historical changelog claims below describe their original releases and are not current benchmark evidence.
+
+## Earlier unreleased changes
 
 ### Changed
 - **Single Codex model authority**: Added the canonical bounded `.codex/agents/luna-worker.toml` using `gpt-5.6-luna` with `max` reasoning. Removed the project-level `o4-mini` pin, invalid local history persistence, and stale skill path override.

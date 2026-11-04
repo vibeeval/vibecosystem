@@ -1,3 +1,4 @@
+import { readHookInput } from './shared/hook-input.js';
 /**
  * Compiler-in-the-Loop Hook
  *
@@ -281,7 +282,7 @@ Fix:`;
 
 async function main() {
   const _perfStart = startTimer();
-  const input: PostToolUseInput = JSON.parse(readStdin());
+  const input = readHookInput<PostToolUseInput>();
 
   // Only process Write tool on .lean files
   if (input.tool_name !== 'Write') {

@@ -6,6 +6,9 @@
  */
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
+import { homedir } from 'node:os';
+import { readHookInput } from './shared/hook-input.js';
+import { budgetContext } from './shared/context-budget.js';
 
 interface HookInput {
   session_id: string;
@@ -52,28 +55,20 @@ const PATH_RULES: PathRule[] = [
   { pattern: /\.claude\/settings\.json$/, skillName: 'wiring', description: 'Wiring verification' },
 ];
 
-function readStdin(): string {
-  return readFileSync(0, 'utf-8');
-}
-
 function getProjectDir(): string {
   return process.env.CLAUDE_PROJECT_DIR || process.cwd();
 }
 
 function loadSkillContent(skillName: string): string | null {
   const projectDir = getProjectDir();
-  const skillPath = join(projectDir, '.claude', 'skills', skillName, 'SKILL.md');
-
-  if (!existsSync(skillPath)) return null;
+  const skillPath = [projectDir, homedir()]
+    .map(root => join(root, '.claude', 'skills', skillName, 'SKILL.md'))
+    .find(file => existsSync(file));
+  if (!skillPath) return null;
 
   try {
-    let content = readFileSync(skillPath, 'utf-8');
-    // Strip frontmatter
-    if (content.startsWith('---')) {
-      const end = content.indexOf('---', 3);
-      if (end !== -1) content = content.slice(end + 3).trim();
-    }
-    return content;
+    return readFileSync(skillPath, 'utf-8')
+      .replace(/^---\r?\n[\s\S]*?\r?\n---(?:\r?\n|$)/, '').trim();
   } catch {
     return null;
   }
@@ -90,7 +85,7 @@ function getMatchingSkills(filePath: string): string[] {
 }
 
 async function main() {
-  const input: HookInput = JSON.parse(readStdin());
+  const input = readHookInput() as unknown as HookInput;
   const filePath = input.tool_input?.file_path;
 
   if (!filePath) {
@@ -115,10 +110,10 @@ async function main() {
     return;
   }
 
-  console.log(JSON.stringify({
-    continue: true,
-    systemMessage: contents.join('\n\n---\n\n')
-  }));
+  const context = budgetContext('path-rules', 'PreToolUse', contents.join('\n\n---\n\n'), { deduplicate: 'session' });
+  console.log(JSON.stringify(context ? {
+    hookSpecificOutput: { hookEventName: 'PreToolUse', additionalContext: context }
+  } : {}));
 }
 
 main().catch(() => process.exit(1));

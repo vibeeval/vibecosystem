@@ -71,6 +71,11 @@
         "sessionChars": 12000
       }
     },
+    "dashboard": {
+      "extends": "core",
+      "description": "Core runtime plus opt-in local activity monitoring.",
+      "hooks": ["dashboard-ws-emitter"]
+    },
     "quality": {
       "extends": "core",
       "description": "Core runtime plus focused edit and verification checks.",

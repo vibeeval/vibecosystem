@@ -47,7 +47,7 @@ async function main() {
   const projectDir = process.env.CLAUDE_PROJECT_DIR || process.cwd();
   try {
     const ledgerDir = path.join(projectDir, "thoughts", "ledgers");
-    const ledgerFiles = fs.readdirSync(ledgerDir).filter((f) => f.startsWith("CONTINUITY_CLAUDE-") && f.endsWith(".md"));
+    const ledgerFiles = fs.existsSync(ledgerDir) ? fs.readdirSync(ledgerDir).filter((f) => f.startsWith("CONTINUITY_CLAUDE-") && f.endsWith(".md")) : [];
     if (ledgerFiles.length > 0) {
       const mostRecent = ledgerFiles.sort((a, b) => {
         const statA = fs.statSync(path.join(ledgerDir, a));
@@ -82,7 +82,7 @@ async function main() {
         }
       }
     }
-    if (!process.env.BRAINTRUST_API_KEY) {
+    if (process.env.VIBECO_BRAINTRUST_ANALYSIS !== "1" || !process.env.BRAINTRUST_API_KEY) {
       console.log(JSON.stringify({ result: "continue" }));
       return;
     }
@@ -100,6 +100,8 @@ async function main() {
         cwd: projectDir,
         detached: true,
         stdio: "ignore"
+      });
+      child.on("error", () => {
       });
       if (child.pid) {
         createExtractorLock(child.pid);

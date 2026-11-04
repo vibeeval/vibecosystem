@@ -1,7 +1,10 @@
 #!/usr/bin/env node
-import { readFileSync, existsSync } from 'fs';
+import { existsSync } from 'fs';
 import { join } from 'path';
-import Database from 'better-sqlite3';
+import type Database from 'better-sqlite3';
+import { loadOptionalSqlite } from './shared/optional-sqlite.js';
+import { readHookInput } from './shared/hook-input.js';
+import { budgetHookOutput } from './shared/context-budget.js';
 
 interface PreToolUseInput {
     session_id: string;
@@ -52,9 +55,11 @@ export function queryBroadcasts(
         return [];
     }
 
+    const Sqlite = loadOptionalSqlite('pre-tool-use-broadcast');
+    if (!Sqlite) return [];
     let db: InstanceType<typeof Database> | null = null;
     try {
-        db = new Database(dbPath, { readonly: true });
+        db = new Sqlite(dbPath, { readonly: true });
         db.pragma('busy_timeout = 5000');
 
         // Check if broadcasts table exists
@@ -92,7 +97,7 @@ export function queryBroadcasts(
 
         return broadcasts;
     } catch {
-        // On error, return empty - hook must never block
+        console.error('[pre-tool-use-broadcast] SQLite broadcast query failed; no broadcasts were loaded.');
         return [];
     } finally {
         try { db?.close(); } catch { /* ignore */ }
@@ -100,9 +105,8 @@ export function queryBroadcasts(
 }
 
 async function main() {
-    const input = readFileSync(0, 'utf-8');
     try {
-        JSON.parse(input) as PreToolUseInput;
+        readHookInput<PreToolUseInput>();
     } catch {
         console.log(JSON.stringify({ result: 'continue' }));
         return;
@@ -150,10 +154,9 @@ async function main() {
             }
             contextMessage += '------------------------\n';
 
-            console.log(JSON.stringify({
-                result: 'continue',
-                message: contextMessage
-            }));
+            console.log(JSON.stringify(budgetHookOutput({
+                hookSpecificOutput: { hookEventName: 'PreToolUse', additionalContext: contextMessage },
+            }, 'pre-tool-use-broadcast', 'PreToolUse')));
         } else {
             console.log(JSON.stringify({ result: 'continue' }));
         }

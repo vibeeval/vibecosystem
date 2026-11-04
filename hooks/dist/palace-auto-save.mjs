@@ -1,3 +1,23 @@
+// src/shared/hook-response.ts
+function responseText(value) {
+  if (value === void 0 || value === null) return "";
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) return value.map(responseText).filter(Boolean).join("\n");
+  if (typeof value !== "object") return String(value);
+  const object = value;
+  if ("stdout" in object || "stderr" in object) {
+    return [object.stdout, object.stderr].map(responseText).filter(Boolean).join("\n");
+  }
+  if ("text" in object) return responseText(object.text);
+  if ("content" in object) return responseText(object.content);
+  if ("file" in object) return responseText(object.file);
+  if (object.type === "image" || object.type === "image_url") return "";
+  return JSON.stringify(value);
+}
+function hookResponseText(input) {
+  return responseText(input.tool_response !== void 0 ? input.tool_response : input.tool_output);
+}
+
 // src/palace-auto-save.ts
 import { readFileSync as readFileSync2, writeFileSync, appendFileSync, existsSync as existsSync2, mkdirSync } from "node:fs";
 import { join as join2, resolve as resolve2, sep } from "node:path";
@@ -205,10 +225,10 @@ function runHook() {
   } catch {
     return;
   }
-  if (event.tool_name !== "Agent" || !event.tool_output) {
+  if (event.tool_name !== "Agent") {
     return;
   }
-  const output = String(event.tool_output);
+  const output = hookResponseText(event);
   if (!isSignificantOutput(output)) {
     return;
   }

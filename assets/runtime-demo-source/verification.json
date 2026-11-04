@@ -1,0 +1,40 @@
+{
+  "asset": "../runtime-demo.gif",
+  "cli": "hyperframes@0.9.13",
+  "browser": "Chrome Headless Shell 154.0.8037.57",
+  "capture": "screenshot",
+  "gpu": "software",
+  "width": 1120,
+  "height": 630,
+  "durationSeconds": 8,
+  "frames": 120,
+  "fps": 15,
+  "bytes": 162547,
+  "sha256": "386f2260b8fdccc0aa5f4cf86c4e088958ee3ad81cdfc4ea7103d63798780314",
+  "checks": {
+    "ok": true,
+    "browserSkipped": false,
+    "lintErrors": 0,
+    "runtimeErrors": 0,
+    "layoutErrors": 0,
+    "layoutSamples": 9,
+    "contrastChecks": 85,
+    "contrastPassed": 85,
+    "craftErrors": 0,
+    "craftWarnings": 0
+  },
+  "visualReview": {
+    "decodedFramesSeconds": [
+      1,
+      3,
+      7
+    ],
+    "bottomEdgeOpaque": true,
+    "footerVisible": true,
+    "manifestCountsVerified": true
+  },
+  "notes": [
+    "GIF is a product diagram, not a terminal recording or token benchmark.",
+    "A normal Chrome render cropped the bottom region; final output uses existing Chrome Headless Shell and software capture."
+  ]
+}

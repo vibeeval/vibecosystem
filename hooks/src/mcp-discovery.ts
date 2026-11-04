@@ -3,11 +3,15 @@
  * Session basinda proje tipine gore MCP server onerir.
  * Sadece 1 kez calisir (session basinda ilk Read'de).
  */
-import { readFileSync, existsSync, mkdirSync } from 'fs';
+import { readFileSync, existsSync, mkdirSync, writeFileSync, readdirSync } from 'node:fs';
 import { join } from 'path';
 import { homedir } from 'os';
+import { createHash } from 'node:crypto';
+import { readHookInput } from './shared/hook-input.js';
+import { budgetHookOutput } from './shared/context-budget.js';
 
 interface ToolEvent {
+  cwd?: string;
   session_id: string;
   hook_event_name?: string;
   tool_name: string;
@@ -72,23 +76,26 @@ const MCP_MAPPINGS: McpMapping[] = [
   },
 ];
 
-const STATE_FILE = join(homedir(), '.claude', 'cache', 'mcp-discovery-fired.json');
+function stateFile(sessionId: string, projectDir: string): string {
+  const key = createHash('sha256').update(`${sessionId}\0${projectDir}`).digest('hex').slice(0, 24);
+  return join(homedir(), '.claude', 'cache', `mcp-discovery-${key}.json`);
+}
 
-function hasAlreadyFired(sessionId: string): boolean {
-  if (!existsSync(STATE_FILE)) return false;
+function hasAlreadyFired(sessionId: string, projectDir: string): boolean {
+  const path = stateFile(sessionId, projectDir);
+  if (!existsSync(path)) return false;
   try {
-    const state = JSON.parse(readFileSync(STATE_FILE, 'utf-8'));
+    const state = JSON.parse(readFileSync(path, 'utf-8'));
     return state.session === sessionId;
   } catch {
     return false;
   }
 }
 
-function markFired(sessionId: string): void {
+function markFired(sessionId: string, projectDir: string): void {
   const cacheDir = join(homedir(), '.claude', 'cache');
   if (!existsSync(cacheDir)) mkdirSync(cacheDir, { recursive: true });
-  const { writeFileSync } = require('fs');
-  writeFileSync(STATE_FILE, JSON.stringify({ session: sessionId, ts: new Date().toISOString() }));
+  writeFileSync(stateFile(sessionId, projectDir), JSON.stringify({ session: sessionId, ts: new Date().toISOString() }));
 }
 
 function getInstalledMcps(): Set<string> {
@@ -122,7 +129,6 @@ function discoverMcps(projectDir: string): McpMapping[] {
   // .sql dosyalari icin ozel kontrol
   if (!installed.has('postgres')) {
     try {
-      const { readdirSync } = require('fs');
       const files = readdirSync(projectDir);
       if (files.some((f: string) => f.endsWith('.sql'))) {
         const pgMapping = MCP_MAPPINGS.find(m => m.name === 'postgres');
@@ -136,7 +142,6 @@ function discoverMcps(projectDir: string): McpMapping[] {
   // .db/.sqlite dosyalari icin kontrol
   if (!installed.has('sqlite')) {
     try {
-      const { readdirSync } = require('fs');
       const files = readdirSync(projectDir);
       if (files.some((f: string) => f.endsWith('.db') || f.endsWith('.sqlite'))) {
         const sqliteMapping = MCP_MAPPINGS.find(m => m.name === 'sqlite');
@@ -151,12 +156,8 @@ function discoverMcps(projectDir: string): McpMapping[] {
 }
 
 function main() {
-  let raw = '';
-  try { raw = readFileSync(0, 'utf-8'); } catch { return; }
-  if (!raw) { console.log('{}'); return; }
-
   let input: ToolEvent;
-  try { input = JSON.parse(raw); } catch { console.log('{}'); return; }
+  try { input = readHookInput<ToolEvent>(); } catch { console.log('{}'); return; }
 
   // Sadece Read tool'unda tetiklen
   if (input.tool_name !== 'Read') {
@@ -166,22 +167,22 @@ function main() {
 
   // Session basina 1 kez calis
   const sessionId = input.session_id || 'unknown';
-  if (hasAlreadyFired(sessionId)) {
+  const projectDir = input.cwd || process.env.CLAUDE_PROJECT_DIR || process.cwd();
+  if (hasAlreadyFired(sessionId, projectDir)) {
     console.log('{}');
     return;
   }
 
-  const projectDir = process.env.CLAUDE_PROJECT_DIR || process.cwd();
   const recommendations = discoverMcps(projectDir);
 
   // Bir sey bulamadiysa sessiz kal
   if (recommendations.length === 0) {
-    markFired(sessionId);
+    markFired(sessionId, projectDir);
     console.log('{}');
     return;
   }
 
-  markFired(sessionId);
+  markFired(sessionId, projectDir);
 
   const lines = [
     '',
@@ -201,10 +202,9 @@ function main() {
   lines.push('~/.mcp.json dosyasina ekleyerek aktive edebilirsiniz.');
   lines.push('---');
 
-  console.log(JSON.stringify({
-    result: 'continue',
-    systemMessage: lines.join('\n'),
-  }));
+  console.log(JSON.stringify(budgetHookOutput({
+    hookSpecificOutput: { hookEventName: 'PreToolUse', additionalContext: lines.join('\n') },
+  }, 'mcp-discovery', 'PreToolUse:Read')));
 }
 
 main();

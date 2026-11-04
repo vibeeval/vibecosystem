@@ -1,11 +1,29 @@
 // src/memory-graph.ts
-import { readFileSync, existsSync } from "fs";
+import { readFileSync, existsSync, mkdirSync } from "fs";
 import { join } from "path";
 import { homedir } from "os";
-import Database from "better-sqlite3";
+
+// src/shared/optional-sqlite.ts
+import { createRequire } from "node:module";
+function reportSqliteUnavailable(hook) {
+  console.error(`[${hook}] SQLite operation skipped: optional better-sqlite3 is missing or incompatible. Install a Node-compatible version in the hooks directory (for a managed install: ~/.claude/hooks), or use the core profile.`);
+}
+function loadOptionalSqlite(hook) {
+  try {
+    return createRequire(import.meta.url)("better-sqlite3");
+  } catch {
+    reportSqliteUnavailable(hook);
+    return null;
+  }
+}
+
+// src/memory-graph.ts
 var DB_PATH = join(homedir(), ".claude", "cache", "memory-graph.db");
 function getDb() {
-  const db = new Database(DB_PATH);
+  const Sqlite = loadOptionalSqlite("memory-graph");
+  if (!Sqlite) return null;
+  mkdirSync(join(homedir(), ".claude", "cache"), { recursive: true });
+  const db = new Sqlite(DB_PATH);
   db.pragma("journal_mode = WAL");
   db.pragma("busy_timeout = 5000");
   db.exec(`
@@ -81,8 +99,13 @@ function main() {
   let db;
   try {
     db = getDb();
-  } catch (e) {
-    console.log(JSON.stringify({ result: "Memory graph: DB baglantisi basarisiz" }));
+  } catch {
+    reportSqliteUnavailable("memory-graph");
+    console.log("{}");
+    return;
+  }
+  if (!db) {
+    console.log("{}");
     return;
   }
   try {

@@ -1,67 +1,37 @@
-var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require : typeof Proxy !== "undefined" ? new Proxy(x, {
-  get: (a, b) => (typeof require !== "undefined" ? require : a)[b]
-}) : x)(function(x) {
-  if (typeof require !== "undefined") return require.apply(this, arguments);
-  throw Error('Dynamic require of "' + x + '" is not supported');
-});
-
 // src/dashboard-ws-emitter.ts
 import { readFileSync } from "fs";
+import { request } from "node:http";
 function extractAgentInfo(input) {
-  const ti = input.tool_input;
+  const ti = input.tool_input || {};
+  const response = input.tool_response;
+  const object = response && typeof response === "object" ? response : {};
+  const hasError = object.is_error === true || object.isError === true || typeof object.exitCode === "number" && object.exitCode !== 0 || typeof object.exit_code === "number" && object.exit_code !== 0;
   if (input.tool_name === "Agent" || input.tool_name === "Task") {
-    const agentType = ti.subagent_type || ti.type || "unknown";
-    const prompt = ti.description || ti.prompt || "";
-    const promptSummary = typeof prompt === "string" ? prompt.slice(0, 120) : "";
-    const hasResponse = input.tool_response !== void 0 && input.tool_response !== null;
-    const responseStr = typeof input.tool_response === "string" ? input.tool_response : JSON.stringify(input.tool_response || "");
-    const hasError = responseStr.toLowerCase().includes("error") || responseStr.toLowerCase().includes("fail");
-    let status = "running";
-    let type = "agent_spawn";
-    if (hasResponse && hasError) {
-      status = "error";
-      type = "agent_error";
-    } else if (hasResponse) {
-      status = "done";
-      type = "agent_complete";
-    }
+    const agentType = typeof ti.subagent_type === "string" ? ti.subagent_type : typeof ti.type === "string" ? ti.type : "unknown";
+    const hasResponse = response !== void 0 && response !== null;
     return {
-      type,
-      agentType,
-      status,
-      metadata: {
-        promptSummary,
-        responseLength: responseStr.length
-      }
-    };
-  }
-  if (input.tool_name === "Bash") {
-    const cmd = (ti.command || "").slice(0, 200);
-    const responseStr = typeof input.tool_response === "string" ? input.tool_response : JSON.stringify(input.tool_response || "");
-    const hasError = responseStr.includes("Error") || responseStr.includes("error:") || responseStr.includes("FAIL");
-    return {
-      type: "tool_call",
-      status: hasError ? "error" : "done",
-      metadata: { tool: "Bash", command: cmd }
+      type: hasError ? "agent_error" : hasResponse ? "agent_complete" : "agent_spawn",
+      agentType: agentType.slice(0, 128),
+      status: hasError ? "error" : hasResponse ? "done" : "running",
+      metadata: { tool: input.tool_name }
     };
   }
   return {
     type: "tool_call",
-    status: "done",
-    metadata: {
-      tool: input.tool_name,
-      detail: JSON.stringify(input.tool_input).slice(0, 150)
-    }
+    status: hasError ? "error" : "done",
+    metadata: { tool: input.tool_name }
   };
 }
 function sendToWebSocket(event) {
+  const port = Number(process.env.VIBECO_DASHBOARD_WS_PORT || 3847);
+  if (!Number.isInteger(port) || port < 1 || port > 65535) return Promise.resolve();
   return new Promise((resolve) => {
     const payload = JSON.stringify(event);
     const postData = Buffer.from(payload);
-    const req = __require("http").request(
+    const req = request(
       {
         hostname: "127.0.0.1",
-        port: 3847,
+        port,
         path: "/event",
         method: "POST",
         headers: {
@@ -70,7 +40,10 @@ function sendToWebSocket(event) {
         },
         timeout: 500
       },
-      () => resolve()
+      (response) => {
+        response.resume();
+        resolve();
+      }
     );
     req.on("error", () => resolve());
     req.on("timeout", () => {
@@ -95,6 +68,10 @@ async function main() {
   let input;
   try {
     input = JSON.parse(raw);
+    if (!input || typeof input.tool_name !== "string" || !input.tool_input || typeof input.tool_input !== "object" || Array.isArray(input.tool_input)) {
+      console.log("{}");
+      return;
+    }
   } catch {
     console.log("{}");
     return;
@@ -108,7 +85,7 @@ async function main() {
   const event = {
     type: partial.type || "tool_call",
     timestamp: (/* @__PURE__ */ new Date()).toISOString(),
-    sessionId: (input.session_id || "unknown").slice(0, 8),
+    sessionId: (typeof input.session_id === "string" ? input.session_id : "unknown").slice(0, 128),
     agentType: partial.agentType || void 0,
     agentId: process.env.CLAUDE_AGENT_ID || void 0,
     status: partial.status || "done",
@@ -118,3 +95,6 @@ async function main() {
   console.log("{}");
 }
 main();
+export {
+  extractAgentInfo
+};

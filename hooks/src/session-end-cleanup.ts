@@ -72,8 +72,9 @@ async function main() {
   try {
     // Update continuity ledger with session end
     const ledgerDir = path.join(projectDir, 'thoughts', 'ledgers');
-    const ledgerFiles = fs.readdirSync(ledgerDir)
-      .filter(f => f.startsWith('CONTINUITY_CLAUDE-') && f.endsWith('.md'));
+    const ledgerFiles = fs.existsSync(ledgerDir)
+      ? fs.readdirSync(ledgerDir).filter(f => f.startsWith('CONTINUITY_CLAUDE-') && f.endsWith('.md'))
+      : [];
 
     if (ledgerFiles.length > 0) {
       const mostRecent = ledgerFiles.sort((a, b) => {
@@ -123,8 +124,8 @@ async function main() {
     // Trigger Braintrust learnings extraction (fire and forget, don't block session end)
     // Uses LLM-as-judge to extract What Worked/Failed/Decisions/Patterns
     //
-    // Skip if Braintrust isn't configured - no point spawning a process that will just error
-    if (!process.env.BRAINTRUST_API_KEY) {
+    // External learning requires explicit opt-in as well as credentials.
+    if (process.env.VIBECO_BRAINTRUST_ANALYSIS !== '1' || !process.env.BRAINTRUST_API_KEY) {
       console.log(JSON.stringify({ result: 'continue' }));
       return;
     }
@@ -159,6 +160,8 @@ async function main() {
         detached: true,
         stdio: 'ignore'
       });
+
+      child.on('error', () => { /* Missing uv must not crash session cleanup. */ });
 
       // Create lock file with spawned PID
       if (child.pid) {

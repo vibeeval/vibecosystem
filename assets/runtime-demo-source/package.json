@@ -1,0 +1,11 @@
+{
+  "name": "runtime-demo-source",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate": "node generate.mjs",
+    "dev": "npx --yes hyperframes@0.9.13 preview",
+    "check": "npx --yes hyperframes@0.9.13 check",
+    "render": "npx --yes hyperframes@0.9.13 render --quality delivery --format gif --fps 15 --workers 1 --no-browser-gpu --strict --output ../runtime-demo.gif"
+  }
+}

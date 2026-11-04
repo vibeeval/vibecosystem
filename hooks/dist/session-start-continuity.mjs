@@ -1,127 +1,210 @@
-// src/session-start-continuity.ts
-import * as fs from "fs";
-import * as path from "path";
-import { execSync } from "child_process";
+// src/shared/hook-input.ts
+import { readFileSync as readFileSync2 } from "node:fs";
 
 // src/shared/context-budget.ts
-import { readFileSync, writeFileSync, existsSync, mkdirSync, statSync } from "fs";
-import { dirname, join } from "path";
-import { homedir } from "os";
-var DEFAULT_LIMITS = {
-  perEventChars: 4e3,
-  sessionChars: 12e3
-};
+import {
+  readFileSync,
+  writeFileSync,
+  existsSync,
+  mkdirSync,
+  statSync,
+  renameSync,
+  rmSync
+} from "node:fs";
+import { basename, dirname, join, resolve } from "node:path";
+import { homedir } from "node:os";
+import { createHash } from "node:crypto";
+var DEFAULT_LIMITS = { perEventChars: 4e3, sessionChars: 12e3 };
+var TRUNCATION_MARKER = "\n[truncated]";
+var MAX_EVENT_RECORDS = 256;
+var MAX_DEDUP_RECORDS = 256;
+var scope = { sessionId: "", project: process.cwd(), eventId: "" };
+var localBudget;
+function digest(value) {
+  return createHash("sha256").update(value).digest("hex");
+}
+function configureContextBudget(input) {
+  const sessionId = typeof input.session_id === "string" ? input.session_id : "";
+  const project = typeof input.cwd === "string" ? resolve(input.cwd) : process.cwd();
+  const eventId = typeof input.tool_use_id === "string" ? input.tool_use_id : digest(JSON.stringify(input));
+  if (scope.sessionId !== sessionId || scope.project !== project) localBudget = void 0;
+  scope = { sessionId, project, eventId };
+}
 function budgetPath() {
-  return process.env.VIBECO_CONTEXT_BUDGET_PATH || join(homedir(), ".claude", "cache", "context-budget.json");
+  if (!scope.sessionId) return void 0;
+  const base = process.env.VIBECO_CONTEXT_BUDGET_PATH || join(homedir(), ".claude", "cache", "context-budget.json");
+  const directory = join(dirname(base), `${basename(base, ".json")}.sessions`);
+  return join(directory, `${digest(`${scope.project}\0${scope.sessionId}`)}.json`);
 }
 function runtimePath() {
   return process.env.VIBECO_RUNTIME_PATH || join(homedir(), ".claude", "vibecosystem-runtime.json");
 }
 function getBudgetLimits() {
   try {
-    const path2 = runtimePath();
-    if (existsSync(path2)) {
-      const runtime = JSON.parse(readFileSync(path2, "utf-8"));
-      const perEventChars = Number(runtime.contextBudget?.perEventChars);
-      const sessionChars = Number(runtime.contextBudget?.sessionChars);
-      if (Number.isFinite(perEventChars) && Number.isFinite(sessionChars)) {
-        return {
-          perEventChars: Math.max(0, perEventChars),
-          sessionChars: Math.max(0, sessionChars)
-        };
-      }
+    const runtime = JSON.parse(readFileSync(runtimePath(), "utf8"));
+    const perEventChars = runtime.contextBudget?.perEventChars;
+    const sessionChars = runtime.contextBudget?.sessionChars;
+    if (typeof perEventChars === "number" && Number.isFinite(perEventChars) && typeof sessionChars === "number" && Number.isFinite(sessionChars)) {
+      return {
+        perEventChars: Math.max(0, Math.floor(perEventChars)),
+        sessionChars: Math.max(0, Math.floor(sessionChars))
+      };
     }
   } catch {
   }
   return DEFAULT_LIMITS;
 }
-function loadBudget() {
-  try {
-    const path2 = budgetPath();
-    if (existsSync(path2)) {
-      return JSON.parse(readFileSync(path2, "utf-8"));
-    }
-  } catch {
-  }
+function freshBudget() {
   return {
-    session_id: "unknown",
+    session_id: scope.sessionId,
     total_chars: 0,
     per_hook: {},
     per_event: {},
+    seen: {},
     updated_at: (/* @__PURE__ */ new Date()).toISOString()
   };
 }
-function saveBudget(budget) {
+function validCounters(value) {
+  return value !== null && typeof value === "object" && !Array.isArray(value) && Object.values(value).every((v) => typeof v === "number" && Number.isFinite(v) && v >= 0);
+}
+function loadBudget(path2) {
   try {
-    const path2 = budgetPath();
-    const cacheDir = dirname(path2);
-    if (!existsSync(cacheDir)) mkdirSync(cacheDir, { recursive: true });
-    writeFileSync(path2, JSON.stringify(budget, null, 2));
+    const value = JSON.parse(readFileSync(path2, "utf8"));
+    if (value.session_id === scope.sessionId && Number.isFinite(value.total_chars) && value.total_chars >= 0 && validCounters(value.per_hook) && validCounters(value.per_event) && value.seen && typeof value.seen === "object" && !Array.isArray(value.seen)) return value;
   } catch {
   }
+  return freshBudget();
 }
-function tryInject(hookName, eventKey, charCount) {
-  const budget = loadBudget();
-  const limits = getBudgetLimits();
-  if (budget.total_chars + charCount > limits.sessionChars) return false;
-  const eventChars = budget.per_event[eventKey] || 0;
-  if (eventChars + charCount > limits.perEventChars) return false;
-  budget.total_chars += charCount;
-  budget.per_hook[hookName] = (budget.per_hook[hookName] || 0) + charCount;
-  budget.per_event[eventKey] = (budget.per_event[eventKey] || 0) + charCount;
-  budget.updated_at = (/* @__PURE__ */ new Date()).toISOString();
-  saveBudget(budget);
-  return true;
-}
-function budgetContext(hookName, eventKey, context) {
-  if (!context) return "";
-  const budget = loadBudget();
-  const limits = getBudgetLimits();
-  const eventRemaining = Math.max(0, limits.perEventChars - (budget.per_event[eventKey] || 0));
-  const sessionRemaining = Math.max(0, limits.sessionChars - budget.total_chars);
-  const available = Math.min(eventRemaining, sessionRemaining);
-  if (available <= 0) return "";
-  const bounded = context.length > available ? `${context.slice(0, Math.max(0, available - 18))}
-[truncated]` : context;
-  return tryInject(hookName, eventKey, bounded.length) ? bounded : "";
-}
-function budgetHookOutput(output, hookName, eventKey) {
-  const root = output;
-  if (root.additionalContext) {
-    const context = budgetContext(hookName, eventKey, String(root.additionalContext));
-    if (context) root.additionalContext = context;
-    else delete root.additionalContext;
+function withBudget(action, fallback) {
+  const path2 = budgetPath();
+  if (!path2) {
+    localBudget ||= freshBudget();
+    return action(localBudget);
   }
-  const hookOutput = output.hookSpecificOutput;
-  if (hookOutput?.additionalContext) {
-    const context = budgetContext(hookName, eventKey, String(hookOutput.additionalContext));
-    if (context) {
-      hookOutput.additionalContext = context;
-    } else {
-      delete hookOutput.additionalContext;
-      if (Object.keys(hookOutput).length === 0) delete output.hookSpecificOutput;
+  const lock = `${path2}.lock`;
+  let locked = false;
+  let temporary;
+  try {
+    mkdirSync(dirname(path2), { recursive: true, mode: 448 });
+    const deadline = Date.now() + 200;
+    while (!locked) {
+      try {
+        mkdirSync(lock, { mode: 448 });
+        locked = true;
+      } catch (error) {
+        if (error.code !== "EEXIST") return fallback;
+        try {
+          if (Date.now() - statSync(lock).mtimeMs > 6e4) rmSync(lock, { recursive: true });
+        } catch {
+        }
+        if (Date.now() >= deadline) return fallback;
+        Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 5);
+      }
+    }
+    const budget = loadBudget(path2);
+    const previous = JSON.stringify(budget);
+    const result = action(budget);
+    if (JSON.stringify(budget) === previous) return result;
+    budget.updated_at = (/* @__PURE__ */ new Date()).toISOString();
+    temporary = `${path2}.${process.pid}.${Math.random().toString(36).slice(2)}.tmp`;
+    writeFileSync(temporary, JSON.stringify(budget), { mode: 384 });
+    renameSync(temporary, path2);
+    return result;
+  } catch {
+    return fallback;
+  } finally {
+    if (temporary) {
+      try {
+        rmSync(temporary, { force: true });
+      } catch {
+      }
+    }
+    if (locked) {
+      try {
+        rmSync(lock, { recursive: true });
+      } catch {
+      }
     }
   }
-  if (hookOutput?.permissionDecisionReason) {
-    const reason = budgetContext(hookName, `${eventKey}:reason`, String(hookOutput.permissionDecisionReason));
-    if (reason) hookOutput.permissionDecisionReason = reason;
-    else delete hookOutput.permissionDecisionReason;
+}
+function eventIdentity(eventKey) {
+  return digest(scope.eventId || eventKey);
+}
+function remaining(budget, limits, event) {
+  return Math.max(0, Math.min(
+    limits.sessionChars - budget.total_chars,
+    limits.perEventChars - (budget.per_event[event] || 0)
+  ));
+}
+function boundedMap(values, maximum) {
+  while (Object.keys(values).length > maximum) delete values[Object.keys(values)[0]];
+}
+function reserve(budget, hookName, event, charCount) {
+  budget.total_chars += charCount;
+  const hook = digest(hookName);
+  budget.per_hook[hook] = (budget.per_hook[hook] || 0) + charCount;
+  budget.per_event[event] = (budget.per_event[event] || 0) + charCount;
+  boundedMap(budget.per_event, MAX_EVENT_RECORDS);
+}
+function truncate(context, available) {
+  if (context.length <= available) return context;
+  const marker = available > TRUNCATION_MARKER.length ? TRUNCATION_MARKER : "";
+  let end = available - marker.length;
+  if (end > 0 && /[\uD800-\uDBFF]/.test(context[end - 1]) && /[\uDC00-\uDFFF]/.test(context[end] || "")) end--;
+  return context.slice(0, end) + marker;
+}
+function budgetContext(hookName, eventKey, context, options = {}) {
+  if (!context) return "";
+  return withBudget((budget) => {
+    const event = eventIdentity(eventKey);
+    const dedup = options.deduplicate === false ? "" : digest(
+      `${hookName}\0${options.deduplicate === "session" ? eventKey : event}\0${context}`
+    );
+    if (dedup && budget.seen[dedup]) return "";
+    const available = remaining(budget, getBudgetLimits(), event);
+    if (!available) return "";
+    const bounded = truncate(context, available);
+    if (!bounded) return "";
+    reserve(budget, hookName, event, bounded.length);
+    if (dedup) {
+      budget.seen[dedup] = true;
+      boundedMap(budget.seen, MAX_DEDUP_RECORDS);
+    }
+    return bounded;
+  }, "");
+}
+function budgetHookOutput(output, hookName, eventKey, options = {}) {
+  const root = output;
+  function boundField(object, field, key) {
+    if (typeof object[field] !== "string") return;
+    const context = budgetContext(hookName, key, object[field], options);
+    if (context) object[field] = context;
+    else delete object[field];
   }
-  if (hookOutput?.updatedInput?.prompt) {
-    const prompt = budgetContext(hookName, `${eventKey}:prompt`, String(hookOutput.updatedInput.prompt));
-    if (prompt) hookOutput.updatedInput.prompt = prompt;
-    else delete hookOutput.updatedInput.prompt;
+  boundField(root, "additionalContext", eventKey);
+  const hookOutput = root.hookSpecificOutput;
+  if (hookOutput && typeof hookOutput === "object") {
+    boundField(hookOutput, "additionalContext", eventKey);
+    if (Object.keys(hookOutput).length === 0) delete root.hookSpecificOutput;
   }
-  for (const field of ["message", "systemMessage"]) {
-    if (typeof root[field] !== "string") continue;
-    const message = budgetContext(hookName, `${eventKey}:${field}`, root[field]);
-    if (message) root[field] = message;
-    else delete root[field];
-  }
+  for (const field of ["message", "systemMessage"]) boundField(root, field, `${eventKey}:${field}`);
   return output;
 }
 
+// src/shared/hook-input.ts
+function readHookInput(raw = readFileSync2(0, "utf-8")) {
+  const input = JSON.parse(raw);
+  if (!input || typeof input !== "object" || Array.isArray(input)) {
+    throw new TypeError("Hook input must be a JSON object");
+  }
+  configureContextBudget(input);
+  return input;
+}
+
 // src/session-start-continuity.ts
+import * as fs from "fs";
+import * as path from "path";
+import { execSync } from "child_process";
 function parseHandoffDirName(dirName) {
   const match = dirName.match(/^(.+)-([0-9a-f]{8})$/i);
   if (match) {
@@ -236,7 +319,7 @@ function getUnmarkedHandoffs() {
   }
 }
 async function main() {
-  const input = JSON.parse(await readStdin());
+  const input = readHookInput();
   const projectDir = process.env.CLAUDE_PROJECT_DIR || process.cwd();
   const sessionType = input.source || input.type;
   let message = "";
@@ -462,13 +545,6 @@ All handoffs in ${handoffDir}:
     };
   }
   console.log(JSON.stringify(budgetHookOutput(output, "session-start-continuity", "SessionStart")));
-}
-async function readStdin() {
-  return new Promise((resolve) => {
-    let data = "";
-    process.stdin.on("data", (chunk) => data += chunk);
-    process.stdin.on("end", () => resolve(data));
-  });
 }
 main().catch(console.error);
 export {

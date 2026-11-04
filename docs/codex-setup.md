@@ -5,7 +5,7 @@ vibecosystem works with [Codex CLI](https://github.com/openai/codex) (OpenAI) in
 ## Prerequisites
 
 1. Node.js 18+
-2. OpenAI API key
+2. A Codex account or API authentication method supported by your host installation
 3. Python 3 for validating the luna worker contract
 4. Codex CLI installed:
 
@@ -31,9 +31,9 @@ cd vibecosystem
 ./install-codex.sh --profile core --install-luna-worker
 ```
 
-Skills are installed into `~/.agents/skills/`, the current Codex skill discovery target. The default is a merge: existing destinations are preserved. The installer does not copy `AGENTS.md` to a global location; keep project instructions in the project where Codex runs.
+Skills are installed into `~/.agents/skills/`, the current Codex skill discovery target. Normal installs update unchanged installer-owned files and reconcile unchanged owned files that are absent from the new profile. Modified and unmanaged destinations are preserved. The installer does not copy `AGENTS.md` to a global location; keep project instructions in the project where Codex runs.
 
-The `core` profile is an explicit allowlist for predictable, lower-cost setup. The `full` profile includes every top-level directory under `skills/`.
+The `core` profile is an explicit allowlist for a predictable, smaller installation. The `full` profile includes every top-level directory under `skills/`.
 
 ### Installer options
 
@@ -43,8 +43,8 @@ The `core` profile is an explicit allowlist for predictable, lower-cost setup. T
 | `--install-luna-worker` | Validate and install `.codex/agents/luna-worker.toml` at `~/.codex/agents/luna-worker.toml`. |
 | `--validate-luna-worker` | Validate the canonical worker contract and exit when used alone. |
 | `--dry-run` | Print the planned changes without creating, replacing, pruning, or backing up user files. |
-| `--prune` | Remove only unchanged skill directories recorded in the installer ownership manifest and absent from the selected profile. |
-| `--force` | Replace existing destinations, after taking a backup. Without it, existing skills or the worker are skipped. |
+| `--prune` | Compatibility flag; normal installs already reconcile unchanged, recorded skills absent from the selected profile. |
+| `--force` | Replace existing destinations, after taking a backup. Without it, modified or unmanaged destinations are preserved. |
 | `--non-interactive` | Skip the confirmation prompt. |
 
 The ownership manifest is `~/.agents/.vibecosystem-codex-skills`. Pruning never removes an unrecorded skill, a symlink, or a skill whose contents changed after installation. If no manifest exists, pruning reports that it has nothing safe to remove. Destructive changes are copied to a timestamped directory under `~/.agents/vibecosystem-backups/` first.
@@ -111,15 +111,17 @@ Then use installed skills by referencing them:
 > "follow postgres-patterns for this migration"
 ```
 
+Model availability and custom-agent discovery depend on the installed Codex version and account. The installer validates the repository contract; it does not test provider access.
+
 The custom worker is named `luna_worker` and is the bounded repository worker for implementation and verification. Its canonical contract pins `gpt-5.6-luna` with `max` reasoning while keeping the task boundary explicit.
 
 ## What works with Codex CLI
 
 | Feature | Status | Notes |
 | --- | --- | --- |
-| Skills (`SKILL.md`) | Full support | Installed under `~/.agents/skills/` and auto-discovered. |
-| Project instructions | Full support | `AGENTS.md`, with `CLAUDE.md` as the configured fallback. |
-| Custom agents | Supported | Standalone TOML files can be project-scoped under `.codex/agents/` or installed globally under `~/.codex/agents/`. |
+| Skills (`SKILL.md`) | Installed by this adapter | Installed under `~/.agents/skills/` and auto-discovered. |
+| Project instructions | Project-scoped | `AGENTS.md`, with `CLAUDE.md` as the configured fallback. |
+| Custom agents | Host-dependent | Standalone TOML files can be project-scoped under `.codex/agents/` or installed globally under `~/.codex/agents/`. |
 | Hooks | Not changed here | Codex and Claude Code hook formats differ. |
 | Rules | Via `AGENTS.md` | Keep project rules in project instructions. |
 
@@ -127,8 +129,9 @@ The custom worker is named `luna_worker` and is the bounded repository worker fo
 
 ```bash
 cd vibecosystem
-git pull
-./install-codex.sh --profile full --force
+git pull --ff-only
+./install-codex.sh --profile core --dry-run
+./install-codex.sh --profile core
 ```
 
 Update the worker explicitly when needed:

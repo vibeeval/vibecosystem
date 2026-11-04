@@ -1,3 +1,4 @@
+import { readHookInput } from './shared/hook-input.js';
 /**
  * PreToolUse Hook: Smart Search Router
  *
@@ -11,10 +12,12 @@
 
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { execSync, spawnSync } from 'child_process';
-import { join } from 'path';
+import { join, resolve } from 'path';
 import { queryDaemonSync, trackHookActivitySync } from './daemon-client.js';
 import { budgetHookOutput, isRelevantForIntent } from './shared/context-budget.js';
 import { startTimer, endTimer } from './shared/hook-profiler.js';
+import { homedir } from 'node:os';
+import { createHash } from 'node:crypto';
 
 interface GrepInput {
   pattern: string;
@@ -28,6 +31,7 @@ interface PreToolUseInput {
   tool_name: string;
   tool_input: GrepInput;
   session_id?: string;
+  cwd?: string;
 }
 
 type QueryType = 'structural' | 'semantic' | 'literal';
@@ -44,17 +48,15 @@ interface SearchContext {
   callers?: string[];           // Cross-file: where the symbol is called/used
 }
 
-const CONTEXT_DIR = '/tmp/claude-search-context';
+const CONTEXT_DIR = join(homedir(), '.claude', 'cache', 'search-context');
 
-function storeSearchContext(sessionId: string, context: SearchContext): void {
+function storeSearchContext(sessionId: string, context: SearchContext, project: string): void {
   try {
     if (!existsSync(CONTEXT_DIR)) {
-      mkdirSync(CONTEXT_DIR, { recursive: true });
+      mkdirSync(CONTEXT_DIR, { recursive: true, mode: 0o700 });
     }
-    writeFileSync(
-      `${CONTEXT_DIR}/${sessionId}.json`,
-      JSON.stringify(context, null, 2)
-    );
+    const key = createHash('sha256').update(JSON.stringify([resolve(project), sessionId])).digest('hex');
+    writeFileSync(join(CONTEXT_DIR, `${key}.json`), JSON.stringify(context), { mode: 0o600 });
   } catch {
     // Ignore errors - context storage is best-effort
   }
@@ -327,10 +329,17 @@ function suggestLayers(targetType: SearchContext['targetType'], queryType: Query
 interface HookOutput {
   hookSpecificOutput?: {
     hookEventName: string;
-    permissionDecision: 'allow' | 'deny' | 'ask';
+    permissionDecision?: 'allow' | 'deny' | 'ask';
     permissionDecisionReason?: string;
+    additionalContext?: string;
   };
   systemMessage?: string;
+}
+
+/** Routing advice never overrides normal Grep permissions or requires optional tools. */
+function emitSearchAdvice(output: HookOutput): void {
+  const bounded = budgetHookOutput(output, 'smart-search-router', 'PreToolUse:Grep');
+  console.log(JSON.stringify(bounded.hookSpecificOutput?.additionalContext ? bounded : {}));
 }
 
 function readStdin(): Promise<string> {
@@ -427,7 +436,7 @@ async function main() {
   const _perfStart = startTimer();
   let input: PreToolUseInput;
   try {
-    input = JSON.parse(await readStdin());
+    input = readHookInput<PreToolUseInput>();
   } catch {
     // Malformed JSON - exit silently
     console.log('{}');
@@ -472,7 +481,7 @@ async function main() {
     suggestedLayers: layers,
     definitionLocation: symbolInfo?.location,
     callers: callers.slice(0, 20),  // Limit to 20 callers for token efficiency
-  });
+  }, input.cwd || process.cwd());
 
   // Track hook activity (P8) - get project dir early for tracking
   const projectDir = process.env.CLAUDE_PROJECT_DIR || '.';
@@ -483,7 +492,7 @@ async function main() {
       queries_routed: 1, literal_queries: 1,
     });
 
-    const reason = `🔍 Use TLDR search for code exploration (95% token savings):
+    const reason = `🔍 Use TLDR search for code exploration when installed:
 
 **Option 1 - TLDR Skill:**
 /tldr-search ${pattern}
@@ -501,12 +510,11 @@ TLDR finds location + provides call graph + docstrings in one call.`;
     const output: HookOutput = {
       hookSpecificOutput: {
         hookEventName: 'PreToolUse',
-        permissionDecision: 'deny',
-        permissionDecisionReason: reason
+        additionalContext: reason
       }
     };
     endTimer(_perfStart, 'smart-search-router', 'PreToolUse');
-    console.log(JSON.stringify(budgetHookOutput(output, 'smart-search-router', 'PreToolUse:Grep')));
+    emitSearchAdvice(output);
     return;
   }
 
@@ -531,12 +539,11 @@ TLDR: finds + call graph + docstrings + complexity`;
     const output: HookOutput = {
       hookSpecificOutput: {
         hookEventName: 'PreToolUse',
-        permissionDecision: 'deny',
-        permissionDecisionReason: reason
+        additionalContext: reason
       }
     };
     endTimer(_perfStart, 'smart-search-router', 'PreToolUse');
-    console.log(JSON.stringify(budgetHookOutput(output, 'smart-search-router', 'PreToolUse:Grep')));
+    emitSearchAdvice(output);
     return;
   }
 
@@ -575,7 +582,7 @@ No semantic index found. To enable AI-powered code search:
 tldr semantic index . --lang all
 \`\`\`
 
-This creates embeddings for your codebase (one-time, ~30s).
+This creates embeddings for your codebase; duration depends on project size and environment.
 After indexing, natural language queries like "${pattern}" will find relevant code.
 
 **For now, use:**
@@ -598,7 +605,7 @@ Then retry your query. The daemon provides fast, in-memory semantic search.
     // Daemon is indexing
     reason = `🧠 **Semantic Index Building...**
 
-The daemon is currently building the semantic index. This takes ~30s.
+The daemon is currently building the semantic index.
 Retry in a moment, or use structured search for now:
 
 \`/tldr-search ${target || pattern}\``;
@@ -617,12 +624,11 @@ No code semantically similar to "${pattern}" found in the index.
   const output: HookOutput = {
     hookSpecificOutput: {
       hookEventName: 'PreToolUse',
-      permissionDecision: 'deny',
-      permissionDecisionReason: reason
+      additionalContext: reason
     }
   };
   endTimer(_perfStart, 'smart-search-router', 'PreToolUse');
-  console.log(JSON.stringify(budgetHookOutput(output, 'smart-search-router', 'PreToolUse:Grep')));
+  emitSearchAdvice(output);
 }
 
 main().catch(console.error);

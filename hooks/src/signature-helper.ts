@@ -1,3 +1,4 @@
+import { readHookInput } from './shared/hook-input.js';
 /**
  * Signature Helper Hook (PreToolUse:Edit)
  *
@@ -123,7 +124,7 @@ function getProjectDir(): string {
 }
 
 async function main() {
-  const input: HookInput = JSON.parse(readFileSync(0, 'utf-8'));
+  const input = readHookInput<HookInput>();
 
   if (!isRelevantForIntent('signature-helper')) {
     console.log('{}');

@@ -1,3 +1,4 @@
+import { readHookInput } from './shared/hook-input.js';
 /**
  * Pre-Edit Context Injection Hook
  *
@@ -100,7 +101,7 @@ function getTLDRExtract(filePath: string, sessionId?: string): TLDRExtract | nul
 }
 
 async function main() {
-  const input: HookInput = JSON.parse(readFileSync(0, 'utf-8'));
+  const input = readHookInput<HookInput>();
 
   if (!isRelevantForIntent('edit-context-inject')) {
     console.log('{}');

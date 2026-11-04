@@ -9,11 +9,11 @@
  * Part of the coordination layer architecture (Phase 1).
  */
 
-import { readFileSync } from 'fs';
+import { readHookInput } from './shared/hook-input.js';
 import { registerSession, getActiveSessions } from './shared/db-utils-pg.js';
 import { generateSessionId, writeSessionId, getProject } from './shared/session-id.js';
-import { resetBudget } from './shared/context-budget.js';
-import type { SessionStartInput, HookOutput } from './shared/types.js';
+import { resetBudget, budgetHookOutput } from './shared/context-budget.js';
+import type { SessionStartInput } from './shared/types.js';
 
 /**
  * Main entry point for the SessionStart hook.
@@ -23,68 +23,51 @@ export function main(): void {
   // Read hook input from stdin
   let input: SessionStartInput;
   try {
-    const stdinContent = readFileSync(0, 'utf-8');
-    input = JSON.parse(stdinContent) as SessionStartInput;
+    input = readHookInput<SessionStartInput>();
   } catch {
     // If we can't read input, just continue silently
     console.log(JSON.stringify({ result: 'continue' }));
     return;
   }
 
-  const sessionId = generateSessionId();
-  const project = getProject();
+  const sessionId = input.session_id || generateSessionId();
+  const project = input.cwd || getProject();
   const projectName = project.split('/').pop() || 'unknown';
 
   // Store session ID in environment and file for other hooks
   process.env.COORDINATION_SESSION_ID = sessionId;
   // Context budget'i sifirla
-  try { resetBudget(sessionId); } catch { /* ok */ }
+  try {
+    if (input.source === 'startup' || input.source === 'clear') resetBudget(sessionId);
+  } catch { /* ok */ }
   if (!writeSessionId(sessionId)) {
     console.error(`[session-register] WARNING: Failed to persist session ID ${sessionId} to file`);
   }
 
   // Register session in PostgreSQL
   const registerResult = registerSession(sessionId, project, '');
+  if (!registerResult.success) {
+    console.error('[session-register] Coordination registration unavailable; session was not registered.');
+    console.log('{}');
+    return;
+  }
 
   // Get other active sessions
   const sessionsResult = getActiveSessions(project);
+  if (!sessionsResult.success) {
+    console.error('[session-register] Session registered, but active peers could not be queried.');
+    console.log('{}');
+    return;
+  }
   const otherSessions = sessionsResult.sessions.filter(s => s.id !== sessionId);
 
-  // Build awareness message
-  let awarenessMessage = `
-<system-reminder>
-MULTI-SESSION COORDINATION ACTIVE
-
-Session: ${sessionId}
-Project: ${projectName}
-`;
-
-  if (otherSessions.length > 0) {
-    awarenessMessage += `
-Active peer sessions (${otherSessions.length}):
-${otherSessions.map(s => `  - ${s.id}: ${s.working_on || 'working...'}`).join('\n')}
-
-Coordination features:
-- File edits are tracked to prevent conflicts
-- Research findings are shared automatically
-- Use Task tool normally - coordination happens via hooks
-`;
-  } else {
-    awarenessMessage += `
-No other sessions active on this project.
-You are the only session currently working here.
-`;
-  }
-
-  awarenessMessage += `</system-reminder>`;
-
-  // Output hook result with awareness injection
-  const output: HookOutput = {
-    result: 'continue',
-    message: awarenessMessage,
+  const peers = otherSessions.slice(0, 10)
+    .map(s => `- ${s.id}: ${(s.working_on || 'working').slice(0, 120)}`).join('\n');
+  const awarenessMessage = `Coordination: ${projectName}; session ${sessionId}; ${otherSessions.length} active peer(s).${peers ? `\n${peers}` : ''}`;
+  const output = {
+    hookSpecificOutput: { hookEventName: 'SessionStart', additionalContext: awarenessMessage },
   };
-
-  console.log(JSON.stringify(output));
+  console.log(JSON.stringify(budgetHookOutput(output, 'session-register', 'SessionStart')));
 }
 
 // Run if executed directly

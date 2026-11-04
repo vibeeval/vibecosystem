@@ -2,6 +2,16 @@
   "hooks": {
     "PreToolUse": [
       {
+        "matcher": "Agent|Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/dist/dashboard-ws-emitter.mjs",
+            "timeout": 2
+          }
+        ]
+      },
+      {
         "matcher": "",
         "hooks": [
           {
@@ -43,16 +53,6 @@
             "type": "command",
             "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/dist/path-rules.mjs",
             "timeout": 5
-          }
-        ]
-      },
-      {
-        "matcher": "Read",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/dist/magic-doc-tracker.mjs",
-            "timeout": 3
           }
         ]
       },
@@ -229,6 +229,16 @@
     ],
     "PostToolUse": [
       {
+        "matcher": "Agent|Task|Bash|Edit|Write|Read|Grep|Glob",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/dist/dashboard-ws-emitter.mjs",
+            "timeout": 2
+          }
+        ]
+      },
+      {
         "matcher": "",
         "hooks": [
           {
@@ -350,6 +360,16 @@
             "type": "command",
             "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/dist/passive-learner.mjs",
             "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/dist/magic-doc-tracker.mjs",
+            "timeout": 3
           }
         ]
       }

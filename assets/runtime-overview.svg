@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+<title id="title">vibecosystem runtime profiles</title><desc id="desc">Core is the default runtime. Dashboard, quality, context, memory and orchestration are optional profiles. Catalog size is different from active context.</desc>
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#121322"/><stop offset="1" stop-color="#221a38"/></linearGradient><linearGradient id="accent"><stop stop-color="#b5a0ff"/><stop offset="1" stop-color="#ddd2ff"/></linearGradient></defs>
+<rect width="1200" height="630" fill="url(#bg)"/>
+<g fill="#f4f0ff" font-family="Arial, Helvetica, sans-serif">
+<text x="62" y="67" font-size="32" font-weight="700" fill="#cab7ff">vibecosystem</text>
+<text x="62" y="124" font-size="44" font-weight="700" fill="#ffffff">Keep the default path focused.</text>
+<text x="62" y="164" font-size="23" font-weight="400" fill="#d5cfe5">Select capabilities for the task. Inspect what is active.</text>
+<rect x="62" y="212" width="500" height="124" rx="18" fill="#30244c" stroke="#bba4ff" stroke-width="2"/><text x="86" y="253" font-size="24" font-weight="700" fill="#ddd0ff">core · default</text><text x="86" y="284" font-size="16" font-weight="400" fill="#d5cfe5">Investigate → implement → review → verify</text>
+<rect x="600" y="212" width="250" height="100" rx="18" fill="#1c1d30" stroke="#484159" stroke-width="1"/><text x="624" y="253" font-size="24" font-weight="700" fill="#f4f0ff">quality</text><text x="624" y="284" font-size="16" font-weight="400" fill="#d5cfe5">Focused edit checks</text>
+<rect x="874" y="212" width="264" height="100" rx="18" fill="#1c1d30" stroke="#484159" stroke-width="1"/><text x="898" y="253" font-size="24" font-weight="700" fill="#f4f0ff">context</text><text x="898" y="284" font-size="16" font-weight="400" fill="#d5cfe5">Targeted retrieval</text>
+<rect x="600" y="334" width="250" height="100" rx="18" fill="#1c1d30" stroke="#484159" stroke-width="1"/><text x="624" y="375" font-size="24" font-weight="700" fill="#f4f0ff">memory</text><text x="624" y="406" font-size="16" font-weight="400" fill="#d5cfe5">Persistent recall</text>
+<rect x="874" y="334" width="264" height="100" rx="18" fill="#1c1d30" stroke="#484159" stroke-width="1"/><text x="898" y="375" font-size="24" font-weight="700" fill="#f4f0ff">orchestration</text><text x="898" y="406" font-size="16" font-weight="400" fill="#d5cfe5">Explicit agent workflows</text>
+<text x="86" y="385" font-size="23" font-weight="700" fill="#d9ccff">Bounded optional hook context</text>
+<text x="86" y="420" font-size="21" font-weight="400" fill="#d5cfe5">4,000 characters / event</text>
+<text x="86" y="453" font-size="21" font-weight="400" fill="#d5cfe5">12,000 characters / session</text>
+<text x="600" y="478" font-size="19" font-weight="400" fill="#d5cfe5">dashboard · optional local activity monitor</text>
+<path d="M562 272 H580 V384 H600 M580 262 H600" fill="none" stroke="#8f78c9" stroke-width="2"/>
+<path d="M62 505 H1138" stroke="#484159"/>
+<text x="62" y="548" font-size="22" font-weight="700" fill="#ddd0ff">full is opt-in</text>
+<text x="254" y="548" font-size="22" font-weight="400" fill="#d5cfe5">Catalog size ≠ active context ≠ model token bill</text>
+<text x="62" y="591" font-size="17" font-weight="400" fill="#9d96b1">Conceptual diagram · not a recording of automated execution</text>
+</g>
+</svg>

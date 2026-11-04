@@ -1,0 +1,57 @@
+<template>
+<style>
+@font-face{font-family:'Inter';src:url('assets/fonts/Inter-400.woff2') format('woff2');font-weight:400;font-display:block}
+@font-face{font-family:'Inter';src:url('assets/fonts/Inter-700.woff2') format('woff2');font-weight:700;font-display:block}
+#root{position:absolute;inset:0;color:#f4f1ff;font-family:'Inter',sans-serif;background:#111019}
+#profile-head{position:absolute;left:76px;top:57px;width:940px}
+#profile-brand{margin:0;color:#c4b5fd;font-size:20px;letter-spacing:1px;font-weight:700}
+#profile-title{margin:22px 0 12px;font-size:54px;line-height:1.08;letter-spacing:-2px}
+#profile-subtitle{margin:0;color:#c4becf;font-size:23px;line-height:1.4}
+#profile-version{position:absolute;right:76px;top:58px;font-size:18px;color:#a8a0b8}
+#profile-core{position:absolute;left:76px;top:252px;width:454px;height:253px;border:2px solid #a78bfa;border-radius:18px;padding:27px 30px;background:#1c172b}
+#profile-default{color:#c4b5fd;font-size:16px;font-weight:700;letter-spacing:2px;margin:0 0 12px}
+#profile-name{font-size:40px;letter-spacing:-1px;margin:0 0 14px;line-height:1}
+#profile-counts{font-size:21px;color:#eee9ff;margin:0 0 20px;line-height:1.35;white-space:nowrap}
+#profile-command{font-family:monospace;font-size:19px;color:#d2c1ff;background:#292038;border-radius:8px;padding:12px;margin:0;white-space:nowrap}
+#profile-budget{position:absolute;left:76px;top:524px;font-size:17px;line-height:1.5;color:#bab2c9;margin:0;width:480px}
+#profile-choices{position:absolute;left:620px;top:250px;width:420px}
+#profile-optin{font-size:16px;font-weight:700;letter-spacing:2px;color:#c4b5fd;margin:0 0 18px}
+.profile-option{width:420px;display:flex;align-items:center;gap:17px;margin-bottom:12px;line-height:1.4}
+.profile-dot{width:8px;height:8px;background:#b59af8;border-radius:50%;flex-shrink:0}
+.profile-label{font-family:monospace;font-size:22px;color:#f4f1ff;display:inline-block;width:175px;flex-shrink:0}
+.profile-purpose{font-size:18px;color:#bfb6ce;white-space:nowrap}
+#profile-line{position:absolute;left:552px;top:286px;width:42px;height:2px;background:#706083;transform-origin:left center}
+#profile-footer{position:absolute;left:76px;bottom:26px;font-size:16px;color:#a59cb7;margin:0}
+#profile-note{position:absolute;left:620px;top:530px;font-size:18px;color:#d4c2ff;margin:0;line-height:1.5}
+</style>
+<div id="root" data-composition-id="profiles" data-width="1120" data-height="630">
+<div id="profile-head"><p id="profile-brand">vibecosystem</p><h1 id="profile-title" data-var-text="headline">Small by default.</h1><p id="profile-subtitle">Add capabilities when the task needs them.</p></div>
+<div id="profile-version">v{{version}}</div>
+<section id="profile-core"><p id="profile-default">DEFAULT PROFILE</p><h2 id="profile-name">core</h2><p id="profile-counts">{{agents}} agents · {{skills}} skills · {{hooks}} hooks</p><p id="profile-command">npx vibecosystem init</p></section>
+<div id="profile-line" data-layout-ignore></div>
+<div id="profile-choices"><p id="profile-optin">EXPLICIT OPT-IN PROFILES</p>
+<div id="profile-quality" class="profile-option"><span class="profile-dot"></span><span class="profile-label">quality</span><span class="profile-purpose">focused checks</span></div>
+<div id="profile-context" class="profile-option"><span class="profile-dot"></span><span class="profile-label">context</span><span class="profile-purpose">code retrieval</span></div>
+<div id="profile-memory" class="profile-option"><span class="profile-dot"></span><span class="profile-label">memory</span><span class="profile-purpose">recall + learning</span></div>
+<div id="profile-orchestration" class="profile-option"><span class="profile-dot"></span><span class="profile-label">orchestration</span><span class="profile-purpose">multi-agent tools</span></div>
+<div id="profile-dashboard" class="profile-option"><span class="profile-dot"></span><span class="profile-label">dashboard</span><span class="profile-purpose">local monitoring</span></div>
+</div>
+<p id="profile-budget">Advisory context: {{eventBudget}} chars/event · {{sessionBudget}} chars/session</p>
+<p id="profile-note">Choose a profile for the task.</p>
+<p id="profile-footer">Manifest-derived product diagram · runtime-manifest.json + hooks/hooks.json</p>
+</div>
+<script>
+const tl=gsap.timeline({paused:true});
+tl.fromTo('#profile-core',{opacity:0,y:16},{opacity:1,y:0,duration:.6,ease:'power4.out'},.2);
+tl.fromTo('#profile-line',{scaleX:0},{scaleX:1,duration:.35,ease:'power3.out'},.7);
+tl.fromTo('#profile-optin',{opacity:0},{opacity:1,duration:.3},.85);
+tl.fromTo('#profile-quality',{opacity:0,x:12},{opacity:1,x:0,duration:.55,ease:'power4.out'},1);
+tl.fromTo('#profile-context',{opacity:0,x:12},{opacity:1,x:0,duration:.55,ease:'power4.out'},2);
+tl.fromTo('#profile-memory',{opacity:0,x:12},{opacity:1,x:0,duration:.55,ease:'power4.out'},3);
+tl.fromTo('#profile-orchestration',{opacity:0,x:12},{opacity:1,x:0,duration:.55,ease:'power4.out'},4);
+tl.fromTo('#profile-dashboard',{opacity:0,x:12},{opacity:1,x:0,duration:.55,ease:'power4.out'},4.8);
+tl.fromTo('#profile-budget',{opacity:0},{opacity:1,duration:.3},.8);
+tl.fromTo('#profile-note',{opacity:0},{opacity:1,duration:.35},5.5);
+window.__timelines['profiles']=tl;
+</script>
+</template>

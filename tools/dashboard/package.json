@@ -1,14 +1,20 @@
 {
   "name": "vibecosystem-dashboard",
-  "version": "2.3.0",
+  "version": "3.5.0",
   "description": "vibecosystem Agent Monitoring Dashboard - Real-time agent timeline, error tracking, session stats",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node --test server.test.cjs ui.test.cjs",
+    "build:css": "tailwindcss -c tailwind.config.cjs -i input.css -o dashboard.css --minify"
   },
   "dependencies": {
     "ws": "^8.18.0"
   },
   "author": "vibeeval",
-  "license": "MIT"
+  "license": "MIT",
+  "type": "commonjs",
+  "devDependencies": {
+    "tailwindcss": "^3.4.19"
+  }
 }

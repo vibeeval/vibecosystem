@@ -1,3 +1,23 @@
+// src/shared/hook-response.ts
+function responseText(value) {
+  if (value === void 0 || value === null) return "";
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) return value.map(responseText).filter(Boolean).join("\n");
+  if (typeof value !== "object") return String(value);
+  const object = value;
+  if ("stdout" in object || "stderr" in object) {
+    return [object.stdout, object.stderr].map(responseText).filter(Boolean).join("\n");
+  }
+  if ("text" in object) return responseText(object.text);
+  if ("content" in object) return responseText(object.content);
+  if ("file" in object) return responseText(object.file);
+  if (object.type === "image" || object.type === "image_url") return "";
+  return JSON.stringify(value);
+}
+function hookResponseText(input) {
+  return responseText(input.tool_response !== void 0 ? input.tool_response : input.tool_output);
+}
+
 // src/token-tracker.ts
 import { appendFileSync, mkdirSync, existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -31,14 +51,14 @@ function runHook() {
     mkdirSync(claudeDir, { recursive: true });
   }
   const inputChars = charCount(JSON.stringify(event.tool_input || {}));
-  const outputChars = charCount(event.tool_output);
+  const outputChars = charCount(hookResponseText(event));
   const usage = getUsage(event);
   const providerInput = Number(usage?.input_tokens);
   const providerOutput = Number(usage?.output_tokens);
   const providerTotal = Number(usage?.total_tokens);
-  const hasProviderInput = Number.isFinite(providerInput);
-  const hasProviderOutput = Number.isFinite(providerOutput);
-  const hasProviderTotal = Number.isFinite(providerTotal);
+  const hasProviderInput = typeof usage?.input_tokens === "number" && Number.isFinite(providerInput) && providerInput >= 0;
+  const hasProviderOutput = typeof usage?.output_tokens === "number" && Number.isFinite(providerOutput) && providerOutput >= 0;
+  const hasProviderTotal = typeof usage?.total_tokens === "number" && Number.isFinite(providerTotal) && providerTotal >= 0;
   const inputTokens = hasProviderInput ? providerInput : estimateTokens(inputChars);
   const outputTokens = hasProviderOutput ? providerOutput : estimateTokens(outputChars);
   const totalTokens = hasProviderTotal ? providerTotal : inputTokens + outputTokens;

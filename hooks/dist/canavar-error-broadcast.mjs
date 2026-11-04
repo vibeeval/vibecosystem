@@ -1,3 +1,23 @@
+// src/shared/hook-response.ts
+function responseText(value) {
+  if (value === void 0 || value === null) return "";
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) return value.map(responseText).filter(Boolean).join("\n");
+  if (typeof value !== "object") return String(value);
+  const object = value;
+  if ("stdout" in object || "stderr" in object) {
+    return [object.stdout, object.stderr].map(responseText).filter(Boolean).join("\n");
+  }
+  if ("text" in object) return responseText(object.text);
+  if ("content" in object) return responseText(object.content);
+  if ("file" in object) return responseText(object.file);
+  if (object.type === "image" || object.type === "image_url") return "";
+  return JSON.stringify(value);
+}
+function hookResponseText(input) {
+  return responseText(input.tool_response !== void 0 ? input.tool_response : input.tool_output);
+}
+
 // src/canavar-error-broadcast.ts
 import { readFileSync as readFileSync2, appendFileSync, mkdirSync as mkdirSync2, existsSync as existsSync2 } from "fs";
 import { join as join2 } from "path";
@@ -54,6 +74,7 @@ function getCurrentRepo() {
   }
 }
 function createIssue(title, body, labels) {
+  if (process.env.VIBECO_GITHUB_AUTOMATION !== "1") return null;
   const state = loadRateLimit();
   if (state.issues_created >= MAX_ISSUES_PER_SESSION) {
     return null;
@@ -188,7 +209,7 @@ function main() {
   const sessionId = input.session_id?.slice(0, 8) || "unknown";
   const agentId = isAgentTool ? input.tool_input?.subagent_type || "unknown-agent" : process.env.CLAUDE_AGENT_ID || "main";
   const agentType = isAgentTool ? input.tool_input?.subagent_type || "unknown-agent" : process.env.CLAUDE_AGENT_TYPE || "main";
-  const output = isAgentTool ? typeof input.tool_output === "string" ? input.tool_output : "" : typeof input.tool_response === "string" ? input.tool_response : JSON.stringify(input.tool_response || "");
+  const output = hookResponseText(input);
   if (!output || output.length < 10) {
     console.log("{}");
     return;

@@ -2,7 +2,22 @@
 import * as fs from "fs";
 import * as path from "path";
 import { spawn, execSync } from "child_process";
-import Database from "better-sqlite3";
+
+// src/shared/optional-sqlite.ts
+import { createRequire } from "node:module";
+function reportSqliteUnavailable(hook) {
+  console.error(`[${hook}] SQLite operation skipped: optional better-sqlite3 is missing or incompatible. Install a Node-compatible version in the hooks directory (for a managed install: ~/.claude/hooks), or use the core profile.`);
+}
+function loadOptionalSqlite(hook) {
+  try {
+    return createRequire(import.meta.url)("better-sqlite3");
+  } catch {
+    reportSqliteUnavailable(hook);
+    return null;
+  }
+}
+
+// src/handoff-index.ts
 function getPpid(pid) {
   if (!Number.isInteger(pid) || pid < 1) return null;
   if (process.platform === "win32") {
@@ -46,11 +61,14 @@ function getTerminalShellPid() {
 function storeSessionAffinity(projectDir, terminalPid, sessionName) {
   const dbPath = path.join(projectDir, ".claude", "cache", "artifact-index", "context.db");
   const dbDir = path.dirname(dbPath);
+  const Sqlite = loadOptionalSqlite("handoff-index");
+  if (!Sqlite) return;
+  let db;
   try {
     if (!fs.existsSync(dbDir)) {
       fs.mkdirSync(dbDir, { recursive: true });
     }
-    const db = new Database(dbPath);
+    db = new Sqlite(dbPath);
     db.exec(`
       CREATE TABLE IF NOT EXISTS instance_sessions (
         terminal_pid TEXT PRIMARY KEY,
@@ -63,8 +81,13 @@ function storeSessionAffinity(projectDir, terminalPid, sessionName) {
       VALUES (?, ?, datetime('now'))
     `);
     stmt.run(terminalPid.toString(), sessionName);
-    db.close();
   } catch {
+    reportSqliteUnavailable("handoff-index");
+  } finally {
+    try {
+      db?.close();
+    } catch {
+    }
   }
 }
 function extractSessionName(filePath) {
@@ -144,6 +167,9 @@ ${content}`;
         cwd: projectDir,
         detached: true,
         stdio: "ignore"
+      });
+      child.on("error", () => {
+        console.error("[handoff-index] Artifact indexing skipped: uv could not start.");
       });
       child.unref();
     }

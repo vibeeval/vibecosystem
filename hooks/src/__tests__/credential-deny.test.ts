@@ -8,9 +8,12 @@
  * handled by try/catch in main(), so import does not crash.
  */
 import { describe, it, expect, afterAll } from 'vitest';
-import { mkdtempSync, symlinkSync, writeFileSync, rmSync } from 'fs';
+import { mkdtempSync, symlinkSync, writeFileSync, rmSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import { buildSync } from 'esbuild';
 
 import {
   resolveAllPaths,
@@ -30,6 +33,19 @@ afterAll(() => {
 // checkFilePath
 // ---------------------------------------------------------------------------
 describe('checkFilePath', () => {
+  it.each(['.env', '.env.local', '.npmrc', 'credentials.json', 'service-account.json'])('blocks bare credential filename %s', file => {
+    expect(checkFilePath(file)).not.toBeNull();
+  });
+
+  it.each(['.ssh', '.aws', '.kube', '.gnupg', '.password-store'])('blocks the sensitive directory itself %s', file => {
+    expect(checkFilePath(file)).not.toBeNull();
+  });
+
+  it('normalizes path traversal before matching', () => {
+    expect(checkFilePath('/tmp/project/.ssh/../safe.txt')).not.toBeNull();
+    expect(checkFilePath('/tmp/project/secrets/../.env')).not.toBeNull();
+  });
+
   it('blocks SSH key path', () => {
     const result = checkFilePath('/home/user/.ssh/id_rsa');
     expect(result).not.toBeNull();
@@ -154,6 +170,20 @@ describe('extractPaths', () => {
 // checkBashCommand
 // ---------------------------------------------------------------------------
 describe('checkBashCommand', () => {
+  it.each([
+    'cat .env', 'cat ".env.local"', "cat '.npmrc'", 'cat credentials.json',
+    'cat config/../.env', 'cat --file=.env', 'cat .\\env',
+    'echo ok; printenv', 'true && env', '/usr/bin/env', 'command env',
+    'printenv OPENAI_API_KEY', 'printenv "AWS_SECRET_ACCESS_KEY"', 'env > dump.txt',
+    'export -p > dump.txt', 'set | cat',
+  ])('blocks straightforward credential exposure: %s', command => {
+    expect(checkBashCommand(command)).not.toBeNull();
+  });
+
+  it.each(['env NODE_ENV=test npm test', 'printenv PATH', 'echo environment', 'cat config.json'])('allows common safe commands: %s', command => {
+    expect(checkBashCommand(command)).toBeNull();
+  });
+
   it('blocks bare env command', () => {
     const result = checkBashCommand('env');
     expect(result).not.toBeNull();
@@ -212,6 +242,15 @@ describe('checkBashCommand', () => {
 // resolveAllPaths
 // ---------------------------------------------------------------------------
 describe('resolveAllPaths', () => {
+  it('resolves missing new files below symlinked sensitive directories', () => {
+    const target = join(symlinkTmpDir, '.ssh');
+    const alias = join(symlinkTmpDir, 'safe-alias');
+    mkdirSync(target);
+    symlinkSync(target, alias);
+    expect(checkFilePath(join(alias, 'new-file'))).toBe('SSH keys');
+    expect(checkFilePath('safe-alias/new-file', symlinkTmpDir)).toBe('SSH keys');
+  });
+
   it('returns the original path for a regular (non-symlink) path', () => {
     // Use a path that does not exist on disk -- resolveAllPaths should still
     // return the original path (lstatSync and realpathSync will throw, caught)
@@ -253,5 +292,32 @@ describe('resolveAllPaths', () => {
     expect(result).toContain(danglingLink);
     // Should contain the readlink target (even though it does not exist)
     expect(result).toContain(nonexistentTarget);
+  });
+});
+
+
+describe('bundled credential hook protocol', () => {
+  it('emits modern PreToolUse denial for credential access and malformed payloads', () => {
+    const bundle = join(symlinkTmpDir, 'credential-deny.mjs');
+    buildSync({ entryPoints: [fileURLToPath(new URL('../credential-deny.ts', import.meta.url))],
+      outfile: bundle, bundle: true, platform: 'node', format: 'esm', logLevel: 'silent' });
+    const invoke = (input: string) => {
+      const result = spawnSync(process.execPath, [bundle], {
+        input, encoding: 'utf8', cwd: symlinkTmpDir, env: { ...process.env, HOME: symlinkTmpDir },
+      });
+      expect(result.status, result.stderr).toBe(0);
+      return JSON.parse(result.stdout);
+    };
+    for (const input of [
+      'null', '[]', '{invalid',
+      JSON.stringify({ tool_name: 'Read', tool_input: { file_path: '.env' } }),
+      JSON.stringify({ tool_name: 'Read', tool_input: { file_path: ['.env'] } }),
+      JSON.stringify({ tool_name: 'Bash', tool_input: { command: 'printenv OPENAI_API_KEY' } }),
+    ]) {
+      expect(invoke(input).hookSpecificOutput).toMatchObject({
+        hookEventName: 'PreToolUse', permissionDecision: 'deny',
+      });
+    }
+    expect(invoke(JSON.stringify({ tool_name: 'Read', tool_input: { file_path: 'safe.txt' } }))).toEqual({});
   });
 });

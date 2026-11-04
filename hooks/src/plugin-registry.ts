@@ -16,7 +16,7 @@
  *   node plugin-registry.mjs disable <hook># Hook'u deaktive et
  *   node plugin-registry.mjs status        # Ozet goster
  */
-import { readFileSync, writeFileSync, existsSync, readdirSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, readdirSync, statSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
 
@@ -42,6 +42,7 @@ function loadConfig(): PluginConfig {
 }
 
 function saveConfig(config: PluginConfig): void {
+  mkdirSync(CLAUDE_HOME, { recursive: true });
   writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2), 'utf-8');
 }
 
@@ -112,7 +113,7 @@ function listSkills(): string[] {
   if (!existsSync(skillsDir)) return [];
   return readdirSync(skillsDir)
     .filter(f => {
-      try { return require('fs').statSync(join(skillsDir, f)).isDirectory(); } catch { return false; }
+      try { return statSync(join(skillsDir, f)).isDirectory(); } catch { return false; }
     })
     .sort();
 }

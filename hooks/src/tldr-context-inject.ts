@@ -1,3 +1,4 @@
+import { readHookInput } from './shared/hook-input.js';
 /**
  * TLDR Context Injection Hook - Intent-Aware Version (DAEMON)
  *
@@ -417,7 +418,7 @@ function readStdin(): string {
 }
 
 async function main() {
-  const input: HookInput = JSON.parse(readStdin());
+  const input = readHookInput<HookInput>();
 
   if (input.tool_name !== 'Task') {
     console.log('{}');

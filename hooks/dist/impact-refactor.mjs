@@ -260,9 +260,18 @@ function trackHookActivitySync(hookName, projectDir, success = true, metrics = {
 }
 
 // src/shared/context-budget.ts
-import { readFileSync as readFileSync2, writeFileSync as writeFileSync2, existsSync as existsSync2, mkdirSync, statSync } from "fs";
-import { dirname, join as join2 } from "path";
-import { homedir } from "os";
+import {
+  readFileSync as readFileSync2,
+  writeFileSync as writeFileSync2,
+  existsSync as existsSync2,
+  mkdirSync,
+  statSync,
+  renameSync,
+  rmSync
+} from "node:fs";
+import { basename, dirname, join as join2, resolve as resolve2 } from "node:path";
+import { homedir } from "node:os";
+var scope = { sessionId: "", project: process.cwd(), eventId: "" };
 var HOOK_RELEVANCE = {
   "tldr-read-enforcer": ["implementation", "debug", "research"],
   "smart-search-router": ["implementation", "debug", "research"],
@@ -282,6 +291,7 @@ function isRelevantForIntent(hookName) {
     const ageMs = Date.now() - fileStat.mtimeMs;
     if (ageMs > 30 * 60 * 1e3) return true;
     const intent = JSON.parse(readFileSync2(intentPath, "utf-8"));
+    if (!scope.sessionId || intent.session_id !== scope.sessionId && intent.session_id !== scope.sessionId.slice(0, 8)) return true;
     const taskType = intent.task_type || "conversational";
     return relevantTypes.includes(taskType);
   } catch {

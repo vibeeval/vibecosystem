@@ -2,8 +2,8 @@
   "$schema": "https://raw.githubusercontent.com/anthropics/claude-code/main/schemas/plugin-marketplace.schema.json",
   "name": "vibecosystem",
   "displayName": "vibecosystem - AI Software Team",
-  "description": "138 specialized agents, 296 skills and 74 hooks. Core is lean by default; memory and orchestration are opt-in.",
-  "version": "3.4.0",
+  "description": "Profile-based coding runtime. The catalog contains 138 agents, 296 skills and 74 hooks; core installs a selected subset.",
+  "version": "3.5.0",
   "author": {
     "name": "vibeeval",
     "url": "https://github.com/vibeeval",
@@ -44,18 +44,13 @@
     "rules": 20
   },
   "features": [
-    "Self-learning pipeline (errors become rules automatically)",
-    "Multi-agent swarm coordination (5 phases)",
-    "Dev-QA loop (implement, review, retry, escalate)",
-    "Agent cross-training (one mistake trains entire team)",
-    "Autonomous skill evolution (pattern detection, draft generation, promotion)",
-    "Memory palace (hierarchical project memory)",
-    "Session compression (ACDE format, 10-30x token reduction)",
-    "3-depth progressive recall",
-    "Achievement system with XP and levels",
-    "Core, quality, context, memory, orchestration and full profiles",
+    "Lean core profile with opt-in quality, context, memory and orchestration",
+    "Bounded context injection with explicit character limits",
+    "Installer ownership tracking and backups",
+    "Prebuilt ESM hooks with optional dependencies documented",
     "Codex luna_worker adapter with gpt-5.6-luna/max",
-    "Hook health monitoring"
+    "Local hook health and estimated/provider usage diagnostics",
+    "Optional local monitoring dashboard"
   ],
   "compatibility": {
     "claude-code": ">=1.0.0",

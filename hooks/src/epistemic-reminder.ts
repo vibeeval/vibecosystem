@@ -1,3 +1,4 @@
+import { readHookInput } from './shared/hook-input.js';
 /**
  * Epistemic Reminder Hook - PostToolUse:Grep|Read
  *
@@ -20,8 +21,7 @@ interface HookInput {
 function main() {
   let input: HookInput;
   try {
-    const stdinContent = readFileSync(0, 'utf-8');
-    input = JSON.parse(stdinContent);
+    input = readHookInput<HookInput>();
   } catch {
     console.log(JSON.stringify({ result: 'continue' }));
     return;
@@ -80,7 +80,7 @@ Grep results are evidence, not proof. Verify with Read before claiming.
     result: 'continue',
     additionalContext: reminder,
   };
-  console.log(JSON.stringify(budgetHookOutput(output, 'epistemic-reminder', `PostToolUse:${input.tool_name}`)));
+  console.log(JSON.stringify(budgetHookOutput(output, 'epistemic-reminder', `PostToolUse:${input.tool_name}`, { deduplicate: 'session' })));
 }
 
 main();
