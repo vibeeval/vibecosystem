@@ -1,7 +1,7 @@
 import { afterEach, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { copyFileSync, existsSync, mkdtempSync, mkdirSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { chmodSync, copyFileSync, existsSync, lstatSync, mkdtempSync, mkdirSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -251,4 +251,76 @@ test('public dashboard profile installs its bundle and both event registrations 
   assert.equal(readFileSync(join(f.claudeDir, 'hooks', 'dist', 'dashboard-ws-emitter.mjs'), 'utf8'), readFileSync(join(repoDir, 'hooks', 'dist', 'dashboard-ws-emitter.mjs'), 'utf8'));
   f.install();
   assert.equal(commands(json(join(f.claudeDir, 'settings.json'))).some((command) => command.includes('/dashboard-ws-emitter.mjs')), false);
+});
+
+
+test('executable source modes survive install, legacy repair and replacement without changing custom modes', () => {
+  const f = fixture();
+  const source = join(f.home, 'mode-source');
+  for (const dir of ['profiles', 'agents', 'skills/runner', 'rules', 'hooks/dist', 'tools/vibeco', 'tools/dashboard']) mkdirSync(join(source, dir), { recursive: true });
+  for (const name of ['install-runtime.mjs', 'profile-runtime.mjs', 'register-hooks.mjs']) copyFileSync(join(repoDir, 'tools', name), join(source, 'tools', name));
+  writeFileSync(join(source, 'profiles', 'runtime-manifest.json'), JSON.stringify({ profiles: { core: { agents: [], skills: ['runner'], rules: [], hooks: [] } } }));
+  writeFileSync(join(source, 'hooks', 'hooks.json'), JSON.stringify({ hooks: {} }));
+  writeFileSync(join(source, 'skills', 'runner', 'SKILL.md'), '# Runnable fixture');
+  const sourceScript = join(source, 'skills', 'runner', 'run.sh');
+  const label = 'skills/runner/run.sh';
+  writeFileSync(sourceScript, '#!/bin/sh\nprintf "script-v1"\n', { mode: 0o755 });
+  const target = join(f.claudeDir, label);
+  const mode = (path) => lstatSync(path).mode & 0o777;
+  const install = (options = {}) => f.install({ repoDir: source, ...options });
+  const direct = () => execFileSync(target, [], { env: { ...process.env, HOME: f.home }, encoding: 'utf8' });
+  const backupMatches = (content, expectedMode) => readdirSync(join(f.claudeDir, 'backups')).some((name) => {
+    const path = join(f.claudeDir, 'backups', name, label);
+    return existsSync(path) && readFileSync(path, 'utf8') === content && mode(path) === expectedMode;
+  });
+  install();
+  assert.equal(mode(target), 0o755);
+  assert.equal(direct(), 'script-v1');
+  assert.equal(mode(join(f.claudeDir, 'skills', 'runner', 'SKILL.md')), mode(join(source, 'skills', 'runner', 'SKILL.md')));
+
+  // Simulate a pre-fix install: correct owned bytes, stripped permissions, no mode ledger.
+  chmodSync(target, 0o644);
+  const statePath = join(f.claudeDir, 'vibecosystem-runtime.json');
+  const state = json(statePath);
+  delete state.ownedFileModes;
+  writeFileSync(statePath, JSON.stringify(state));
+  assert.equal(install().stats.modesUpdated, 1);
+  assert.equal(mode(target), 0o755);
+  assert.equal(direct(), 'script-v1');
+  assert.ok(backupMatches(readFileSync(sourceScript, 'utf8'), 0o644));
+
+  const previousContent = readFileSync(target, 'utf8');
+  writeFileSync(sourceScript, '#!/bin/sh\nprintf "script-v2"\n');
+  install();
+  assert.equal(mode(target), 0o755);
+  assert.equal(direct(), 'script-v2');
+  assert.ok(backupMatches(previousContent, 0o755));
+
+  // A deliberate user mode change is retained across repeated owned updates.
+  chmodSync(target, 0o700);
+  for (let run = 0; run < 2; run += 1) { install(); assert.equal(mode(target), 0o700); }
+  const customContent = '#!/bin/sh\nprintf "user-owned"\n';
+  writeFileSync(target, customContent);
+  chmodSync(target, 0o600);
+  install();
+  assert.equal(readFileSync(target, 'utf8'), customContent);
+  assert.equal(mode(target), 0o600);
+  install({ force: true });
+  assert.equal(direct(), 'script-v2');
+  assert.equal(mode(target), 0o755);
+  assert.ok(backupMatches(customContent, 0o600));
+
+  // Execute permissions follow source mode; they are never added to ordinary files.
+  chmodSync(sourceScript, 0o644);
+  install();
+  assert.equal(mode(target), 0o644);
+  assert.equal(spawnSync(target).error?.code, 'EACCES');
+
+  const unmanaged = fixture();
+  const unmanagedTarget = join(unmanaged.claudeDir, label);
+  mkdirSync(dirname(unmanagedTarget), { recursive: true });
+  writeFileSync(unmanagedTarget, customContent, { mode: 0o700 });
+  unmanaged.install({ repoDir: source });
+  assert.equal(readFileSync(unmanagedTarget, 'utf8'), customContent);
+  assert.equal(mode(unmanagedTarget), 0o700);
 });
