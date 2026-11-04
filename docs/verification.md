@@ -80,7 +80,7 @@ Completed locally on macOS arm64 with Node.js 22.23.2 and npm 10.9.8:
 | --- | --- |
 | Clean hook dependency install | `npm ci --ignore-scripts` passed with the repaired lockfile |
 | Hook TypeScript check and build | Passed; all 74 emitted ESM entrypoints rebuilt |
-| Hook suite | 280 tests in 16 files passed |
+| Hook suite | 296 tests in 17 files passed |
 | Installer and packed-runtime suite | 14 tests passed, including a real npm tarball extracted without source dependencies and executable helper modes |
 | Claude installer shell validation | Passed using temporary HOME |
 | Codex installer shell validation | Passed, including generated JSON/TOML and macOS Bash 3.2 cases |

@@ -19,6 +19,8 @@ This version is being prepared in source. No npm publication, release tag or dep
 
 ### Fixed
 
+- Linux CI exposed a bundled transcript-parser CLI side effect in the PreCompact hook. Parsing is now a pure shared module with a separate CLI wrapper; canonical-path package tests reproduce the previous failure on macOS too. Continuity ledger/handoff paths reject symlink escapes and save messages reflect actual writes.
+
 - Independent follow-up review found two additional regressions before publication: executable skill permissions are preserved (including legacy repair and user-mode conflicts), and agent-memory paths reject symlink escapes before reads/writes. A bounded cooperative lock protects append/retention from lost parallel updates.
 
 - Remote installer update failures stop without removing the checkout. Normal Claude and Codex installs reconcile unchanged owned files, preserve modified/unmanaged files and back up replacements.

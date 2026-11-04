@@ -1,4 +1,8 @@
 // src/transcript-parser.ts
+import { realpathSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+
+// src/shared/transcript-parser.ts
 import * as fs from "fs";
 function parseTranscript(transcriptPath) {
   const summary = {
@@ -192,8 +196,17 @@ function generateAutoHandoff(summary, sessionName) {
   }
   return lines.join("\n");
 }
-var isMainModule = import.meta.url === `file://${process.argv[1]}`;
-if (isMainModule) {
+
+// src/transcript-parser.ts
+function isDirectExecution() {
+  if (!process.argv[1]) return false;
+  try {
+    return realpathSync(fileURLToPath(import.meta.url)) === realpathSync(process.argv[1]);
+  } catch {
+    return false;
+  }
+}
+if (isDirectExecution()) {
   const args = process.argv.slice(2);
   if (args.length === 0) {
     console.log("Usage: npx tsx transcript-parser.ts <transcript-path> [session-name]");

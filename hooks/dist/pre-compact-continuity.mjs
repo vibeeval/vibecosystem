@@ -3,7 +3,7 @@ import * as fs2 from "fs";
 import * as path from "path";
 import { homedir as homedir2 } from "os";
 
-// src/transcript-parser.ts
+// src/shared/transcript-parser.ts
 import * as fs from "fs";
 function parseTranscript(transcriptPath) {
   const summary = {
@@ -197,22 +197,6 @@ function generateAutoHandoff(summary, sessionName) {
   }
   return lines.join("\n");
 }
-var isMainModule = import.meta.url === `file://${process.argv[1]}`;
-if (isMainModule) {
-  const args = process.argv.slice(2);
-  if (args.length === 0) {
-    console.log("Usage: npx tsx transcript-parser.ts <transcript-path> [session-name]");
-    process.exit(1);
-  }
-  const transcriptPath = args[0];
-  const sessionName = args[1] || "test-session";
-  console.log(`Parsing transcript: ${transcriptPath}`);
-  const summary = parseTranscript(transcriptPath);
-  console.log("\n--- Summary ---");
-  console.log(JSON.stringify(summary, null, 2));
-  console.log("\n--- Auto-Handoff ---");
-  console.log(generateAutoHandoff(summary, sessionName));
-}
 
 // src/shared/hook-profiler.ts
 import { mkdirSync, existsSync as existsSync2 } from "fs";
@@ -263,13 +247,61 @@ function endTimer(start, hookName, eventType, sessionId = "unknown") {
   }
 }
 
+// src/shared/precompact-paths.ts
+import { closeSync, constants, fstatSync, lstatSync, mkdirSync as mkdirSync2, openSync, realpathSync } from "node:fs";
+import { join as join2 } from "node:path";
+function continuityDirectory(project, parts, create = false) {
+  try {
+    const anchor = realpathSync(project);
+    if (!lstatSync(anchor).isDirectory()) return;
+    let path2 = anchor;
+    for (const part of parts) {
+      if (!part || part === "." || part === ".." || /[/\\]/.test(part)) return;
+      path2 = join2(path2, part);
+      if (create) {
+        try {
+          mkdirSync2(path2, { mode: 448 });
+        } catch (error) {
+          if (error.code !== "EEXIST") throw error;
+        }
+      }
+      const stat = lstatSync(path2);
+      if (stat.isSymbolicLink() || !stat.isDirectory()) return;
+    }
+    if (realpathSync(path2) !== path2) return;
+    return { path: path2, anchor, parts };
+  } catch {
+    return;
+  }
+}
+function isContinuityDirectory(dir) {
+  return continuityDirectory(dir.anchor, dir.parts)?.path === dir.path;
+}
+function withContinuityFile(dir, name, flags, use) {
+  let fd;
+  try {
+    if (!name || name === "." || name === ".." || /[/\\]/.test(name) || !isContinuityDirectory(dir)) return;
+    if (typeof constants.O_NOFOLLOW !== "number" || flags & constants.O_TRUNC) return;
+    fd = openSync(join2(dir.path, name), flags | constants.O_NOFOLLOW | constants.O_NONBLOCK, 384);
+    const opened = fstatSync(fd);
+    if (!opened.isFile() || !isContinuityDirectory(dir)) return;
+    const current = lstatSync(join2(dir.path, name));
+    if (!current.isFile() || current.isSymbolicLink() || current.dev !== opened.dev || current.ino !== opened.ino) return;
+    return use(fd);
+  } catch {
+    return;
+  } finally {
+    if (fd !== void 0) closeSync(fd);
+  }
+}
+
 // src/pre-compact-continuity.ts
 async function main() {
   const _perfStart = startTimer();
   const input = JSON.parse(await readStdin());
   const projectDir = process.env.CLAUDE_PROJECT_DIR || process.cwd();
-  const ledgerDir = path.join(projectDir, "thoughts", "ledgers");
-  if (!fs2.existsSync(ledgerDir)) {
+  const ledgerDir = continuityDirectory(projectDir, ["thoughts", "ledgers"]);
+  if (!ledgerDir) {
     const output = {
       continue: true,
       systemMessage: "[PreCompact] No ledger directory found."
@@ -278,45 +310,43 @@ async function main() {
     console.log(JSON.stringify(output));
     return;
   }
-  const ledgerFiles = fs2.readdirSync(ledgerDir).filter((f) => f.startsWith("CONTINUITY_CLAUDE-") && f.endsWith(".md"));
+  const ledgerFiles = fs2.readdirSync(ledgerDir.path).filter((name) => name.startsWith("CONTINUITY_CLAUDE-") && name.endsWith(".md")).flatMap((name) => {
+    const mtime = withContinuityFile(ledgerDir, name, fs2.constants.O_RDONLY, (fd) => fs2.fstatSync(fd).mtimeMs);
+    return mtime === void 0 ? [] : [{ name, mtime }];
+  });
   if (ledgerFiles.length === 0) {
     const output = {
       continue: true,
-      systemMessage: "[PreCompact] No ledger found. Create one? /continuity_ledger"
+      systemMessage: "[PreCompact] No ledger found. Save a brief task summary before compacting."
     };
     endTimer(_perfStart, "pre-compact-continuity", "PreCompact");
     console.log(JSON.stringify(output));
     return;
   }
-  const mostRecent = ledgerFiles.sort((a, b) => {
-    const statA = fs2.statSync(path.join(ledgerDir, a));
-    const statB = fs2.statSync(path.join(ledgerDir, b));
-    return statB.mtime.getTime() - statA.mtime.getTime();
-  })[0];
-  const ledgerPath = path.join(ledgerDir, mostRecent);
+  const mostRecent = ledgerFiles.sort((a, b) => b.mtime - a.mtime)[0].name;
   if (input.trigger === "auto") {
     const sessionName = mostRecent.replace("CONTINUITY_CLAUDE-", "").replace(".md", "");
     let handoffFile = "";
     if (input.transcript_path && fs2.existsSync(input.transcript_path)) {
       const summary = parseTranscript(input.transcript_path);
       const handoffContent = generateAutoHandoff(summary, sessionName);
-      const handoffDir = path.join(projectDir, "thoughts", "shared", "handoffs", sessionName);
-      fs2.mkdirSync(handoffDir, { recursive: true });
+      const handoffDir = continuityDirectory(projectDir, ["thoughts", "shared", "handoffs", sessionName], true);
       const timestamp = (/* @__PURE__ */ new Date()).toISOString().replace(/[:.]/g, "-").slice(0, 19);
-      handoffFile = `auto-handoff-${timestamp}.yaml`;
-      const handoffPath = path.join(handoffDir, handoffFile);
-      fs2.writeFileSync(handoffPath, handoffContent);
-      const briefSummary = generateAutoSummary(projectDir, input.session_id);
-      if (briefSummary) {
-        appendToLedger(ledgerPath, briefSummary);
-      }
-    } else {
-      const briefSummary = generateAutoSummary(projectDir, input.session_id);
-      if (briefSummary) {
-        appendToLedger(ledgerPath, briefSummary);
-      }
+      const candidate = `auto-handoff-${timestamp}.yaml`;
+      const written = handoffDir && withContinuityFile(
+        handoffDir,
+        candidate,
+        fs2.constants.O_WRONLY | fs2.constants.O_CREAT | fs2.constants.O_EXCL,
+        (fd) => {
+          fs2.writeFileSync(fd, handoffContent);
+          return true;
+        }
+      );
+      if (written) handoffFile = candidate;
     }
-    const message = handoffFile ? `[PreCompact:auto] Created YAML handoff: thoughts/shared/handoffs/${sessionName}/${handoffFile}` : `[PreCompact:auto] Session summary auto-appended to ${mostRecent}`;
+    const briefSummary = generateAutoSummary(projectDir, input.session_id);
+    const appended = briefSummary && appendToLedger(ledgerDir, mostRecent, briefSummary);
+    const message = handoffFile ? `[PreCompact:auto] Created YAML handoff: thoughts/shared/handoffs/${sessionName}/${handoffFile}` : appended ? `[PreCompact:auto] Session summary auto-appended to ${mostRecent}` : "[PreCompact:auto] No continuity update saved. Save a brief task summary before compacting.";
     const output = {
       continue: true,
       systemMessage: message
@@ -326,7 +356,7 @@ async function main() {
   } else {
     const output = {
       continue: true,
-      systemMessage: `[PreCompact] Consider updating ledger before compacting: /continuity_ledger
+      systemMessage: `[PreCompact] Save a brief task summary in the ledger before compacting.
 Ledger: ${mostRecent}`
     };
     endTimer(_perfStart, "pre-compact-continuity", "PreCompact");
@@ -434,9 +464,9 @@ function generateAutoSummary(projectDir, sessionId) {
   }
   return lines.join("\n");
 }
-function appendToLedger(ledgerPath, summary) {
-  try {
-    let content = fs2.readFileSync(ledgerPath, "utf-8");
+function appendToLedger(directory, name, summary) {
+  return withContinuityFile(directory, name, fs2.constants.O_RDWR, (fd) => {
+    let content = fs2.readFileSync(fd, "utf-8");
     const stateMatch = content.match(/## State\n/);
     if (stateMatch) {
       const nowMatch = content.match(/(\n-\s*Now:)/);
@@ -453,9 +483,15 @@ function appendToLedger(ledgerPath, summary) {
     } else {
       content += summary;
     }
-    fs2.writeFileSync(ledgerPath, content);
-  } catch (err) {
-  }
+    if (!isContinuityDirectory(directory)) return false;
+    const bytes = Buffer.from(content, "utf-8");
+    let offset = 0;
+    while (offset < bytes.length) {
+      offset += fs2.writeSync(fd, bytes, offset, bytes.length - offset, offset);
+    }
+    fs2.ftruncateSync(fd, bytes.length);
+    return true;
+  }) === true;
 }
 async function readStdin() {
   return new Promise((resolve) => {

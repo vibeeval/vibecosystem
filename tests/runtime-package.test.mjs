@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, statSync } from 'node:fs';
+import { existsSync, mkdtempSync, mkdirSync, readFileSync, realpathSync, rmSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -10,7 +10,8 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const readJson = path => JSON.parse(readFileSync(path, 'utf8'));
 
 test('packed npm layout installs and runs core plus opt-in bundles without source node_modules', () => {
-  const fixture = mkdtempSync(join(tmpdir(), 'vibeco-package-'));
+  // Canonical paths expose imported-CLI side effects on macOS as on Linux.
+  const fixture = realpathSync(mkdtempSync(join(tmpdir(), 'vibeco-package-')));
   try {
     const home = join(fixture, 'home');
     const project = join(fixture, 'project');
@@ -32,7 +33,7 @@ test('packed npm layout installs and runs core plus opt-in bundles without sourc
         cwd: project, env: { HOME: home, PATH: '', CLAUDE_PROJECT_DIR: project },
         input: input && JSON.stringify(input), encoding: 'utf8', timeout: 10_000,
       });
-      assert.equal(result.status, 0, `${path}: ${result.stderr}`);
+      assert.equal(result.status, 0, `${path}\nstdout: ${result.stdout.slice(0, 2000)}\nstderr: ${result.stderr.slice(0, 2000)}`);
       assert.doesNotMatch(result.stderr, /require is not defined|Dynamic require|ERR_MODULE_NOT_FOUND|ReferenceError/);
       return result;
     };

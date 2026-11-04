@@ -1,8 +1,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { homedir } from 'os';
-import { parseTranscript, generateAutoHandoff } from './transcript-parser.js';
+import { parseTranscript, generateAutoHandoff } from './shared/transcript-parser.js';
 import { startTimer, endTimer } from './shared/hook-profiler.js';
+import { continuityDirectory, isContinuityDirectory, withContinuityFile, type ContinuityDirectory } from './shared/precompact-paths.js';
 
 interface PreCompactInput {
   trigger: 'manual' | 'auto';
@@ -22,8 +23,8 @@ async function main() {
   const projectDir = process.env.CLAUDE_PROJECT_DIR || process.cwd();
 
   // Find existing ledger files
-  const ledgerDir = path.join(projectDir, 'thoughts', 'ledgers');
-  if (!fs.existsSync(ledgerDir)) {
+  const ledgerDir = continuityDirectory(projectDir, ['thoughts', 'ledgers']);
+  if (!ledgerDir) {
     const output: HookOutput = {
       continue: true,
       systemMessage: '[PreCompact] No ledger directory found.'
@@ -32,14 +33,18 @@ async function main() {
     console.log(JSON.stringify(output));
     return;
   }
-  const ledgerFiles = fs.readdirSync(ledgerDir)
-    .filter(f => f.startsWith('CONTINUITY_CLAUDE-') && f.endsWith('.md'));
+  const ledgerFiles = fs.readdirSync(ledgerDir.path)
+    .filter(name => name.startsWith('CONTINUITY_CLAUDE-') && name.endsWith('.md'))
+    .flatMap(name => {
+      const mtime = withContinuityFile(ledgerDir, name, fs.constants.O_RDONLY, fd => fs.fstatSync(fd).mtimeMs);
+      return mtime === undefined ? [] : [{ name, mtime }];
+    });
 
   if (ledgerFiles.length === 0) {
     // No ledger - just remind to create one
     const output: HookOutput = {
       continue: true,
-      systemMessage: '[PreCompact] No ledger found. Create one? /continuity_ledger'
+      systemMessage: '[PreCompact] No ledger found. Save a brief task summary before compacting.'
     };
     endTimer(_perfStart, 'pre-compact-continuity', 'PreCompact');
     console.log(JSON.stringify(output));
@@ -47,13 +52,7 @@ async function main() {
   }
 
   // Get most recent ledger
-  const mostRecent = ledgerFiles.sort((a, b) => {
-    const statA = fs.statSync(path.join(ledgerDir, a));
-    const statB = fs.statSync(path.join(ledgerDir, b));
-    return statB.mtime.getTime() - statA.mtime.getTime();
-  })[0];
-
-  const ledgerPath = path.join(ledgerDir, mostRecent);
+  const mostRecent = ledgerFiles.sort((a, b) => b.mtime - a.mtime)[0].name;
 
   if (input.trigger === 'auto') {
     // Auto-compact: Use transcript parser to generate full handoff
@@ -66,31 +65,29 @@ async function main() {
       const handoffContent = generateAutoHandoff(summary, sessionName);
 
       // Ensure handoff directory exists (thoughts/shared/handoffs is tracked in git)
-      const handoffDir = path.join(projectDir, 'thoughts', 'shared', 'handoffs', sessionName);
-      fs.mkdirSync(handoffDir, { recursive: true });
+      const handoffDir = continuityDirectory(projectDir, ['thoughts', 'shared', 'handoffs', sessionName], true);
 
       // Write handoff with timestamp (YAML format for session-start injection)
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-      handoffFile = `auto-handoff-${timestamp}.yaml`;
-      const handoffPath = path.join(handoffDir, handoffFile);
-      fs.writeFileSync(handoffPath, handoffContent);
+      const candidate = `auto-handoff-${timestamp}.yaml`;
+      const written = handoffDir && withContinuityFile(
+        handoffDir, candidate, fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_EXCL, fd => {
+          fs.writeFileSync(fd, handoffContent);
+          return true;
+        },
+      );
+      if (written) handoffFile = candidate;
 
-      // Also append brief summary to ledger for visibility
-      const briefSummary = generateAutoSummary(projectDir, input.session_id);
-      if (briefSummary) {
-        appendToLedger(ledgerPath, briefSummary);
-      }
-    } else {
-      // Fallback: no transcript, use legacy summary
-      const briefSummary = generateAutoSummary(projectDir, input.session_id);
-      if (briefSummary) {
-        appendToLedger(ledgerPath, briefSummary);
-      }
     }
 
+    // Preserve the brief ledger summary, including the no-transcript fallback.
+    const briefSummary = generateAutoSummary(projectDir, input.session_id);
+    const appended = briefSummary && appendToLedger(ledgerDir, mostRecent, briefSummary);
     const message = handoffFile
       ? `[PreCompact:auto] Created YAML handoff: thoughts/shared/handoffs/${sessionName}/${handoffFile}`
-      : `[PreCompact:auto] Session summary auto-appended to ${mostRecent}`;
+      : appended
+        ? `[PreCompact:auto] Session summary auto-appended to ${mostRecent}`
+        : '[PreCompact:auto] No continuity update saved. Save a brief task summary before compacting.';
 
     const output: HookOutput = {
       continue: true,
@@ -102,7 +99,7 @@ async function main() {
     // Manual compact: warn user (cannot block, just inform)
     const output: HookOutput = {
       continue: true,
-      systemMessage: `[PreCompact] Consider updating ledger before compacting: /continuity_ledger\nLedger: ${mostRecent}`
+      systemMessage: `[PreCompact] Save a brief task summary in the ledger before compacting.\nLedger: ${mostRecent}`
     };
     endTimer(_perfStart, 'pre-compact-continuity', 'PreCompact');
     console.log(JSON.stringify(output));
@@ -233,9 +230,9 @@ function generateAutoSummary(projectDir: string, sessionId: string): string | nu
   return lines.join('\n');
 }
 
-function appendToLedger(ledgerPath: string, summary: string): void {
-  try {
-    let content = fs.readFileSync(ledgerPath, 'utf-8');
+function appendToLedger(directory: ContinuityDirectory, name: string, summary: string): boolean {
+  return withContinuityFile(directory, name, fs.constants.O_RDWR, fd => {
+    let content = fs.readFileSync(fd, 'utf-8');
 
     // Find the "## State" section and append after "Done:" items
     const stateMatch = content.match(/## State\n/);
@@ -259,10 +256,15 @@ function appendToLedger(ledgerPath: string, summary: string): void {
       content += summary;
     }
 
-    fs.writeFileSync(ledgerPath, content);
-  } catch (err) {
-    // Silently fail - don't break compact
-  }
+    if (!isContinuityDirectory(directory)) return false;
+    const bytes = Buffer.from(content, 'utf-8');
+    let offset = 0;
+    while (offset < bytes.length) {
+      offset += fs.writeSync(fd, bytes, offset, bytes.length - offset, offset);
+    }
+    fs.ftruncateSync(fd, bytes.length);
+    return true;
+  }) === true;
 }
 
 async function readStdin(): Promise<string> {

@@ -1,6 +1,6 @@
 # Security policy
 
-Agent memory accepts regular files under validated user/project/local roots. Symbolic links in memory entries, metadata and their directory descendants are rejected. Trusted HOME/project anchors are resolved first to support normal platform aliases. Cooperative savers serialize append and retention. A busy or abandoned `.learnings.lock` produces a diagnostic and skips the optional save after a bounded wait; stop all writers and review the lock before manual recovery. This does not provide a sandbox against hostile concurrent filesystem changes by another process with the same user privileges.
+Agent memory accepts regular files under validated user/project/local roots. Symbolic links in memory entries, metadata and their directory descendants are rejected. PreCompact similarly validates ledger/handoff descendants and uses regular no-follow file descriptors. Trusted HOME/project anchors are resolved first to support normal platform aliases. Cooperative savers serialize append and retention. A busy or abandoned `.learnings.lock` produces a diagnostic and skips the optional save after a bounded wait; stop all writers and review the lock before manual recovery. This does not provide a sandbox against hostile concurrent filesystem changes by another process with the same user privileges.
 
 ## Supported versions
 

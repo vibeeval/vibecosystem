@@ -27,6 +27,12 @@ The security reviewer independently reran the original destructive-write and sec
 
 See [verification.md](verification.md) for final totals and reproduction commands. Reviewer-authored reports, standalone harnesses and source hashes are retained in the local delivery artifacts. Reviewers did not modify repository source.
 
+## Linux CI follow-up
+
+GitHub run [41922050896](https://github.com/vibeeval/vibecosystem/actions/runs/41922050896) passed the hook suite but exposed a packed PreCompact failure: a bundled library's direct-CLI check fired on canonical Linux paths. macOS temporary-path aliases had hidden it locally. `/root/final_behavior_review` independently reproduced that exact red/green difference. The parser implementation now lives in a pure shared module; the compatibility CLI remains separate. The packed-runtime fixture resolves canonical paths on both platforms.
+
+The CI-adjacent security pass also reproduced PreCompact ledger/handoff symlinks writing outside a synthetic project. `/root/final_security_review` and its static subreview checked the repaired output guards against seven negative link cases and two legitimate workflows. `/root/final_behavior_review` separately verified manual compaction, transcript-driven and fallback summaries, direct CLI aliases/encoded paths, preserved parser exports and truthful no-save messages. Sixteen new regressions cover these paths; neither reviewer reported an actionable P1/P2 in the frozen follow-up source.
+
 ## Limits
 
 No live host/provider, real billing, production database, working native SQLite or live TLDR service was validated. Path checks do not promise an operating-system sandbox against hostile same-user directory swaps or hardlinks. An abandoned lock can suppress optional learning until reviewed. These checks reduce uncertainty within the inspected paths; they do not prove the entire catalog has no defects.
