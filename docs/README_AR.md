@@ -20,6 +20,6 @@ cd vibecosystem
 vibeco effective-config
 ```
 
-الإصدار 3.5.0 قيد الإعداد في هذه الشجرة المصدرية؛ لا يعني ذلك نشره على npm أو GitHub. The published npm package is 3.3.0. Unreleased: available when installing from source (main), not yet on npm. حدود السياق تُحسب بالأحرف ولا تحد استهلاك النموذج الكامل. لا نعد بنسبة ثابتة لتوفير التوكنات.
+الإصدار 3.5.0 قيد الإعداد في هذه الشجرة المصدرية؛ لا يعني ذلك نشره على npm أو GitHub. الحزمة المنشورة على npm هي 3.3.0. غير منشور: متاح عند التثبيت من المصدر (main)، وليس بعد على npm. حدود السياق تُحسب بالأحرف ولا تحد استهلاك النموذج الكامل. لا نعد بنسبة ثابتة لتوفير التوكنات.
 
 [Profiles and setup](../README.md#profiles) · [Codex](codex-setup.md) · [Upgrade guide](../UPGRADING.md) · [Security](../SECURITY.md) · [Verification](verification.md)

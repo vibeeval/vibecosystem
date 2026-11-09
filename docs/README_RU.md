@@ -20,6 +20,6 @@ cd vibecosystem
 vibeco effective-config
 ```
 
-Версия 3.5.0 готовится в этом дереве исходного кода; это не означает публикацию в npm или GitHub. The published npm package is 3.3.0. Unreleased: available when installing from source (main), not yet on npm. Ограничения контекста заданы в символах и не ограничивают весь расход токенов модели. Фиксированный процент экономии токенов не обещается.
+Версия 3.5.0 готовится в этом дереве исходного кода; это не означает публикацию в npm или GitHub. Опубликованный npm-пакет — 3.3.0. Не выпущено: доступно при установке из исходного кода (main), пока нет в npm. Ограничения контекста заданы в символах и не ограничивают весь расход токенов модели. Фиксированный процент экономии токенов не обещается.
 
 [Profiles and setup](../README.md#profiles) · [Codex](codex-setup.md) · [Upgrade guide](../UPGRADING.md) · [Security](../SECURITY.md) · [Verification](verification.md)

@@ -1,7 +1,5 @@
 # Architecture
 
-Unreleased: available when installing from source (main), not yet on npm.
-
 ## Runtime boundary
 
 vibecosystem is a file-based extension for coding hosts. The Claude adapter installs selected agents, skills, rules and bundled hooks. The Codex adapter installs skills and optionally a bounded TOML worker. There is no central agent executor, RPC mesh or guarantee that every instruction will be followed by a model.

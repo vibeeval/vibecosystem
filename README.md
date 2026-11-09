@@ -59,8 +59,6 @@ The source installer creates `~/.local/bin/vibeco` unless an unmanaged launcher 
 
 ## Profiles
 
-Unreleased: available when installing from source (main), not yet on npm.
-
 Profiles select installed components and registered hook commands. Catalog size does not describe how much prompt content is loaded into each request.
 
 | Profile | Purpose |
@@ -83,8 +81,6 @@ vibeco profile core
 Profile changes reconcile installer-owned files and hook registrations. Modified or unmanaged files require review; the installer preserves ownership boundaries and creates backups before replacements. See [UPGRADING.md](UPGRADING.md).
 
 ## Token and runtime efficiency
-
-Unreleased: available when installing from source (main), not yet on npm.
 
 The default profile avoids installing the complete agent and skill catalog. Context-producing hooks use character limits: **4,000 per event and 12,000 per session** for lean profiles; **8,000/50,000** for `full`. These are limits on participating hook context, not limits on total model input, output, reasoning, tool results or billing.
 
@@ -114,8 +110,6 @@ The optional memory pipeline captures and consolidates patterns under the user's
 
 ## Catalog
 
-Unreleased: available when installing from source (main), not yet on npm.
-
 | Path | Catalog contents |
 | --- | --- |
 | `agents/` | 138 Markdown agent definitions |
@@ -127,8 +121,6 @@ Source entry points, unique hook names and registered commands are different cou
 
 ## Codex and other adapters
 
-Unreleased: available when installing from source (main), not yet on npm.
-
 | Host | Setup | Scope |
 | --- | --- | --- |
 | Claude Code | `./install.sh --profile core` | Selected agents, skills, hooks and rules |
@@ -139,8 +131,6 @@ Unreleased: available when installing from source (main), not yet on npm.
 The Codex worker contract is [`.codex/agents/luna-worker.toml`](.codex/agents/luna-worker.toml): `gpt-5.6-luna` with `max` reasoning. The project config stays model-neutral. Claude-only `opus`/`sonnet` metadata is not applied by the Codex installer. Model availability and custom-agent support depend on the host and account. See [docs/codex-setup.md](docs/codex-setup.md).
 
 ## Optional integrations and data
-
-Unreleased: available when installing from source (main), not yet on npm.
 
 Core installation does not provision external services. Some optional hooks and skills need tools that are not bundled:
 

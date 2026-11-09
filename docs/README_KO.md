@@ -20,6 +20,6 @@ cd vibecosystem
 vibeco effective-config
 ```
 
-3.5.0은 이 소스 트리에서 준비 중이며 npm 또는 GitHub에 게시되었다는 의미가 아닙니다. The published npm package is 3.3.0. Unreleased: available when installing from source (main), not yet on npm. 컨텍스트 제한은 문자 수 기준이며 모델의 전체 토큰 사용량을 제한하지 않습니다. 고정된 토큰 절감률을 약속하지 않습니다.
+3.5.0은 이 소스 트리에서 준비 중이며 npm 또는 GitHub에 게시되었다는 의미가 아닙니다. 게시된 npm 패키지는 3.3.0입니다. 미출시: 소스(main)에서 설치할 때 사용할 수 있으며, 아직 npm에는 없습니다. 컨텍스트 제한은 문자 수 기준이며 모델의 전체 토큰 사용량을 제한하지 않습니다. 고정된 토큰 절감률을 약속하지 않습니다.
 
 [Profiles and setup](../README.md#profiles) · [Codex](codex-setup.md) · [Upgrade guide](../UPGRADING.md) · [Security](../SECURITY.md) · [Verification](verification.md)

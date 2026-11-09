@@ -20,6 +20,6 @@ cd vibecosystem
 vibeco effective-config
 ```
 
-3.5.0 正在此源码树中准备，并不表示已经发布到 npm 或 GitHub。 The published npm package is 3.3.0. Unreleased: available when installing from source (main), not yet on npm. 上下文限制以字符计算，不限制模型的总 token 使用量。项目不承诺固定比例的 token 节省。
+3.5.0 正在此源码树中准备，并不表示已经发布到 npm 或 GitHub。已发布的 npm 包为 3.3.0。未发布：从源码 (main) 安装时可用，尚未上架 npm。上下文限制以字符计算，不限制模型的总 token 使用量。项目不承诺固定比例的 token 节省。
 
 [Profiles and setup](../README.md#profiles) · [Codex](codex-setup.md) · [Upgrade guide](../UPGRADING.md) · [Security](../SECURITY.md) · [Verification](verification.md)
