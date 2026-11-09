@@ -98,6 +98,11 @@ interface MatchedSkill {
  */
 function runPatternInference(prompt: string, projectDir: string): PatternInference | null {
     try {
+        // Project-local scripts run untrusted repo code; require explicit opt-in.
+        if (process.env.VIBECO_ALLOW_PROJECT_SCRIPTS !== '1') {
+            return null;
+        }
+
         const scriptPath = join(projectDir, 'scripts', 'agentica_patterns', 'pattern_inference.py');
         if (!existsSync(scriptPath)) {
             return null;

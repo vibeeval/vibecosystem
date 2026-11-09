@@ -209,6 +209,9 @@ var PATTERN_AGENT_MAP = {
 };
 function runPatternInference(prompt, projectDir) {
   try {
+    if (process.env.VIBECO_ALLOW_PROJECT_SCRIPTS !== "1") {
+      return null;
+    }
     const scriptPath = join3(projectDir, "scripts", "agentica_patterns", "pattern_inference.py");
     if (!existsSync3(scriptPath)) {
       return null;
