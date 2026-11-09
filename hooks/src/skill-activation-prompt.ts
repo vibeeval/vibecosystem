@@ -258,9 +258,16 @@ async function main() {
         const projectRules: SkillRules | null = existsSync(projectRulesPath)
             ? JSON.parse(readFileSync(projectRulesPath, 'utf-8'))
             : null;
-        const globalRules: SkillRules | null = existsSync(globalRulesPath)
-            ? JSON.parse(readFileSync(globalRulesPath, 'utf-8'))
-            : null;
+        let globalRules: SkillRules | null = null;
+        if (existsSync(globalRulesPath)) {
+            try {
+                globalRules = JSON.parse(readFileSync(globalRulesPath, 'utf-8'));
+            } catch (err) {
+                const message = err instanceof Error ? err.message : String(err);
+                console.error(`${globalRulesPath}: ${message}`);
+                globalRules = null;
+            }
+        }
         if (!projectRules && !globalRules) {
             // No rules file found, exit silently
             process.exit(0);

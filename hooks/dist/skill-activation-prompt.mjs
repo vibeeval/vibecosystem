@@ -338,7 +338,16 @@ async function main() {
     const projectRulesPath = join3(projectDir, ".claude", "skills", "skill-rules.json");
     const globalRulesPath = join3(homeDir, ".claude", "skills", "skill-rules.json");
     const projectRules = existsSync3(projectRulesPath) ? JSON.parse(readFileSync3(projectRulesPath, "utf-8")) : null;
-    const globalRules = existsSync3(globalRulesPath) ? JSON.parse(readFileSync3(globalRulesPath, "utf-8")) : null;
+    let globalRules = null;
+    if (existsSync3(globalRulesPath)) {
+      try {
+        globalRules = JSON.parse(readFileSync3(globalRulesPath, "utf-8"));
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        console.error(`${globalRulesPath}: ${message}`);
+        globalRules = null;
+      }
+    }
     if (!projectRules && !globalRules) {
       process.exit(0);
     }

@@ -1,6 +1,6 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { buildSync } from 'esbuild';
-import { chmodSync, existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, rmSync, unlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -222,5 +222,55 @@ describe('skill-activation-prompt project script opt-in', () => {
     expect(result.stdout).toContain('SKILL ACTIVATION CHECK');
     expect(result.stdout).toContain('global-union-skill');
     expect(result.stdout).toContain('project-union-skill');
+  });
+
+  it('loads a global-only skill-rules.json entry when no project file exists', () => {
+    unlinkSync(join(project, '.claude', 'skills', 'skill-rules.json'));
+    writeSkillRules(home, {
+      'global-only-skill': {
+        type: 'domain',
+        enforcement: 'suggest',
+        priority: 'high',
+        promptTriggers: { keywords: ['global-only-kw'] },
+        description: 'GLOBAL_ONLY_CONTENT',
+      },
+    });
+
+    const result = runHook({}, 'Please use global-only-kw in this request');
+    expect(result.stdout).toContain('SKILL ACTIVATION CHECK');
+    expect(result.stdout).toContain('global-only-skill');
+    expect(result.stdout).not.toContain('fixture-skill');
+  });
+
+  it('ignores malformed global skill-rules.json when a valid project file exists', () => {
+    writeSkillRules(project, {
+      'project-valid-skill': {
+        type: 'domain',
+        enforcement: 'suggest',
+        priority: 'high',
+        promptTriggers: { keywords: ['project-valid-kw'] },
+        description: 'PROJECT_VALID_CONTENT',
+      },
+    });
+    mkdirSync(join(home, '.claude', 'skills'), { recursive: true });
+    writeFileSync(join(home, '.claude', 'skills', 'skill-rules.json'), '{not-json');
+
+    const result = runHook({}, 'Please use project-valid-kw in this request');
+    expect(result.stdout).toContain('SKILL ACTIVATION CHECK');
+    expect(result.stdout).toContain('project-valid-skill');
+    expect(result.stdout).not.toContain('GLOBAL_ONLY_CONTENT');
+    expect(result.stderr).toContain(join(home, '.claude', 'skills', 'skill-rules.json'));
+    expect(result.stderr).toMatch(/not-json|JSON|Unexpected|SyntaxError/i);
+  });
+
+  it('exits 0 with a warning when global skill-rules.json is malformed and no project file exists', () => {
+    unlinkSync(join(project, '.claude', 'skills', 'skill-rules.json'));
+    mkdirSync(join(home, '.claude', 'skills'), { recursive: true });
+    writeFileSync(join(home, '.claude', 'skills', 'skill-rules.json'), '{not-json');
+
+    const result = runHook({}, 'Please use project-valid-kw in this request');
+    expect(result.stdout).not.toContain('SKILL ACTIVATION CHECK');
+    expect(result.stderr).toContain(join(home, '.claude', 'skills', 'skill-rules.json'));
+    expect(result.stderr).toMatch(/not-json|JSON|Unexpected|SyntaxError/i);
   });
 });
