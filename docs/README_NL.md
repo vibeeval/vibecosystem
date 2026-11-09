@@ -20,6 +20,6 @@ cd vibecosystem
 vibeco effective-config
 ```
 
-Versie 3.5.0 wordt in deze broncode voorbereid; dit betekent niet dat deze op npm of GitHub is gepubliceerd. Contextlimieten tellen tekens en begrenzen niet het totale modelverbruik. Er wordt geen vast percentage tokenbesparing beloofd.
+Versie 3.5.0 wordt in deze broncode voorbereid; dit betekent niet dat deze op npm of GitHub is gepubliceerd. The published npm package is 3.3.0. Unreleased: available when installing from source (main), not yet on npm. Contextlimieten tellen tekens en begrenzen niet het totale modelverbruik. Er wordt geen vast percentage tokenbesparing beloofd.
 
 [Profiles and setup](../README.md#profiles) · [Codex](codex-setup.md) · [Upgrade guide](../UPGRADING.md) · [Security](../SECURITY.md) · [Verification](verification.md)

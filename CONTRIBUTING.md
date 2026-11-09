@@ -1,5 +1,7 @@
 # Contributing to vibecosystem
 
+Unreleased: available when installing from source (main), not yet on npm.
+
 The optional Claude review workflow runs only on same-repository PRs labelled `claude-review` and requires a configured Anthropic API key. New commits cancel stale review runs. The issue-fix workflow requires the `claude-fix` label and serializes runs per issue. Ordinary validation and tests do not call an LLM.
 
 Prefer changes that make existing workflows reliable, focused and verifiable. New catalog entries should solve a distinct need; the size of the catalog is not a measure of quality or token efficiency.

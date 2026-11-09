@@ -19,7 +19,7 @@
 
 vibecosystem packages agents, skills and hooks for software work. The default `core` profile installs a selected set for investigation, implementation, review and verification. Memory, learning and orchestration have explicit profiles; the complete catalog is available through `full`.
 
-**3.5.0 is a release candidate in this source tree.** It is not a claim that an npm package or GitHub release has been published. See [CHANGELOG.md](CHANGELOG.md) and the [upgrade guide](UPGRADING.md).
+**3.5.0 is a release candidate in this source tree.** The published npm package is **3.3.0**. It is not a claim that an npm package or GitHub release of 3.5.0 has been published. See [CHANGELOG.md](CHANGELOG.md) and the [upgrade guide](UPGRADING.md).
 
 ## Quick start
 
@@ -34,13 +34,13 @@ cd vibecosystem
 
 The installer uses the prebuilt hooks in `hooks/dist/`; a normal installation does not compile TypeScript or install the hook development dependencies. Node.js 18+ and Bash are required. Development checks use Node.js 22.
 
-For the published npm version:
+For the published npm version (currently 3.3.0):
 
 ```bash
-npx vibecosystem init --profile core
+npx vibecosystem init
 ```
 
-The remote installer is also available. Review the script before running it:
+The remote installer fetches `main` (this source tree). Unreleased: available when installing from source (main), not yet on npm. Review the script before running it:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/vibeeval/vibecosystem/main/install-remote.sh -o install-remote.sh
@@ -58,6 +58,8 @@ vibeco stats
 The source installer creates `~/.local/bin/vibeco` unless an unmanaged launcher already exists there. Add `~/.local/bin` to `PATH` if your shell cannot find it. You can also run the source CLI with `node tools/vibeco/vibeco.mjs`.
 
 ## Profiles
+
+Unreleased: available when installing from source (main), not yet on npm.
 
 Profiles select installed components and registered hook commands. Catalog size does not describe how much prompt content is loaded into each request.
 
@@ -81,6 +83,8 @@ vibeco profile core
 Profile changes reconcile installer-owned files and hook registrations. Modified or unmanaged files require review; the installer preserves ownership boundaries and creates backups before replacements. See [UPGRADING.md](UPGRADING.md).
 
 ## Token and runtime efficiency
+
+Unreleased: available when installing from source (main), not yet on npm.
 
 The default profile avoids installing the complete agent and skill catalog. Context-producing hooks use character limits: **4,000 per event and 12,000 per session** for lean profiles; **8,000/50,000** for `full`. These are limits on participating hook context, not limits on total model input, output, reasoning, tool results or billing.
 
@@ -110,6 +114,8 @@ The optional memory pipeline captures and consolidates patterns under the user's
 
 ## Catalog
 
+Unreleased: available when installing from source (main), not yet on npm.
+
 | Path | Catalog contents |
 | --- | --- |
 | `agents/` | 138 Markdown agent definitions |
@@ -121,6 +127,8 @@ Source entry points, unique hook names and registered commands are different cou
 
 ## Codex and other adapters
 
+Unreleased: available when installing from source (main), not yet on npm.
+
 | Host | Setup | Scope |
 | --- | --- | --- |
 | Claude Code | `./install.sh --profile core` | Selected agents, skills, hooks and rules |
@@ -131,6 +139,8 @@ Source entry points, unique hook names and registered commands are different cou
 The Codex worker contract is [`.codex/agents/luna-worker.toml`](.codex/agents/luna-worker.toml): `gpt-5.6-luna` with `max` reasoning. The project config stays model-neutral. Claude-only `opus`/`sonnet` metadata is not applied by the Codex installer. Model availability and custom-agent support depend on the host and account. See [docs/codex-setup.md](docs/codex-setup.md).
 
 ## Optional integrations and data
+
+Unreleased: available when installing from source (main), not yet on npm.
 
 Core installation does not provision external services. Some optional hooks and skills need tools that are not bundled:
 
@@ -171,7 +181,7 @@ vibeco effective-config
 
 Token verimliliği için önce göreve uygun küçük profili seç. Bağlam sınırları modelin toplam token tüketimini sınırlamaz; ücret ve kullanım görevine, modele ve tekrar sayısına bağlıdır. Ölçülmemiş tasarruf oranları vaat etmiyoruz. `full` profili tüm kataloğu açar; otomatik olarak bir agent ordusu başlatmaz.
 
-3.5.0 bu kaynak ağacında hazırlanıyor. Yayınlanmış sürüm ve kurulum için İngilizce bölümü, değişiklikler için [CHANGELOG.md](CHANGELOG.md) dosyasını takip edebilirsin.
+3.5.0 bu kaynak ağacında hazırlanıyor. Yayınlanmış npm paketi 3.3.0. Yayınlanmış sürüm ve kurulum için İngilizce bölümü, değişiklikler için [CHANGELOG.md](CHANGELOG.md) dosyasını takip edebilirsin.
 
 ## Credits and license
 

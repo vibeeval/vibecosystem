@@ -4,7 +4,7 @@ Agent memory accepts regular files under validated user/project/local roots. Sym
 
 ## Supported versions
 
-Security fixes target the current 3.x source line. Version 3.5.0 is in preparation; a version string in this tree does not mean a published package or release exists. Earlier releases may lack fixes documented in [CHANGELOG.md](CHANGELOG.md).
+Security fixes target the current 3.x source line. Version 3.5.0 is in preparation; a version string in this tree does not mean a published package or release exists. The published npm package is 3.3.0. Earlier releases may lack fixes documented in [CHANGELOG.md](CHANGELOG.md).
 
 ## Report a vulnerability
 
