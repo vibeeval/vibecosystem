@@ -249,22 +249,29 @@ async function main() {
         }
         const prompt = data.prompt.toLowerCase();
 
-        // Load skill rules (try project first, then global)
+        // Load project and global skill rules. On a same-name conflict, global wins.
         const projectDir = process.env.CLAUDE_PROJECT_DIR || process.cwd();
         const homeDir = process.env.HOME || process.env.USERPROFILE || '';
         const projectRulesPath = join(projectDir, '.claude', 'skills', 'skill-rules.json');
         const globalRulesPath = join(homeDir, '.claude', 'skills', 'skill-rules.json');
 
-        let rulesPath = '';
-        if (existsSync(projectRulesPath)) {
-            rulesPath = projectRulesPath;
-        } else if (existsSync(globalRulesPath)) {
-            rulesPath = globalRulesPath;
-        } else {
+        const projectRules: SkillRules | null = existsSync(projectRulesPath)
+            ? JSON.parse(readFileSync(projectRulesPath, 'utf-8'))
+            : null;
+        const globalRules: SkillRules | null = existsSync(globalRulesPath)
+            ? JSON.parse(readFileSync(globalRulesPath, 'utf-8'))
+            : null;
+        if (!projectRules && !globalRules) {
             // No rules file found, exit silently
             process.exit(0);
         }
-        const rules: SkillRules = JSON.parse(readFileSync(rulesPath, 'utf-8'));
+        const rules: SkillRules = {
+            version: globalRules?.version || projectRules?.version || '',
+            skills: { ...(projectRules?.skills || {}), ...(globalRules?.skills || {}) },
+            agents: (projectRules?.agents || globalRules?.agents)
+                ? { ...(projectRules?.agents || {}), ...(globalRules?.agents || {}) }
+                : undefined,
+        };
 
         // CHANGE 1: Run pattern inference EARLY on all prompts
         const patternInference = runPatternInference(data.prompt, projectDir);

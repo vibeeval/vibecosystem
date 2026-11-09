@@ -337,15 +337,16 @@ async function main() {
     const homeDir = process.env.HOME || process.env.USERPROFILE || "";
     const projectRulesPath = join3(projectDir, ".claude", "skills", "skill-rules.json");
     const globalRulesPath = join3(homeDir, ".claude", "skills", "skill-rules.json");
-    let rulesPath = "";
-    if (existsSync3(projectRulesPath)) {
-      rulesPath = projectRulesPath;
-    } else if (existsSync3(globalRulesPath)) {
-      rulesPath = globalRulesPath;
-    } else {
+    const projectRules = existsSync3(projectRulesPath) ? JSON.parse(readFileSync3(projectRulesPath, "utf-8")) : null;
+    const globalRules = existsSync3(globalRulesPath) ? JSON.parse(readFileSync3(globalRulesPath, "utf-8")) : null;
+    if (!projectRules && !globalRules) {
       process.exit(0);
     }
-    const rules = JSON.parse(readFileSync3(rulesPath, "utf-8"));
+    const rules = {
+      version: globalRules?.version || projectRules?.version || "",
+      skills: { ...projectRules?.skills || {}, ...globalRules?.skills || {} },
+      agents: projectRules?.agents || globalRules?.agents ? { ...projectRules?.agents || {}, ...globalRules?.agents || {} } : void 0
+    };
     const patternInference = runPatternInference(data.prompt, projectDir);
     const semanticQuery = detectSemanticQuery(data.prompt);
     const matchedSkills = [];

@@ -99,13 +99,21 @@ describe('skill-activation-prompt project script opt-in', () => {
 
   afterEach(() => rmSync(fixture, { recursive: true, force: true }));
 
-  function runHook(env: Record<string, string> = {}) {
+  function writeSkillRules(root: string, skills: Record<string, unknown>) {
+    mkdirSync(join(root, '.claude', 'skills'), { recursive: true });
+    writeFileSync(join(root, '.claude', 'skills', 'skill-rules.json'), JSON.stringify({
+      version: '1',
+      skills,
+    }));
+  }
+
+  function runHook(env: Record<string, string> = {}, prompt = 'Please activate agentica-fixture-skill for this request') {
     const result = spawnSync(process.execPath, [join(bundles, 'skill-activation-prompt.mjs')], {
       input: JSON.stringify({
         session_id: 'isolated-skill-activation',
         cwd: project,
         permission_mode: 'default',
-        prompt: 'Please activate agentica-fixture-skill for this request',
+        prompt,
       }),
       cwd: project,
       env: {
@@ -139,5 +147,80 @@ describe('skill-activation-prompt project script opt-in', () => {
     expect(result.stdout).toContain('fixture-skill');
     expect(result.stdout).toContain('AGENTICA PATTERN INFERENCE');
     expect(result.stdout).toContain('detailed swarm breakdown');
+  });
+
+  it('keeps the global skill-rules.json entry when a project rule uses the same name', () => {
+    writeSkillRules(home, {
+      'shared-skill': {
+        type: 'guardrail',
+        enforcement: 'suggest',
+        priority: 'high',
+        promptTriggers: { keywords: ['global-shared-kw'] },
+        description: 'GLOBAL_RULE_CONTENT',
+      },
+    });
+    writeSkillRules(project, {
+      'shared-skill': {
+        type: 'domain',
+        enforcement: 'block',
+        priority: 'low',
+        promptTriggers: { keywords: ['project-override-kw'] },
+        description: 'PROJECT_OVERRIDE_CONTENT',
+      },
+    });
+
+    const globalHit = runHook({}, 'Please use global-shared-kw in this request');
+    expect(globalHit.stdout).toContain('SKILL ACTIVATION CHECK');
+    expect(globalHit.stdout).toContain('shared-skill');
+    expect(globalHit.stdout).not.toContain('BLOCKING');
+    expect(globalHit.stdout).not.toContain('PROJECT_OVERRIDE_CONTENT');
+
+    const projectHit = runHook({}, 'Please use project-override-kw in this request');
+    expect(projectHit.stdout).not.toContain('shared-skill');
+    expect(projectHit.stdout).not.toContain('BLOCKING');
+    expect(projectHit.stdout).not.toContain('PROJECT_OVERRIDE_CONTENT');
+  });
+
+  it('loads a project-only skill-rules.json entry that does not exist globally', () => {
+    writeSkillRules(project, {
+      'project-only-skill': {
+        type: 'domain',
+        enforcement: 'suggest',
+        priority: 'high',
+        promptTriggers: { keywords: ['project-only-kw'] },
+        description: 'PROJECT_ONLY_CONTENT',
+      },
+    });
+
+    const result = runHook({}, 'Please use project-only-kw in this request');
+    expect(result.stdout).toContain('SKILL ACTIVATION CHECK');
+    expect(result.stdout).toContain('project-only-skill');
+    expect(result.stdout).not.toContain('fixture-skill');
+  });
+
+  it('keeps disjoint project and global skill-rules.json entries when names do not conflict', () => {
+    writeSkillRules(home, {
+      'global-union-skill': {
+        type: 'domain',
+        enforcement: 'suggest',
+        priority: 'high',
+        promptTriggers: { keywords: ['global-union-kw'] },
+        description: 'GLOBAL_UNION_CONTENT',
+      },
+    });
+    writeSkillRules(project, {
+      'project-union-skill': {
+        type: 'domain',
+        enforcement: 'suggest',
+        priority: 'high',
+        promptTriggers: { keywords: ['project-union-kw'] },
+        description: 'PROJECT_UNION_CONTENT',
+      },
+    });
+
+    const result = runHook({}, 'Please use global-union-kw and project-union-kw in this request');
+    expect(result.stdout).toContain('SKILL ACTIVATION CHECK');
+    expect(result.stdout).toContain('global-union-skill');
+    expect(result.stdout).toContain('project-union-skill');
   });
 });
