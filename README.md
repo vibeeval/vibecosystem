@@ -20,7 +20,7 @@
 
 vibecosystem packages agents, skills and hooks for software work. The default `core` profile installs a selected set for investigation, implementation, review and verification. Memory, learning and orchestration have explicit profiles; `full` installs all 138 agents, 296 skills and 20 rules plus 53 of the 74 hooks.
 
-**3.5.0 is the current npm release.** See [CHANGELOG.md](CHANGELOG.md) and the [upgrade guide](UPGRADING.md).
+**3.5.1 is the current npm release.** See [CHANGELOG.md](CHANGELOG.md) and the [upgrade guide](UPGRADING.md).
 
 ## Quick start
 
@@ -180,7 +180,7 @@ vibeco effective-config
 
 Token verimliliği için önce göreve uygun küçük profili seç. Bağlam sınırları modelin toplam token tüketimini sınırlamaz; ücret ve kullanım görevine, modele ve tekrar sayısına bağlıdır. Ölçülmemiş tasarruf oranları vaat etmiyoruz. `full` profili 138 agent, 296 skill ve 20 rule ile 74 hook'tan 53'ünü kurar; otomatik olarak bir agent ordusu başlatmaz.
 
-3.5.0 şu anda npm üzerindeki güncel sürümdür. Yayınlanmış sürüm ve kurulum için İngilizce bölümü, değişiklikler için [CHANGELOG.md](CHANGELOG.md) dosyasını takip edebilirsin.
+3.5.1 şu anda npm üzerindeki güncel sürümdür. Yayınlanmış sürüm ve kurulum için İngilizce bölümü, değişiklikler için [CHANGELOG.md](CHANGELOG.md) dosyasını takip edebilirsin.
 
 ## Credits and license
 
