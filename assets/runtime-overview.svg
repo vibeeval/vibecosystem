@@ -19,7 +19,7 @@
 <path d="M62 404 H1138" stroke="#484159"/>
 <rect x="62" y="418" width="526" height="100" rx="18" fill="#1c1d30" stroke="#484159" stroke-width="1"/><text x="86" y="459" font-size="24" font-weight="700" fill="#f4f0ff">Catalog (in repo)</text><text x="86" y="490" font-size="16" font-weight="400" fill="#d5cfe5">138 agents · 296 skills · 74 hooks · 20 rules</text>
 <rect x="612" y="418" width="526" height="100" rx="18" fill="#1c1d30" stroke="#484159" stroke-width="1"/><text x="636" y="459" font-size="24" font-weight="700" fill="#f4f0ff">Default core</text><text x="636" y="490" font-size="16" font-weight="400" fill="#d5cfe5">12 agents · 32 skills · 6 hooks</text>
-<text x="62" y="546" font-size="22" font-weight="700" fill="#ddd0ff">full: 138 agents, 296 skills, 20 rules, 53 of 74 hooks</text>
+<text x="62" y="546" font-size="22" font-weight="700" fill="#ddd0ff">full (opt-in): 138 agents, 296 skills, 20 rules, 53 of 74 hooks</text>
 <text x="62" y="576" font-size="22" font-weight="400" fill="#d5cfe5">Catalog size ≠ active context ≠ model token bill</text>
 <text x="62" y="608" font-size="17" font-weight="400" fill="#9d96b1">Conceptual diagram · not a recording of automated execution</text>
 </g>

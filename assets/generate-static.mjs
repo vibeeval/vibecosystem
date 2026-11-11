@@ -30,7 +30,7 @@ ${label(600,388,'dashboard · optional local activity monitor',19)}
 <path d="M62 404 H1138" stroke="#484159"/>
 ${card(62,418,526,100,'Catalog (in repo)','138 agents · 296 skills · 74 hooks · 20 rules')}
 ${card(612,418,526,100,'Default core','12 agents · 32 skills · 6 hooks')}
-${label(62,546,'full: 138 agents, 296 skills, 20 rules, 53 of 74 hooks',22,'#ddd0ff',700)}
+${label(62,546,'full (opt-in): 138 agents, 296 skills, 20 rules, 53 of 74 hooks',22,'#ddd0ff',700)}
 ${label(62,576,'Catalog size ≠ active context ≠ model token bill',22)}
 ${label(62,608,'Conceptual diagram · not a recording of automated execution',17,'#9d96b1')}
 `,'Core is the default runtime. Catalog (in repo) has 138 agents, 296 skills, 74 hooks and 20 rules. Default core has 12 agents, 32 skills and 6 hooks. The full profile installs 138 agents, 296 skills, 20 rules and 53 of the 74 hooks. Catalog size is different from active context.'));
