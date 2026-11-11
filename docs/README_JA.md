@@ -20,6 +20,6 @@ cd vibecosystem
 vibeco effective-config
 ```
 
-3.5.0 はこのソースツリーで準備中です。npm や GitHub での公開を意味しません。公開中の npm パッケージは 3.3.0 です。コンテキスト制限は文字数であり、モデル全体のトークン使用量の上限ではありません。一定割合のトークン削減は保証しません。
+3.5.0 は現在公開中の npm パッケージです。コンテキスト制限は文字数であり、モデル全体のトークン使用量の上限ではありません。一定割合のトークン削減は保証しません。
 
 [Profiles and setup](../README.md#profiles) · [Codex](codex-setup.md) · [Upgrade guide](../UPGRADING.md) · [Security](../SECURITY.md) · [Verification](verification.md)

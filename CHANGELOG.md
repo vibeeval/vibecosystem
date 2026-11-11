@@ -4,7 +4,9 @@ All notable changes to vibecosystem will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [3.5.0] - Unreleased
+## [Unreleased]
+
+## [3.5.0] - 2026-11-11
 
 This version is being prepared in source. No npm publication, release tag or deployment is implied.
 

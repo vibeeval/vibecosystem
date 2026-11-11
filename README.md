@@ -19,7 +19,7 @@
 
 vibecosystem packages agents, skills and hooks for software work. The default `core` profile installs a selected set for investigation, implementation, review and verification. Memory, learning and orchestration have explicit profiles; the complete catalog is available through `full`.
 
-**3.5.0 is a release candidate in this source tree.** The published npm package is **3.3.0**. It is not a claim that an npm package or GitHub release of 3.5.0 has been published. See [CHANGELOG.md](CHANGELOG.md) and the [upgrade guide](UPGRADING.md).
+**3.5.0 is the current npm release.** See [CHANGELOG.md](CHANGELOG.md) and the [upgrade guide](UPGRADING.md).
 
 ## Quick start
 
@@ -34,13 +34,13 @@ cd vibecosystem
 
 The installer uses the prebuilt hooks in `hooks/dist/`; a normal installation does not compile TypeScript or install the hook development dependencies. Node.js 18+ and Bash are required. Development checks use Node.js 22.
 
-For the published npm version (currently 3.3.0):
+For the published npm version (currently 3.5.0):
 
 ```bash
 npx vibecosystem init
 ```
 
-The remote installer fetches `main` (this source tree). Unreleased: available when installing from source (main), not yet on npm. Review the script before running it:
+The remote installer fetches `main` (this source tree). Review the script before running it:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/vibeeval/vibecosystem/main/install-remote.sh -o install-remote.sh
@@ -171,7 +171,7 @@ vibeco effective-config
 
 Token verimliliği için önce göreve uygun küçük profili seç. Bağlam sınırları modelin toplam token tüketimini sınırlamaz; ücret ve kullanım görevine, modele ve tekrar sayısına bağlıdır. Ölçülmemiş tasarruf oranları vaat etmiyoruz. `full` profili tüm kataloğu açar; otomatik olarak bir agent ordusu başlatmaz.
 
-3.5.0 bu kaynak ağacında hazırlanıyor. Yayınlanmış npm paketi 3.3.0. Yayınlanmış sürüm ve kurulum için İngilizce bölümü, değişiklikler için [CHANGELOG.md](CHANGELOG.md) dosyasını takip edebilirsin.
+3.5.0 şu anda npm üzerindeki güncel sürümdür. Yayınlanmış sürüm ve kurulum için İngilizce bölümü, değişiklikler için [CHANGELOG.md](CHANGELOG.md) dosyasını takip edebilirsin.
 
 ## Credits and license
 

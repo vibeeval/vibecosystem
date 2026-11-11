@@ -20,6 +20,6 @@ cd vibecosystem
 vibeco effective-config
 ```
 
-La version 3.5.0 est en préparation dans cette arborescence ; cela ne signifie pas qu’elle est publiée sur npm ou GitHub. Le paquet npm publié est 3.3.0. Les limites de contexte sont exprimées en caractères, pas en consommation totale du modèle. Aucun taux fixe d’économie de tokens n’est garanti.
+La version 3.5.0 est le paquet npm actuellement publié. Les limites de contexte sont exprimées en caractères, pas en consommation totale du modèle. Aucun taux fixe d’économie de tokens n’est garanti.
 
 [Profiles and setup](../README.md#profiles) · [Codex](codex-setup.md) · [Upgrade guide](../UPGRADING.md) · [Security](../SECURITY.md) · [Verification](verification.md)
