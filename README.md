@@ -162,7 +162,7 @@ Keep `hooks/dist/` synchronized with source. Installer tests use temporary home 
 
 ## Visuals
 
-The current [seven-second GIF](assets/runtime-demo.gif) is a locally rendered product diagram, not a screen recording or benchmark. Its [editable source](assets/runtime-demo-source/README.md) freezes data from the runtime manifest. The [static diagram](assets/runtime-overview.svg) describes profile selection and runtime boundaries. Earlier terminal GIFs remain in `assets/` as historical material; they depict legacy workflows and are not evidence that every feature runs in the default profile. See [assets/README.md](assets/README.md) for sources and reproduction requirements.
+The current [eight-second GIF](assets/runtime-demo.gif) is a locally rendered product diagram, not a screen recording or benchmark. Its [editable source](assets/runtime-demo-source/README.md) freezes data from the runtime manifest. The [static diagram](assets/runtime-overview.svg) describes profile selection and runtime boundaries. Earlier terminal GIFs remain in `assets/` as historical material; they depict legacy workflows and are not evidence that every feature runs in the default profile. See [assets/README.md](assets/README.md) for sources and reproduction requirements.
 
 <a name="turkce"></a>
 
