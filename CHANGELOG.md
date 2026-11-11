@@ -34,7 +34,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - See [the verification record](docs/verification.md) for reproducible checks, measurements and their limitations. Historical changelog claims below describe their original releases and are not current benchmark evidence.
 
-## Earlier unreleased changes
+## Earlier changes included in 3.5.0
 
 ### Changed
 - **Single Codex model authority**: Added the canonical bounded `.codex/agents/luna-worker.toml` using `gpt-5.6-luna` with `max` reasoning. Removed the project-level `o4-mini` pin, invalid local history persistence, and stale skill path override.

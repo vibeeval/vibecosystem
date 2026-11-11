@@ -1,6 +1,6 @@
 # Codex CLI Setup Guide
 
-Unreleased: available when installing from source (main), not yet on npm.
+This setup is available in 3.5.0 on npm.
 
 vibecosystem works with [Codex CLI](https://github.com/openai/codex) (OpenAI) in addition to Claude Code.
 

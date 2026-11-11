@@ -1,6 +1,6 @@
 # Verification record for 3.5.0
 
-This document distinguishes reproducible checks from product promises. Version 3.5.0 is a source release candidate; it has not been published by this work.
+This document distinguishes reproducible checks from product promises. Version 3.5.0 is published on npm.
 
 ## Reproduce the checks
 

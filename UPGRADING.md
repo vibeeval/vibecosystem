@@ -2,7 +2,7 @@
 
 ## Preparing for 3.5.0
 
-3.5.0 is in preparation in this source tree. The published npm package is 3.3.0. Check the branch or release you intend to install; `npx vibecosystem` resolves the published npm package (currently 3.3.0), which can differ from a source branch.
+3.5.0 is the current npm release. Check the branch or release you intend to install; `npx vibecosystem` resolves the published npm package, which can differ from a source branch.
 
 Use a clean source checkout and fast-forward updates:
 
