@@ -5,8 +5,11 @@
 **A focused runtime for Claude Code. A bounded worker for Codex.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![catalog: 138 agents · 296 skills · 74 hooks · 20 rules](https://img.shields.io/badge/catalog-138%20agents%20%C2%B7%20296%20skills%20%C2%B7%2074%20hooks%20%C2%B7%2020%20rules-blue.svg)](#catalog)
-[![default core: 12 agents · 32 skills · 6 hooks](https://img.shields.io/badge/default%20core-12%20agents%20%C2%B7%2032%20skills%20%C2%B7%206%20hooks-green.svg)](#catalog)
+
+**Catalog (in repo):** [![Agents](https://img.shields.io/badge/agents-138-blue.svg)](#catalog) [![Skills](https://img.shields.io/badge/skills-296-green.svg)](#catalog) [![Hooks](https://img.shields.io/badge/hooks-74-orange.svg)](#catalog) [![Rules](https://img.shields.io/badge/rules-20-red.svg)](#catalog)
+
+**Default core:** [![default core: 12 agents · 32 skills · 6 hooks](https://img.shields.io/badge/default%20core-12%20agents%20%C2%B7%2032%20skills%20%C2%B7%206%20hooks-green.svg)](#catalog)
+
 [![Validate](https://github.com/vibeeval/vibecosystem/actions/workflows/validate.yml/badge.svg)](https://github.com/vibeeval/vibecosystem/actions/workflows/validate.yml)
 
 [Türkçe](#turkce) · [Español](docs/README_ES.md) · [Français](docs/README_FR.md) · [Deutsch](docs/README_DE.md) · [Português](docs/README_PT.md) · [Italiano](docs/README_IT.md) · [Nederlands](docs/README_NL.md) · [中文](docs/README_ZH.md) · [日本語](docs/README_JA.md) · [한국어](docs/README_KO.md) · [العربية](docs/README_AR.md) · [हिन्दी](docs/README_HI.md) · [Русский](docs/README_RU.md)
@@ -15,7 +18,7 @@
 
 </div>
 
-vibecosystem packages agents, skills and hooks for software work. The default `core` profile installs a selected set for investigation, implementation, review and verification. Memory, learning and orchestration have explicit profiles; the complete catalog is available through `full`.
+vibecosystem packages agents, skills and hooks for software work. The default `core` profile installs a selected set for investigation, implementation, review and verification. Memory, learning and orchestration have explicit profiles; `full` installs all 138 agents, 296 skills and 20 rules plus 53 of the 74 hooks.
 
 **3.5.0 is the current npm release.** See [CHANGELOG.md](CHANGELOG.md) and the [upgrade guide](UPGRADING.md).
 
@@ -69,7 +72,7 @@ Profiles select installed components and registered hook commands. Catalog size 
 | `context` | Core plus targeted code context retrieval |
 | `memory` | Core plus persistent recall and learning |
 | `orchestration` | Core plus explicit multi-agent workflows |
-| `full` | All catalog components and the complete hook registration manifest |
+| `full` | All 138 agents, 296 skills and 20 rules; 53 of the 74 hooks |
 
 `minimal` and `smart` alias `core`; `all` aliases `full`. Legacy `frontend`, `backend`, `fullstack` and `devops` profiles retain domain allowlists with core hooks. Read the exact selection in [profiles/runtime-manifest.json](profiles/runtime-manifest.json), or use `vibeco effective-config` after installation.
 
@@ -77,7 +80,7 @@ Profiles select installed components and registered hook commands. Catalog size 
 vibeco profile quality   # core plus focused edit, compiler and security checks
 vibeco profile core      # default selected set
 vibeco profile memory    # core plus persistent recall and learning
-vibeco profile full      # all catalog components
+vibeco profile full      # all agents, skills and rules; 53 of 74 hooks
 ```
 
 Profile changes reconcile installer-owned files and hook registrations. Modified or unmanaged files require review; the installer preserves ownership boundaries and creates backups before replacements. See [UPGRADING.md](UPGRADING.md).
@@ -112,7 +115,7 @@ The optional memory pipeline captures and consolidates patterns under the user's
 
 ## Catalog
 
-| Path | Full catalog | Default core |
+| Path | Catalog (in repo) | Default core |
 | --- | --- | --- |
 | `agents/` | 138 Markdown agent definitions | 12 |
 | `skills/` | 296 top-level skill directories; some contain nested skills | 32 |
@@ -173,9 +176,9 @@ vibecosystem, Claude Code için agent, skill ve hook'ları bir araya getirir. Va
 vibeco effective-config
 ```
 
-`vibeco effective-config` shows which profile is active and how many hooks are registered and compiled.
+`vibeco effective-config` aktif profili ve kayıtlı hook sayısını gösterir.
 
-Token verimliliği için önce göreve uygun küçük profili seç. Bağlam sınırları modelin toplam token tüketimini sınırlamaz; ücret ve kullanım görevine, modele ve tekrar sayısına bağlıdır. Ölçülmemiş tasarruf oranları vaat etmiyoruz. `full` profili tüm kataloğu açar; otomatik olarak bir agent ordusu başlatmaz.
+Token verimliliği için önce göreve uygun küçük profili seç. Bağlam sınırları modelin toplam token tüketimini sınırlamaz; ücret ve kullanım görevine, modele ve tekrar sayısına bağlıdır. Ölçülmemiş tasarruf oranları vaat etmiyoruz. `full` profili 138 agent, 296 skill ve 20 rule ile 74 hook'tan 53'ünü kurar; otomatik olarak bir agent ordusu başlatmaz.
 
 3.5.0 şu anda npm üzerindeki güncel sürümdür. Yayınlanmış sürüm ve kurulum için İngilizce bölümü, değişiklikler için [CHANGELOG.md](CHANGELOG.md) dosyasını takip edebilirsin.
 
