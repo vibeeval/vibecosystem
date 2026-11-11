@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { installClaude } from '../tools/install-runtime.mjs';
 import { mergeOwnedHooks } from '../tools/register-hooks.mjs';
-import { resolveProfile } from '../tools/profile-runtime.mjs';
+import { registeredHookFiles, resolveProfile } from '../tools/profile-runtime.mjs';
 
 const repoDir = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const roots = [];
@@ -323,4 +323,88 @@ test('executable source modes survive install, legacy repair and replacement wit
   unmanaged.install({ repoDir: source });
   assert.equal(readFileSync(unmanagedTarget, 'utf8'), customContent);
   assert.equal(mode(unmanagedTarget), 0o700);
+});
+
+
+function hookCopyFixture({ registered = ['registered-hook'], extraDist = [], inlineCommands = [], missingRegistered = [] } = {}) {
+  const source = mkdtempSync(join(tmpdir(), 'vibeco-hook-copy-'));
+  roots.push(source);
+  for (const dir of ['profiles', 'agents', 'skills', 'rules', 'hooks/dist', 'tools/vibeco', 'tools/dashboard']) mkdirSync(join(source, dir), { recursive: true });
+  for (const name of ['install-runtime.mjs', 'profile-runtime.mjs', 'register-hooks.mjs']) copyFileSync(join(repoDir, 'tools', name), join(source, 'tools', name));
+  for (const name of [...registered, ...extraDist]) {
+    if (missingRegistered.includes(name)) continue;
+    writeFileSync(join(source, 'hooks', 'dist', `${name}.mjs`), `export const id = ${JSON.stringify(name)};\n`);
+  }
+  const fileHooks = [...registered, ...missingRegistered].map((name) => ({
+    type: 'command',
+    command: `node \${CLAUDE_PLUGIN_ROOT}/hooks/dist/${name}.mjs`,
+  }));
+  writeFileSync(join(source, 'hooks', 'hooks.json'), JSON.stringify({
+    hooks: { Stop: [{ hooks: [...fileHooks, ...inlineCommands] }] },
+  }));
+  writeFileSync(join(source, 'profiles', 'runtime-manifest.json'), JSON.stringify({
+    profiles: { core: { agents: [], skills: [], rules: [], hooks: 'all' } },
+  }));
+  return source;
+}
+
+test('install copies only hooks.json-registered files, skips unregistered dist files, and exits 0', () => {
+  const f = fixture();
+  const source = hookCopyFixture({
+    registered: ['registered-hook', 'shared-hook'],
+    extraDist: ['unregistered-hook'],
+    inlineCommands: [{ type: 'command', command: 'echo inline-shell' }],
+  });
+  writeFileSync(join(source, 'hooks', 'hooks.json'), JSON.stringify({
+    hooks: {
+      PreToolUse: [{ hooks: [{ type: 'command', command: 'node ${CLAUDE_PLUGIN_ROOT}/hooks/dist/shared-hook.mjs' }] }],
+      Stop: [{
+        hooks: [
+          { type: 'command', command: 'node ${CLAUDE_PLUGIN_ROOT}/hooks/dist/registered-hook.mjs' },
+          { type: 'command', command: 'node ${CLAUDE_PLUGIN_ROOT}/hooks/dist/shared-hook.mjs' },
+          { type: 'command', command: 'echo inline-shell' },
+        ],
+      }],
+    },
+  }));
+  const registered = registeredHookFiles(json(join(source, 'hooks', 'hooks.json')));
+  const result = spawnSync(process.execPath, [join(repoDir, 'tools', 'install-runtime.mjs'), '--non-interactive'], {
+    env: { ...process.env, HOME: f.home, VIBECO_REPO_DIR: source },
+    encoding: 'utf8',
+  });
+  assert.equal(result.status, 0, result.stderr);
+  const installed = readdirSync(join(f.claudeDir, 'hooks', 'dist')).filter((name) => name.endsWith('.mjs')).sort();
+  assert.deepEqual(installed, registered.map((name) => `${name}.mjs`).sort());
+  assert.deepEqual(installed, ['registered-hook.mjs', 'shared-hook.mjs']);
+  assert.equal(existsSync(join(f.claudeDir, 'hooks', 'dist', 'unregistered-hook.mjs')), false);
+  assert.equal(existsSync(join(f.claudeDir, 'hooks', 'dist', 'echo')), false);
+});
+
+test('full profile install copies exactly the files registered in repository hooks.json', () => {
+  const f = fixture();
+  const result = f.install({ profile: 'full' });
+  const installed = readdirSync(join(f.claudeDir, 'hooks', 'dist')).filter((name) => name.endsWith('.mjs')).sort();
+  const registered = registeredHookFiles(json(join(repoDir, 'hooks', 'hooks.json'))).map((name) => `${name}.mjs`).sort();
+  assert.deepEqual(installed, registered);
+  assert.equal(existsSync(join(f.claudeDir, 'hooks', 'dist', 'plugin-registry.mjs')), false);
+  assert.equal(existsSync(join(f.claudeDir, 'hooks', 'dist', 'unregistered-hook.mjs')), false);
+  assert.ok(result.stats.added > 0);
+});
+
+test('a registered hook missing on disk fails install with an explicit error', () => {
+  const f = fixture();
+  const source = hookCopyFixture({
+    registered: ['present-hook'],
+    missingRegistered: ['missing-hook'],
+  });
+  const missing = join(source, 'hooks', 'dist', 'missing-hook.mjs');
+  assert.equal(existsSync(missing), false);
+  const result = spawnSync(process.execPath, [join(repoDir, 'tools', 'install-runtime.mjs'), '--non-interactive'], {
+    env: { ...process.env, HOME: f.home, VIBECO_REPO_DIR: source },
+    encoding: 'utf8',
+  });
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /Hook registered in hooks\.json is missing/);
+  assert.match(result.stderr, /missing-hook\.mjs/);
+  assert.equal(existsSync(join(f.claudeDir, 'hooks', 'dist')), false);
 });

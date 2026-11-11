@@ -72,9 +72,9 @@ test('packed npm layout installs and runs core plus opt-in bundles without sourc
     // Exercise optional code from the installed layout, not a dev dependency tree.
     run(cli, ['profile', 'full']);
     const hooks = join(home, '.claude/hooks/dist');
-    for (const name of ['mcp-discovery', 'plugin-registry', 'smart-memory-recall',
+    for (const name of ['mcp-discovery', 'smart-memory-recall',
       'pre-tool-use-broadcast', 'handoff-index']) {
-      run(join(hooks, `${name}.mjs`), name === 'plugin-registry' ? ['status'] : [], {
+      run(join(hooks, `${name}.mjs`), [], {
         ...input, tool_name: 'Unknown', prompt: 'unrelated fixture',
       });
     }

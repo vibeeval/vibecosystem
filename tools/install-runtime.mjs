@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
-import { filterHookManifest, resolveProfile } from './profile-runtime.mjs';
+import { filterHookManifest, registeredHookFiles, resolveProfile } from './profile-runtime.mjs';
 import { mergeOwnedHooks } from './register-hooks.mjs';
 
 const DEFAULT_REPO_DIR = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -81,12 +81,13 @@ export function installClaude({ repoDir = DEFAULT_REPO_DIR, profile = 'core', fo
   const backupRoot = join(claudeDir, 'backups', `vibecosystem-${new Date().toISOString().replace(/[:.]/g, '-')}-${process.pid}`);
   assertSafePath(backupRoot, dirname(claudeDir));
   const select = (kind, suffix = '') => runtime[kind] === 'all'
-    ? (suffix ? listFiles(join(repoDir, kind === 'hooks' ? 'hooks/dist' : kind), suffix).map((x) => basename(x, suffix)) : listDirs(join(repoDir, kind)))
+    ? (suffix ? listFiles(join(repoDir, kind), suffix).map((x) => basename(x, suffix)) : listDirs(join(repoDir, kind)))
     : runtime[kind];
   const agentNames = select('agents', '.md');
   const skillNames = select('skills');
   const ruleNames = runtime.rules === 'all' ? listFiles(join(repoDir, 'rules'), '.md') : runtime.rules;
-  const hookNames = select('hooks', '.mjs');
+  const manifest = filterHookManifest(readJson(join(repoDir, 'hooks', 'hooks.json')), runtime.hooks);
+  const hookNames = registeredHookFiles(manifest);
   const addSource = (source, label) => {
     if (!existsSync(source)) throw new Error(`Profile ${profile} references missing file: ${source}`);
     assertSafePath(source);
@@ -99,8 +100,11 @@ export function installClaude({ repoDir = DEFAULT_REPO_DIR, profile = 'core', fo
     for (const file of walkFiles(root)) addSource(file, join('skills', name, relative(root, file)));
   }
   for (const name of ruleNames) addSource(join(repoDir, 'rules', name), join('rules', name));
-  for (const name of hookNames) addSource(join(repoDir, 'hooks', 'dist', `${name}.mjs`), join('hooks', 'dist', `${name}.mjs`));
-  const manifest = filterHookManifest(readJson(join(repoDir, 'hooks', 'hooks.json')), runtime.hooks);
+  for (const name of hookNames) {
+    const source = join(repoDir, 'hooks', 'dist', `${name}.mjs`);
+    if (!existsSync(source)) throw new Error(`Hook registered in hooks.json is missing: ${source}`);
+    addSource(source, join('hooks', 'dist', `${name}.mjs`));
+  }
   desired.set(join('hooks', 'hooks.json'), { content: Buffer.from(`${JSON.stringify(manifest, null, 2)}\n`), mode: 0o644 });
   for (const file of listFiles(join(repoDir, 'profiles'), '.json')) addSource(join(repoDir, 'profiles', file), join('profiles', file));
   // CLI imports its installer helpers; retain its source location to reconcile profiles later.

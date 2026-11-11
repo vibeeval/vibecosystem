@@ -65,6 +65,19 @@ export function hookNameFromCommand(command) {
   return match ? match[1] : null;
 }
 
+export function registeredHookFiles(manifest) {
+  const files = new Set();
+  for (const groups of Object.values(manifest?.hooks || {})) {
+    for (const group of groups || []) {
+      for (const hook of group.hooks || []) {
+        const name = hookNameFromCommand(hook?.command);
+        if (name) files.add(name);
+      }
+    }
+  }
+  return [...files].sort();
+}
+
 export function filterHookManifest(manifest, enabledHooks) {
   if (enabledHooks === 'all') return manifest;
   const allowed = new Set(enabledHooks || []);
