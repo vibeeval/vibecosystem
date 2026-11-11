@@ -17,8 +17,18 @@ git clone https://github.com/vibeeval/vibecosystem.git
 cd vibecosystem
 ./install.sh --profile core --dry-run
 ./install.sh --profile core
-vibeco effective-config
 ```
+
+डिफ़ॉल्ट प्रोफ़ाइल `core` है; प्रोफ़ाइल बदलें:
+
+```bash
+vibeco profile quality
+vibeco profile core
+vibeco profile memory
+vibeco profile full
+```
+
+`vibeco effective-config` सक्रिय प्रोफ़ाइल और पंजीकृत हुक की संख्या दिखाता है।
 
 3.5.0 वर्तमान प्रकाशित npm पैकेज है। संदर्भ सीमाएँ अक्षरों में हैं और मॉडल के कुल टोकन उपयोग को सीमित नहीं करतीं। निश्चित प्रतिशत टोकन बचत का वादा नहीं है।
 

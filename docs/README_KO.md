@@ -17,8 +17,18 @@ git clone https://github.com/vibeeval/vibecosystem.git
 cd vibecosystem
 ./install.sh --profile core --dry-run
 ./install.sh --profile core
-vibeco effective-config
 ```
+
+기본 프로필은 `core`입니다. 프로필 전환:
+
+```bash
+vibeco profile quality
+vibeco profile core
+vibeco profile memory
+vibeco profile full
+```
+
+`vibeco effective-config`는 활성 프로필과 등록된 훅 수를 보여줍니다.
 
 3.5.0은 현재 게시된 npm 패키지입니다. 컨텍스트 제한은 문자 수 기준이며 모델의 전체 토큰 사용량을 제한하지 않습니다. 고정된 토큰 절감률을 약속하지 않습니다.
 

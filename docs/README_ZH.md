@@ -17,8 +17,18 @@ git clone https://github.com/vibeeval/vibecosystem.git
 cd vibecosystem
 ./install.sh --profile core --dry-run
 ./install.sh --profile core
-vibeco effective-config
 ```
+
+默认配置为 `core`；切换配置：
+
+```bash
+vibeco profile quality
+vibeco profile core
+vibeco profile memory
+vibeco profile full
+```
+
+`vibeco effective-config` 显示当前配置以及已注册的 hook 数量。
 
 3.5.0 是当前已发布的 npm 包。上下文限制以字符计算，不限制模型的总 token 使用量。项目不承诺固定比例的 token 节省。
 

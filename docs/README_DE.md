@@ -17,8 +17,18 @@ git clone https://github.com/vibeeval/vibecosystem.git
 cd vibecosystem
 ./install.sh --profile core --dry-run
 ./install.sh --profile core
-vibeco effective-config
 ```
+
+Das Standardprofil ist `core`; Profile wechseln mit:
+
+```bash
+vibeco profile quality
+vibeco profile core
+vibeco profile memory
+vibeco profile full
+```
+
+`vibeco effective-config` zeigt das aktive Profil und die Anzahl der registrierten Hooks.
 
 Version 3.5.0 ist das aktuelle veröffentlichte npm-Paket. Kontextgrenzen zählen Zeichen und begrenzen nicht den gesamten Modellverbrauch. Es gibt kein Versprechen eines festen Token-Sparprozentsatzes.
 

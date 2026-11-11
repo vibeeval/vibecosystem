@@ -17,8 +17,18 @@ git clone https://github.com/vibeeval/vibecosystem.git
 cd vibecosystem
 ./install.sh --profile core --dry-run
 ./install.sh --profile core
-vibeco effective-config
 ```
+
+الملف الشخصي الافتراضي هو `core`؛ بدّل الملف الشخصي بـ:
+
+```bash
+vibeco profile quality
+vibeco profile core
+vibeco profile memory
+vibeco profile full
+```
+
+`vibeco effective-config` يعرض الملف الشخصي النشط وعدد الـ hooks المسجّلة.
 
 الإصدار 3.5.0 هو الإصدار الحالي المنشور على npm. حدود السياق تُحسب بالأحرف ولا تحد استهلاك النموذج الكامل. لا نعد بنسبة ثابتة لتوفير التوكنات.
 
