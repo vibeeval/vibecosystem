@@ -57,6 +57,33 @@ function backupFile(source, backupRoot, label) {
   chmodSync(target, fileMode(source));
 }
 
+export const REQUIRED_CLI_FILES = ['canavar-cli.mjs', 'instinct-cli.mjs'];
+const REQUIRED_CLI_DOCS = {
+  'canavar-cli.mjs': {
+    agents: ['reputation-engine'],
+    skills: ['hizir', 'agent-benchmark', 'skill-evolution', 'reputation-patterns'],
+    rules: ['canavar.md'],
+  },
+  'instinct-cli.mjs': {
+    agents: [],
+    skills: [],
+    rules: ['cross-project-learning.md'],
+  },
+};
+
+function catalogHas(names, wanted) {
+  return wanted.some((name) => names.includes(name));
+}
+
+export function requiredCliFilesForSelection({ agentNames, skillNames, ruleNames }) {
+  return REQUIRED_CLI_FILES.filter((file) => {
+    const docs = REQUIRED_CLI_DOCS[file];
+    return catalogHas(agentNames, docs.agents)
+      || catalogHas(skillNames, docs.skills)
+      || catalogHas(ruleNames, docs.rules);
+  });
+}
+
 export function installClaude({ repoDir = DEFAULT_REPO_DIR, profile = 'core', force = false, prune = true, dryRun = false, claudeDir = join(homedir(), '.claude'), nonInteractive = false, binDir = join(homedir(), '.local', 'bin') } = {}) {
   repoDir = resolve(repoDir);
   claudeDir = resolve(claudeDir);
@@ -104,6 +131,11 @@ export function installClaude({ repoDir = DEFAULT_REPO_DIR, profile = 'core', fo
     const source = join(repoDir, 'hooks', 'dist', `${name}.mjs`);
     if (!existsSync(source)) throw new Error(`Hook registered in hooks.json is missing: ${source}`);
     addSource(source, join('hooks', 'dist', `${name}.mjs`));
+  }
+  for (const name of requiredCliFilesForSelection({ agentNames, skillNames, ruleNames })) {
+    const source = join(repoDir, 'hooks', 'dist', name);
+    if (!existsSync(source)) throw new Error(`Required CLI listed in REQUIRED_CLI_FILES is missing: ${source}`);
+    addSource(source, join('hooks', 'dist', name));
   }
   desired.set(join('hooks', 'hooks.json'), { content: Buffer.from(`${JSON.stringify(manifest, null, 2)}\n`), mode: 0o644 });
   for (const file of listFiles(join(repoDir, 'profiles'), '.json')) addSource(join(repoDir, 'profiles', file), join('profiles', file));

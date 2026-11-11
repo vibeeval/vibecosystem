@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { installClaude } from '../tools/install-runtime.mjs';
+import { installClaude, REQUIRED_CLI_FILES } from '../tools/install-runtime.mjs';
 import { mergeOwnedHooks } from '../tools/register-hooks.mjs';
 import { registeredHookFiles, resolveProfile } from '../tools/profile-runtime.mjs';
 
@@ -380,15 +380,83 @@ test('install copies only hooks.json-registered files, skips unregistered dist f
   assert.equal(existsSync(join(f.claudeDir, 'hooks', 'dist', 'echo')), false);
 });
 
-test('full profile install copies exactly the files registered in repository hooks.json', () => {
+function installedHookBundles(claudeDir) {
+  return readdirSync(join(claudeDir, 'hooks', 'dist')).filter((name) => name.endsWith('.mjs')).sort();
+}
+
+function distReferencesInTree(root) {
+  const refs = new Set();
+  const skip = new Set(['backups', 'node_modules', '.git']);
+  const walk = (dir) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      if (skip.has(entry.name)) continue;
+      const path = join(dir, entry.name);
+      if (entry.isDirectory()) { walk(path); continue; }
+      if (!entry.isFile()) continue;
+      const text = readFileSync(path, 'utf8');
+      for (const match of text.matchAll(/hooks\/dist\/([A-Za-z0-9._-]+\.mjs)/g)) refs.add(match[1]);
+    }
+  };
+  walk(root);
+  return [...refs].sort();
+}
+
+test('full profile install copies canavar-cli.mjs and instinct-cli.mjs and exits 0', () => {
   const f = fixture();
-  const result = f.install({ profile: 'full' });
-  const installed = readdirSync(join(f.claudeDir, 'hooks', 'dist')).filter((name) => name.endsWith('.mjs')).sort();
-  const registered = registeredHookFiles(json(join(repoDir, 'hooks', 'hooks.json'))).map((name) => `${name}.mjs`).sort();
-  assert.deepEqual(installed, registered);
-  assert.equal(existsSync(join(f.claudeDir, 'hooks', 'dist', 'plugin-registry.mjs')), false);
-  assert.equal(existsSync(join(f.claudeDir, 'hooks', 'dist', 'unregistered-hook.mjs')), false);
-  assert.ok(result.stats.added > 0);
+  const result = spawnSync(process.execPath, [join(repoDir, 'tools', 'install-runtime.mjs'), '--profile', 'full', '--non-interactive'], {
+    env: { ...process.env, HOME: f.home, VIBECO_REPO_DIR: repoDir },
+    encoding: 'utf8',
+  });
+  assert.equal(result.status, 0, result.stderr);
+  const dist = join(f.claudeDir, 'hooks', 'dist');
+  const installed = installedHookBundles(f.claudeDir);
+  const registered = registeredHookFiles(json(join(repoDir, 'hooks', 'hooks.json'))).map((name) => `${name}.mjs`);
+  assert.deepEqual(REQUIRED_CLI_FILES, ['canavar-cli.mjs', 'instinct-cli.mjs']);
+  assert.ok(installed.includes('canavar-cli.mjs'));
+  assert.ok(installed.includes('instinct-cli.mjs'));
+  assert.deepEqual(installed, [...registered, 'canavar-cli.mjs', 'instinct-cli.mjs'].sort());
+  assert.equal(existsSync(join(dist, 'plugin-registry.mjs')), false);
+  assert.equal(existsSync(join(dist, 'daemon-client.mjs')), false);
+});
+
+test('full re-install with prune keeps canavar-cli.mjs and instinct-cli.mjs', () => {
+  const f = fixture();
+  f.install({ profile: 'full' });
+  const dist = join(f.claudeDir, 'hooks', 'dist');
+  assert.equal(existsSync(join(dist, 'canavar-cli.mjs')), true);
+  assert.equal(existsSync(join(dist, 'instinct-cli.mjs')), true);
+  f.install({ profile: 'full', prune: true });
+  assert.equal(existsSync(join(dist, 'canavar-cli.mjs')), true);
+  assert.equal(existsSync(join(dist, 'instinct-cli.mjs')), true);
+  assert.equal(existsSync(join(dist, 'plugin-registry.mjs')), false);
+  assert.equal(existsSync(join(dist, 'daemon-client.mjs')), false);
+});
+
+test('every hooks/dist/*.mjs reference in a full install resolves to an installed file', () => {
+  const f = fixture();
+  f.install({ profile: 'full' });
+  const dist = join(f.claudeDir, 'hooks', 'dist');
+  for (const name of distReferencesInTree(f.claudeDir)) {
+    assert.equal(existsSync(join(dist, name)), true, name);
+  }
+});
+
+test('a listed required CLI missing on disk fails install with exit 1', () => {
+  const f = fixture();
+  const source = hookCopyFixture({ registered: ['present-hook'] });
+  writeFileSync(join(source, 'agents', 'reputation-engine.md'), '# reputation-engine fixture\n');
+  writeFileSync(join(source, 'profiles', 'runtime-manifest.json'), JSON.stringify({
+    profiles: { core: { agents: ['reputation-engine'], skills: [], rules: [], hooks: ['present-hook'] } },
+  }));
+  assert.equal(existsSync(join(source, 'hooks', 'dist', 'canavar-cli.mjs')), false);
+  const result = spawnSync(process.execPath, [join(repoDir, 'tools', 'install-runtime.mjs'), '--non-interactive'], {
+    env: { ...process.env, HOME: f.home, VIBECO_REPO_DIR: source },
+    encoding: 'utf8',
+  });
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /REQUIRED_CLI_FILES is missing/);
+  assert.match(result.stderr, /canavar-cli\.mjs/);
+  assert.equal(existsSync(join(f.claudeDir, 'hooks', 'dist')), false);
 });
 
 test('a registered hook missing on disk fails install with an explicit error', () => {
