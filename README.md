@@ -5,10 +5,8 @@
 **A focused runtime for Claude Code. A bounded worker for Codex.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Agents](https://img.shields.io/badge/agents-138-blue.svg)](#catalog)
-[![Skills](https://img.shields.io/badge/skills-296-green.svg)](#catalog)
-[![Hooks](https://img.shields.io/badge/hooks-74-orange.svg)](#catalog)
-[![Rules](https://img.shields.io/badge/rules-20-red.svg)](#catalog)
+[![catalog: 138 agents · 296 skills · 74 hooks · 20 rules](https://img.shields.io/badge/catalog-138%20agents%20%C2%B7%20296%20skills%20%C2%B7%2074%20hooks%20%C2%B7%2020%20rules-blue.svg)](#catalog)
+[![default core: 12 agents · 32 skills · 6 hooks](https://img.shields.io/badge/default%20core-12%20agents%20%C2%B7%2032%20skills%20%C2%B7%206%20hooks-green.svg)](#catalog)
 [![Validate](https://github.com/vibeeval/vibecosystem/actions/workflows/validate.yml/badge.svg)](https://github.com/vibeeval/vibecosystem/actions/workflows/validate.yml)
 
 [Türkçe](#turkce) · [Español](docs/README_ES.md) · [Français](docs/README_FR.md) · [Deutsch](docs/README_DE.md) · [Português](docs/README_PT.md) · [Italiano](docs/README_IT.md) · [Nederlands](docs/README_NL.md) · [中文](docs/README_ZH.md) · [日本語](docs/README_JA.md) · [한국어](docs/README_KO.md) · [العربية](docs/README_AR.md) · [हिन्दी](docs/README_HI.md) · [Русский](docs/README_RU.md)
@@ -55,6 +53,8 @@ vibeco doctor
 vibeco stats
 ```
 
+`vibeco effective-config` shows which profile is active and how many hooks are registered and compiled.
+
 The source installer creates `~/.local/bin/vibeco` unless an unmanaged launcher already exists there. Add `~/.local/bin` to `PATH` if your shell cannot find it. You can also run the source CLI with `node tools/vibeco/vibeco.mjs`.
 
 ## Profiles
@@ -74,8 +74,10 @@ Profiles select installed components and registered hook commands. Catalog size 
 `minimal` and `smart` alias `core`; `all` aliases `full`. Legacy `frontend`, `backend`, `fullstack` and `devops` profiles retain domain allowlists with core hooks. Read the exact selection in [profiles/runtime-manifest.json](profiles/runtime-manifest.json), or use `vibeco effective-config` after installation.
 
 ```bash
-vibeco profile quality
-vibeco profile core
+vibeco profile quality   # core plus focused edit, compiler and security checks
+vibeco profile core      # default selected set
+vibeco profile memory    # core plus persistent recall and learning
+vibeco profile full      # all catalog components
 ```
 
 Profile changes reconcile installer-owned files and hook registrations. Modified or unmanaged files require review; the installer preserves ownership boundaries and creates backups before replacements. See [UPGRADING.md](UPGRADING.md).
@@ -110,12 +112,14 @@ The optional memory pipeline captures and consolidates patterns under the user's
 
 ## Catalog
 
-| Path | Catalog contents |
-| --- | --- |
-| `agents/` | 138 Markdown agent definitions |
-| `skills/` | 296 top-level skill directories; some contain nested skills |
-| `hooks/src/` | 74 TypeScript entry points, including utilities and CLIs |
-| `rules/` | 20 rule documents; the lean profiles do not install the full rule set |
+| Path | Full catalog | Default core |
+| --- | --- | --- |
+| `agents/` | 138 Markdown agent definitions | 12 |
+| `skills/` | 296 top-level skill directories; some contain nested skills | 32 |
+| `hooks/src/` | 74 TypeScript entry points, including utilities and CLIs | 6 |
+| `rules/` | 20 rule documents; the lean profiles do not install the full rule set | - |
+
+The `full` profile installs 138 agents, 296 skills, 20 rules and 53 of the 74 hooks.
 
 Source entry points, unique hook names and registered commands are different counts. [hooks/hooks.json](hooks/hooks.json) is the registration source. Some files are command-line utilities or are not registered by default. Use `vibeco list agents --search security` to browse the installed catalog.
 
@@ -168,6 +172,8 @@ vibecosystem, Claude Code için agent, skill ve hook'ları bir araya getirir. Va
 ./install.sh --profile core
 vibeco effective-config
 ```
+
+`vibeco effective-config` shows which profile is active and how many hooks are registered and compiled.
 
 Token verimliliği için önce göreve uygun küçük profili seç. Bağlam sınırları modelin toplam token tüketimini sınırlamaz; ücret ve kullanım görevine, modele ve tekrar sayısına bağlıdır. Ölçülmemiş tasarruf oranları vaat etmiyoruz. `full` profili tüm kataloğu açar; otomatik olarak bir agent ordusu başlatmaz.
 
