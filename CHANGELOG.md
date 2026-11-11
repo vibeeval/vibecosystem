@@ -8,8 +8,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [3.5.0] - 2026-11-11
 
-This version is being prepared in source. No npm publication, release tag or deployment is implied.
-
 ### Changed
 
 - Claude CI review is opt-in through the `claude-review` label and cancels stale runs. Ordinary validation does not call an LLM.
