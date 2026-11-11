@@ -12,7 +12,7 @@ import { installClaude } from '../tools/install-runtime.mjs';
 const __filename = fileURLToPath(import.meta.url);
 const REPO_DIR = join(dirname(__filename), '..');
 const CLAUDE_DIR = join(homedir(), '.claude');
-const VERSION = '3.5.0';
+const VERSION = '3.5.1';
 
 const VALID_PROFILES = new Set([
   'core', 'quality', 'context', 'memory', 'orchestration', 'dashboard', 'full',

@@ -1,6 +1,6 @@
 {
   "name": "vibecosystem",
-  "version": "3.5.0",
+  "version": "3.5.1",
   "description": "Profile-based Claude runtime: 138 agents, 296 skills, 74 hooks in the catalog; bounded Codex worker",
   "type": "module",
   "bin": {

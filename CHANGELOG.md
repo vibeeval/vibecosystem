@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.5.1] - 2026-11-11
+
+### Changed
+
+- Docs: the README, localized READMEs and runtime overview now show the full catalog separately from the default core.
+
 ## [3.5.0] - 2026-11-11
 
 ### Changed

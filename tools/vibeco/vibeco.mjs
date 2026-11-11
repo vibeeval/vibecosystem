@@ -13,7 +13,7 @@ import { get } from 'node:http';
 import { parseFrontmatter } from './lib/frontmatter.mjs';
 import { installClaude } from '../install-runtime.mjs';
 
-const VERSION = '3.5.0';
+const VERSION = '3.5.1';
 const CLAUDE_DIR = join(homedir(), '.claude');
 const PROFILES_DIR = join(CLAUDE_DIR, 'profiles');
 const PLUGIN_CONFIG = join(CLAUDE_DIR, 'plugin-config.json');

@@ -3,7 +3,7 @@
   "name": "vibecosystem",
   "displayName": "vibecosystem - AI Software Team",
   "description": "Profile-based coding runtime. The catalog contains 138 agents, 296 skills and 74 hooks; core installs a selected subset.",
-  "version": "3.5.0",
+  "version": "3.5.1",
   "author": {
     "name": "vibeeval",
     "url": "https://github.com/vibeeval",
